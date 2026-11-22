@@ -1,23 +1,57 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>03_5.3.4_用“木桶理论”看待推荐系统的迭代升级</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>5.3.4 用“木桶理论”看待推荐系统的迭代升级</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>03_5.3.4 用“木桶理论”看待推荐系统的迭代升级</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第5章 多角度审视推荐系统/5.3 推荐系统的实时性
-Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
-&quot;&quot;&quot;</p>
-<h3>5.3.4 用“木桶理论”看待推荐系统的迭代升级</h3>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#concept">木桶理论的基本概念</a>
+      <a href="#bottleneck">短板的识别</a>
+      <a href="#strategy">迭代升级的策略</a>
+      <a href="#cases">实例分析</a>
+      <a href="#future">未来方向</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>用“木桶理论”看待推荐系统的迭代升级</h1>
+        <p class="dek">系统的整体效果由最短的那块板决定。推荐系统的特征、模型、推理、数据流任一环成为短板，其他环节再强也换不来提升。</p>
+      </header>
+      <section id="concept" aria-labelledby="concept-h">
+        <h2 id="concept-h">木桶理论的基本概念</h2>
 <p>“木桶理论”指的是一只木桶的容水量取决于最短的那块木板，而不是最长的。对于推荐系统的迭代升级，这一理论同样适用。以下是对如何用“木桶理论”看待和进行推荐系统迭代升级的详细分析。</p>
-<h4>一、木桶理论的基本概念</h4>
 <ol>
 <li>
 <p><strong>定义</strong>：</p>
@@ -32,7 +66,32 @@ Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
 </ul>
 </li>
 </ol>
-<h4>二、推荐系统中的短板识别</h4>
+        <figure>
+          <svg viewBox="0 0 900 400" role="img" aria-labelledby="fig534-t fig534-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig534-t">木桶理论：推荐系统的能力受最短的木板限制</title>
+            <desc id="fig534-d">一个由五块不同高度的木板组成的木桶，分别代表数据流、特征工程、模型训练、在线推理与策略；水面停在最矮的“在线推理”处，虚线标注实际能力上限。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <rect x="100" y="230" width="670" height="110" fill="#147f80" opacity="0.18"/>
+              <rect x="110" y="130" width="90" height="210" rx="8" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <rect x="250" y="190" width="90" height="150" rx="8" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <rect x="390" y="90" width="90" height="250" rx="8" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <rect x="530" y="230" width="90" height="110" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="3"/>
+              <rect x="670" y="160" width="90" height="180" rx="8" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <line x1="90" y1="340" x2="800" y2="340" stroke="#203035" stroke-width="2"/>
+              <text x="155" y="366" text-anchor="middle" font-size="14" fill="#203035">数据流</text>
+              <text x="295" y="366" text-anchor="middle" font-size="14" fill="#203035">特征工程</text>
+              <text x="435" y="366" text-anchor="middle" font-size="14" fill="#203035">模型训练</text>
+              <text x="575" y="366" text-anchor="middle" font-size="14" font-weight="700" fill="#d06d4d">在线推理</text>
+              <text x="715" y="366" text-anchor="middle" font-size="14" fill="#203035">策略</text>
+              <line x1="95" y1="230" x2="795" y2="230" stroke="#d06d4d" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="795" y="216" text-anchor="end" font-size="14" font-weight="700" fill="#d06d4d">实际能力上限 = 最短板</text>
+            </g>
+          </svg>
+          <figcaption>图 5.3-1（自绘）：把推荐系统的各环节看成木桶的木板。抬高“模型训练”并不会让水位上升，只有当最矮的那块板（如图中的在线推理）被抬高，整体能力才会提升。</figcaption>
+        </figure>
+      </section>
+      <section id="bottleneck" aria-labelledby="bottleneck-h">
+        <h2 id="bottleneck-h">短板的识别：性能瓶颈与效果瓶颈</h2>
 <ol>
 <li>
 <p><strong>性能瓶颈</strong>：</p>
@@ -47,7 +106,9 @@ Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
 </ul>
 </li>
 </ol>
-<h4>三、迭代升级的策略</h4>
+      </section>
+      <section id="strategy" aria-labelledby="strategy-h">
+        <h2 id="strategy-h">迭代升级的策略</h2>
 <ol>
 <li>
 <p><strong>抓住关键点，重点提升</strong>：</p>
@@ -68,7 +129,9 @@ Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
 </ul>
 </li>
 </ol>
-<h4>四、实例分析</h4>
+      </section>
+      <section id="cases" aria-labelledby="cases-h">
+        <h2 id="cases-h">实例分析</h2>
 <ol>
 <li>
 <p><strong>Facebook的实验</strong>：</p>
@@ -83,7 +146,9 @@ Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
 </ul>
 </li>
 </ol>
-<h4>五、未来发展方向</h4>
+      </section>
+      <section id="future" aria-labelledby="future-h">
+        <h2 id="future-h">未来发展方向</h2>
 <ol>
 <li>
 <p><strong>全面协同优化</strong>：</p>
@@ -98,24 +163,21 @@ Content: 03_5.3.4 用“木桶理论”看待推荐系统的迭代升级
 </ul>
 </li>
 </ol>
-<h4>总结</h4>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
 <p>用“木桶理论”看待推荐系统的迭代升级，能够帮助我们找到系统中的关键短板，并通过重点优化提升系统的整体性能和效果。在实际应用中，通过持续评估和优化，推荐系统能够不断适应用户需求和市场变化，提供更加精准和高效的推荐服务。</p>
-
+        <div class="note"><strong>教学示意：</strong>本页为对第 5 章 5.3 节“实时性与系统迭代”观点的归纳；文中 Facebook、Netflix 案例依据原书叙述转述，未逐一核实具体数值，具体效果请回到原书与对应资料。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 5 章 5.3 节「推荐系统的实时性」，含用“木桶理论”看待迭代升级的论述。</li>
+          <li>本页图 5.3-1 为按原书观点<strong>自绘</strong>的示意，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
