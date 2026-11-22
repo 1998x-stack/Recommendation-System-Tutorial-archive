@@ -1,25 +1,60 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_3.1_深度学习推荐模型的演化关系图</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.1 深度学习推荐模型的演化关系图</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_3.1 深度学习推荐模型的演化关系图</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第3章 浪潮之巅——深度学习在推荐系统中的应用
-Content: 00_3.1 深度学习推荐模型的演化关系图
-&quot;&quot;&quot;</p>
-<h3>00_3.1 深度学习推荐模型的演化关系图</h3>
-<h4>1. 概述</h4>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">概述：以 MLP 为核心</a>
+      <a href="#directions">七条演化方向</a>
+      <a href="#knowledge">关键知识</a>
+      <a href="#table">模型对比表</a>
+      <a href="#summary">按方向速查</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>深度学习推荐模型的演化关系</h1>
+        <p class="dek">这些模型共享同一个内核——多层感知机（MLP），差别只在于往它身上添加了什么：更多的层、新的特征交叉、第二种网络、注意力、序列或强化学习。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">概述：以 MLP 为核心</h2>
 <p>深度学习在推荐系统中的应用经历了迅速的发展和演变。图3-1展示了主流深度学习推荐模型的演化关系。这些模型以多层感知机（MLP）为核心，通过改变神经网络的结构，构建出各具特色的深度学习推荐模型。其主要的演变方向如下：</p>
-<h4>2. 演化方向</h4>
-<p>深度学习推荐模型的演化主要体现在以下几个方面：</p>
+      </section>
+      <section id="directions" aria-labelledby="directions-h">
+        <h2 id="directions-h">七条演化方向</h2>
+        <p>以 MLP 为内核，主流模型沿以下七个方向展开；每一条都可以理解为对“基础 MLP”做的一次结构性改造。</p>
 <ol>
 <li>
 <p><strong>神经网络复杂程度的改变</strong>：
@@ -50,7 +85,51 @@ Content: 00_3.1 深度学习推荐模型的演化关系图
 强化学习被应用于推荐领域，强调模型的在线学习和实时更新。DRN（Deep Reinforcement Learning Network，深度强化学习网络）是这一方向的代表模型。</p>
 </li>
 </ol>
-<h4>3. 深度学习推荐模型的关键知识</h4>
+        <figure>
+          <svg viewBox="0 0 900 540" role="img" aria-labelledby="fig3-1-t fig3-1-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig3-1-t">以 MLP 为核心的七条演化方向</title>
+            <desc id="fig3-1-d">左侧为公共内核多层感知机 MLP；右侧七行分别代表按复杂度、特征交叉、组合模型、FM 演化、注意力、序列与强化学习展开的模型家族及其代表模型。</desc>
+            <defs><marker id="evo3-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#53676d"/></marker></defs>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif" font-size="16">
+              <rect x="20" y="195" width="210" height="150" rx="14" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="125" y="258" text-anchor="middle" font-size="19" font-weight="700" fill="#147f80">多层感知机</text>
+              <text x="125" y="288" text-anchor="middle" font-size="16" fill="#203035">MLP（公共内核）</text>
+              <line x1="230" y1="270" x2="300" y2="270" stroke="#53676d" stroke-width="2"/>
+              <line x1="300" y1="50" x2="300" y2="490" stroke="#dce8e4" stroke-width="2"/>
+              <g stroke="#53676d" stroke-width="2" marker-end="url(#evo3-arw)">
+                <line x1="300" y1="50" x2="316" y2="50"/><line x1="300" y1="124" x2="316" y2="124"/>
+                <line x1="300" y1="198" x2="316" y2="198"/><line x1="300" y1="272" x2="316" y2="272"/>
+                <line x1="300" y1="346" x2="316" y2="346"/><line x1="300" y1="420" x2="316" y2="420"/>
+                <line x1="300" y1="490" x2="316" y2="490"/>
+              </g>
+              <rect x="320" y="20" width="560" height="60" rx="10" fill="#f7f4fd" stroke="#7461ba"/>
+              <text x="340" y="56" font-weight="700" fill="#7461ba">复杂度</text>
+              <text x="470" y="56" fill="#203035">AutoRec · Deep Crossing</text>
+              <rect x="320" y="94" width="560" height="60" rx="10" fill="#f3f9f6" stroke="#147f80"/>
+              <text x="340" y="130" font-weight="700" fill="#147f80">特征交叉</text>
+              <text x="470" y="130" fill="#203035">NeuralCF · PNN</text>
+              <rect x="320" y="168" width="560" height="60" rx="10" fill="#fdf1ec" stroke="#d06d4d"/>
+              <text x="340" y="204" font-weight="700" fill="#d06d4d">组合模型</text>
+              <text x="470" y="204" fill="#203035">Wide&amp;Deep · Deep&amp;Cross · DeepFM</text>
+              <rect x="320" y="242" width="560" height="60" rx="10" fill="#f3f9f6" stroke="#147f80"/>
+              <text x="340" y="278" font-weight="700" fill="#147f80">FM 演化</text>
+              <text x="470" y="278" fill="#203035">NFM · FNN · AFM</text>
+              <rect x="320" y="316" width="560" height="60" rx="10" fill="#f7f3e6" stroke="#916c22"/>
+              <text x="340" y="352" font-weight="700" fill="#916c22">注意力</text>
+              <text x="470" y="352" fill="#203035">AFM · DIN</text>
+              <rect x="320" y="390" width="560" height="60" rx="10" fill="#f7f4fd" stroke="#7461ba"/>
+              <text x="340" y="426" font-weight="700" fill="#7461ba">序列</text>
+              <text x="470" y="426" fill="#203035">DIEN（GRU + 注意力）</text>
+              <rect x="320" y="460" width="560" height="60" rx="10" fill="#fdf1ec" stroke="#d06d4d"/>
+              <text x="340" y="496" font-weight="700" fill="#d06d4d">强化学习</text>
+              <text x="470" y="496" fill="#203035">DRN</text>
+            </g>
+          </svg>
+          <figcaption>图 3.1-1（自绘，对应原书图 3-1）：深度学习推荐模型共用 MLP 内核，七个方向分别为“加深网络、换特征交叉方式、拼第二种网络、把 FM 神经网络化、引入注意力、引入序列模型、引入强化学习”。</figcaption>
+        </figure>
+      </section>
+      <section id="knowledge" aria-labelledby="knowledge-h">
+        <h2 id="knowledge-h">关键知识：为什么会不断演化</h2>
 <p>深度学习推荐模型借鉴并融合了图像、语音及自然语言处理等领域的成果，形成了快速演化的模型结构。其关键知识包括：</p>
 <ol>
 <li>
@@ -66,11 +145,10 @@ Content: 00_3.1 深度学习推荐模型的演化关系图
 深度学习推荐模型从未停下前进的脚步，从阿里巴巴的多模态、多目标的深度学习模型，到YouTube基于session的推荐系统，再到Airbnb使用Embedding技术构建的搜索推荐模型，深度学习推荐模型的进化速度越来越快，应用场景也越来越广。</p>
 </li>
 </ol>
-<h4>4. 总结</h4>
-<p>深度学习推荐模型的演化关系图展示了各类模型的演变路径和技术特点。面对众多可选的深度学习推荐模型，推荐工程师需要熟悉每个模型之间的关系及其适用场景，并通过充分的调参和对比，选择最适合业务数据的深度学习推荐模型。</p>
-<hr>
-<h3>深度学习推荐模型的演化关系图</h3>
-<p>以下是一个详细的表格，列出了深度学习推荐模型的主要演化关系及其关键特点：</p>
+      </section>
+      <section id="table" aria-labelledby="table-h">
+        <h2 id="table-h">模型对比表</h2>
+        <p>下表把 12 个代表模型按演化方向归类，列出关键创新点与典型场景，可与上图逐行对照。</p>
 <table>
 <thead>
 <tr>
@@ -155,7 +233,9 @@ Content: 00_3.1 深度学习推荐模型的演化关系图
 </tr>
 </tbody>
 </table>
-<h3>模型演化关系图说明</h3>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">按方向速查：每个模型解决了什么</h2>
 <ol>
 <li>
 <p><strong>神经网络复杂程度的改变</strong>：</p>
@@ -200,24 +280,17 @@ Content: 00_3.1 深度学习推荐模型的演化关系图
 </ul>
 </li>
 </ol>
-<h3>总结</h3>
-<p>深度学习推荐模型通过不断演化，逐步提高了模型的表达能力和推荐效果。各类模型在处理特征交叉、捕捉用户兴趣、动态调整推荐策略等方面各有优势，推荐系统工程师需要根据具体应用场景选择最合适的模型，并通过不断的调参和优化，提升推荐系统的性能和用户满意度。</p>
-
+        <div class="note"><strong>教学示意：</strong>上表与上图为便于对照而作了简化归纳：模型归类与关键特点依据原书第 3 章「浪潮之巅」及各模型原始论文的公开描述，具体效果与线上收益仍需以各自论文与业务实验为准。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 3 章「浪潮之巅——深度学习在推荐系统中的应用」，含深度学习推荐模型演化关系图（原书图 3-1）。</li>
+          <li>本页图 3.1-1 为按原书叙述<strong>自绘</strong>的分类示意图，用于说明七条演化方向，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
