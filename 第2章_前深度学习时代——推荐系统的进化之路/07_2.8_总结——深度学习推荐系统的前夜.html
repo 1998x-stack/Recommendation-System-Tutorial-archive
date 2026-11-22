@@ -1,24 +1,59 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>07_2.8_总结——深度学习推荐系统的前夜</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>2.8 总结——深度学习推荐系统的前夜</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>07_2.8 总结——深度学习推荐系统的前夜</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第2章 前深度学习时代——推荐系统的进化之路
-Content: 07_2.8 总结——深度学习推荐系统的前夜
-&quot;&quot;&quot;</p>
-<h3>2.8 总结——深度学习推荐系统的前夜</h3>
-<h4>背景介绍</h4>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#background">背景介绍</a>
+      <a href="#features">传统模型特点总结</a>
+      <a href="#lessons">对深度学习的启示</a>
+      <a href="#outlook">未来展望</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>总结：深度学习推荐系统的前夜</h1>
+        <p class="dek">前深度学习时代的模型不只是“过时的旧方法”，它们留下的三条线索——非线性特征、自动化特征工程、可扩展性——正是深度学习推荐系统的起点。</p>
+      </header>
+      <section id="background" aria-labelledby="background-h">
+        <h2 id="background-h">背景介绍</h2>
 <p>在深度学习时代到来之前，推荐系统经历了多个阶段的演变。从早期的协同过滤、矩阵分解到后来的逻辑回归模型，推荐系统不断发展，逐渐积累了丰富的理论和实践经验。这些传统模型为深度学习推荐系统奠定了坚实的基础。本节将对前深度学习时代的推荐系统进行总结，重点回顾这些模型的特点及其对现代推荐系统的影响  。</p>
-<h4>传统推荐模型的特点总结</h4>
+      </section>
+      <section id="features" aria-labelledby="features-h">
+        <h2 id="features-h">传统推荐模型的特点总结</h2>
 <ol>
 <li>
 <p><strong>协同过滤算法</strong>：</p>
@@ -56,7 +91,9 @@ Content: 07_2.8 总结——深度学习推荐系统的前夜
 </ul>
 </li>
 </ol>
-<h4>传统推荐模型对深度学习的启示</h4>
+      </section>
+      <section id="lessons" aria-labelledby="lessons-h">
+        <h2 id="lessons-h">对深度学习的三条启示</h2>
 <ol>
 <li>
 <p><strong>非线性特征学习</strong>：</p>
@@ -77,26 +114,51 @@ Content: 07_2.8 总结——深度学习推荐系统的前夜
 </ul>
 </li>
 </ol>
-<h4>未来展望</h4>
+        <figure>
+          <svg viewBox="0 0 900 340" role="img" aria-labelledby="fig28-t fig28-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig28-t">传统推荐模型向深度学习推荐系统迁移的三条线索</title>
+            <desc id="fig28-d">左侧为传统推荐模型（CF、矩阵分解、LR、FM），右侧为深度学习推荐系统（Embedding、DNN、MLP）；三条带标签的箭头表示非线性特征学习、自动化特征工程、可扩展与高效三条经验被后者继承并发扬。</desc>
+            <defs><marker id="br-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#53676d"/></marker></defs>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif" font-size="16">
+              <rect x="20" y="60" width="190" height="240" rx="14" fill="#f7f4fd" stroke="#7461ba" stroke-width="2"/>
+              <text x="115" y="172" text-anchor="middle" font-size="19" font-weight="700" fill="#7461ba">传统推荐模型</text>
+              <text x="115" y="204" text-anchor="middle" font-size="14" fill="#203035">CF · 矩阵分解 · LR · FM</text>
+              <rect x="690" y="60" width="190" height="240" rx="14" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <text x="785" y="172" text-anchor="middle" font-size="19" font-weight="700" fill="#d06d4d">深度学习推荐系统</text>
+              <text x="785" y="204" text-anchor="middle" font-size="14" fill="#203035">Embedding · DNN · MLP</text>
+              <g stroke="#53676d" stroke-width="2" marker-end="url(#br-arw)">
+                <line x1="210" y1="100" x2="686" y2="100"/>
+                <line x1="210" y1="180" x2="686" y2="180"/>
+                <line x1="210" y1="260" x2="686" y2="260"/>
+              </g>
+              <g fill="#203035" text-anchor="middle" font-size="15">
+                <text x="448" y="90">非线性特征学习 → 嵌入层与非线性变换</text>
+                <text x="448" y="170">自动化特征工程 → 端到端训练</text>
+                <text x="448" y="250">可扩展与高效 → 大规模稀疏训练</text>
+              </g>
+            </g>
+          </svg>
+          <figcaption>图 2.8-1（自绘）：前深度学习时代留下的三条线索。左侧模型家族的具体局限已在 2.2–2.7 讨论，此处只标出它们被深度学习继承并发扬的能力方向。</figcaption>
+        </figure>
+      </section>
+      <section id="outlook" aria-labelledby="outlook-h">
+        <h2 id="outlook-h">未来展望</h2>
 <p>随着深度学习技术的不断发展，推荐系统将继续朝着更高效、更智能的方向演进。传统推荐模型的理论基础和实践经验，将继续为深度学习推荐系统的发展提供重要支持。通过不断创新和优化，未来的推荐系统将在多样化和个性化推荐方面取得更大突破  。</p>
-<h4>总结</h4>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
 <p>在深度学习时代的前夜，传统推荐模型的演化为现代推荐系统的发展奠定了坚实基础。通过理解这些模型的特点和演进过程，可以更好地把握推荐系统的发展脉络，提升对现代推荐系统的理解和应用能力。未来，随着深度学习技术的不断进步，推荐系统将迎来更加广阔的发展空间  。</p>
-
+        <div class="note"><strong>教学示意：</strong>本页为对第 2 章的小结性归纳，模型特点与“对深度学习的启示”依据原书第 2 章的叙述整理，具体结论与线上效果仍需以原书及各自论文为准。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 2 章「前深度学习时代——推荐系统的进化之路」与 2.8 节小结。</li>
+          <li>本页图 2.8-1 为按原书叙述<strong>自绘</strong>的线索示意，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
