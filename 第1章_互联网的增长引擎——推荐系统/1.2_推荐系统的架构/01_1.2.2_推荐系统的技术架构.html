@@ -1,24 +1,60 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_1.2.2_推荐系统的技术架构</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>1.2.2 推荐系统的技术架构</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_1.2.2 推荐系统的技术架构</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第1章 互联网的增长引擎——推荐系统/1.2 推荐系统的架构
-Content: 01_1.2.2 推荐系统的技术架构
-&quot;&quot;&quot;</p>
-<h3>01_1.2.2 推荐系统的技术架构：极致详细分析</h3>
-<h4>一、推荐系统的技术架构概述</h4>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">技术架构概述</a>
+      <a href="#dataflow">数据流架构</a>
+      <a href="#model">模型架构</a>
+      <a href="#engineering">工程实现</a>
+      <a href="#challenges">挑战与未来</a>
+      <a href="#conclusion">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>推荐系统的技术架构</h1>
+        <p class="dek">把“用户兴趣”变成“推荐列表”的过程被拆成两大部分：<strong>数据流架构</strong>负责把行为变成特征与样本，<strong>模型架构</strong>负责召回、排序与再优化。先看清整条链路，再补每一环的细节。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">技术架构概述</h2>
 <p>推荐系统的技术架构是将推荐系统的抽象概念和模块具体化、工程化的过程。其核心是解决数据和信息处理、推荐算法和模型训练与预测的问题。在实际应用中，推荐系统的技术架构可以分为数据流架构和模型架构两大部分，每个部分又包含若干细分模块。</p>
-<h4>二、推荐系统的数据流架构</h4>
+      </section>
+      <section id="dataflow" aria-labelledby="dataflow-h">
+        <h2 id="dataflow-h">数据流架构</h2>
 <p>数据流架构是推荐系统的基础，负责用户、物品和场景信息的收集、存储、处理和传输。一个成熟的推荐系统数据流架构通常包含以下三个部分：</p>
 <ol>
 <li>
@@ -46,7 +82,9 @@ Content: 01_1.2.2 推荐系统的技术架构
 </ul>
 </li>
 </ol>
-<h4>三、推荐系统的模型架构</h4>
+      </section>
+      <section id="model" aria-labelledby="model-h">
+        <h2 id="model-h">模型架构</h2>
 <p>模型架构是推荐系统的核心，负责推荐模型的训练、评估、部署和线上推断。模型架构通常包含以下三个主要层次：</p>
 <ol>
 <li>
@@ -71,7 +109,45 @@ Content: 01_1.2.2 推荐系统的技术架构
 </ul>
 </li>
 </ol>
-<h4>四、推荐系统的工程实现</h4>
+        <figure>
+          <svg viewBox="0 0 900 440" role="img" aria-labelledby="fig122-t fig122-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig122-t">推荐系统的技术架构：数据流与模型两大部分</title>
+            <desc id="fig122-d">上排数据流架构：客户端与实时上报 → 流处理与大数据平台 → 数据存储、特征与样本输出；下排模型架构：召回层 → 排序层 → 补充策略与算法层 → 推荐列表。中间的虚线表示特征/样本从数据流送入模型。</desc>
+            <defs><marker id="a122" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#53676d"/></marker></defs>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="20" y="26" font-size="16" font-weight="700" fill="#53676d">数据流架构</text>
+              <rect x="20" y="42" width="270" height="100" rx="12" fill="#f7f4fd" stroke="#7461ba" stroke-width="2"/>
+              <text x="155" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#7461ba">客户端 / 实时上报</text>
+              <text x="155" y="110" text-anchor="middle" font-size="14" fill="#203035">点击、浏览、购买等行为</text>
+              <line x1="290" y1="92" x2="318" y2="92" stroke="#53676d" stroke-width="2" marker-end="url(#a122)"/>
+              <rect x="320" y="42" width="270" height="100" rx="12" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="455" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#147f80">流处理 / 大数据平台</text>
+              <text x="455" y="110" text-anchor="middle" font-size="14" fill="#203035">Kafka · Hadoop · Flink</text>
+              <line x1="590" y1="92" x2="618" y2="92" stroke="#53676d" stroke-width="2" marker-end="url(#a122)"/>
+              <rect x="620" y="42" width="260" height="100" rx="12" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="750" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="#147f80">存储与输出</text>
+              <text x="750" y="110" text-anchor="middle" font-size="14" fill="#203035">特征 / 样本 / 统计数据</text>
+              <line x1="450" y1="142" x2="450" y2="244" stroke="#53676d" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#a122)"/>
+              <text x="462" y="198" font-size="13" fill="#53676d">特征 / 样本</text>
+              <text x="20" y="270" font-size="16" font-weight="700" fill="#53676d">模型架构</text>
+              <rect x="20" y="286" width="270" height="100" rx="12" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <text x="155" y="328" text-anchor="middle" font-size="16" font-weight="700" fill="#d06d4d">召回层</text>
+              <text x="155" y="354" text-anchor="middle" font-size="14" fill="#203035">从海量候选中快速过滤</text>
+              <line x1="290" y1="336" x2="318" y2="336" stroke="#53676d" stroke-width="2" marker-end="url(#a122)"/>
+              <rect x="320" y="286" width="270" height="100" rx="12" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <text x="455" y="328" text-anchor="middle" font-size="16" font-weight="700" fill="#d06d4d">排序层</text>
+              <text x="455" y="354" text-anchor="middle" font-size="14" fill="#203035">LR · 决策树 · DNN 打分</text>
+              <line x1="590" y1="336" x2="618" y2="336" stroke="#53676d" stroke-width="2" marker-end="url(#a122)"/>
+              <rect x="620" y="286" width="260" height="100" rx="12" fill="#f7f3e6" stroke="#916c22" stroke-width="2"/>
+              <text x="750" y="328" text-anchor="middle" font-size="16" font-weight="700" fill="#916c22">补充策略与算法层</text>
+              <text x="750" y="354" text-anchor="middle" font-size="14" fill="#203035">多样性 / 新鲜度 → 推荐列表</text>
+            </g>
+          </svg>
+          <figcaption>图 1.2-1（自绘，对应原书图 1-5 的技术架构）：上排数据流把行为变成特征与样本，下排模型完成“召回→排序→再优化”。颜色区分两大组成部分：紫/青为数据流，橙/黄为模型链路。</figcaption>
+        </figure>
+      </section>
+      <section id="engineering" aria-labelledby="engineering-h">
+        <h2 id="engineering-h">工程实现</h2>
 <p>推荐系统的工程实现涉及数据流架构和模型架构的具体部署与集成，确保系统的高效、稳定运行。主要包括以下几个方面：</p>
 <ol>
 <li>
@@ -100,7 +176,9 @@ Content: 01_1.2.2 推荐系统的技术架构
 </ul>
 </li>
 </ol>
-<h4>五、推荐系统的挑战和未来发展</h4>
+      </section>
+      <section id="challenges" aria-labelledby="challenges-h">
+        <h2 id="challenges-h">挑战与未来发展</h2>
 <ol>
 <li>
 <p><strong>数据处理挑战</strong>：海量数据的实时处理和特征提取是推荐系统面临的主要挑战，需要高效的数据流平台和分布式计算框架支持。</p>
@@ -120,24 +198,21 @@ Content: 01_1.2.2 推荐系统的技术架构
 </ul>
 </li>
 </ol>
-<h3>结论</h3>
+      </section>
+      <section id="conclusion" aria-labelledby="conclusion-h">
+        <h2 id="conclusion-h">小结</h2>
 <p>推荐系统的技术架构涉及数据流架构和模型架构两大部分，每个部分又包含若干细分模块。通过高效的数据处理平台和先进的模型训练与部署技术，推荐系统能够实现精准、高效的个性化推荐，为用户提供优质服务的同时，提升平台的商业价值。未来，推荐系统将在数据融合、智能化和跨领域应用方面不断发展，带来更多创新和突破。</p>
-
+        <div class="note"><strong>教学示意：</strong>本页架构分层依据原书第 1 章 1.2 节对推荐系统技术架构的叙述整理；图中组件（Kafka、Hadoop、Flink、HBase 等）为原文列举的典型示例，具体选型随业务而异。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 1 章 1.2 节「推荐系统的架构」（技术架构与数据流/模型部分）。</li>
+          <li>本页图 1.2-1 为按原书叙述<strong>自绘</strong>的架构示意，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
