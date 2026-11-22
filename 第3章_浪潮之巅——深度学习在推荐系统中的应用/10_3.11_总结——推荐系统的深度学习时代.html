@@ -1,24 +1,60 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>10_3.11_总结——推荐系统的深度学习时代</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.11 总结——推荐系统的深度学习时代</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>10_3.11 总结——推荐系统的深度学习时代</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第3章 浪潮之巅——深度学习在推荐系统中的应用
-Content: 10_3.11 总结——推荐系统的深度学习时代
-&quot;&quot;&quot;</p>
-<h3>10_3.11 总结——推荐系统的深度学习时代</h3>
-<h4>1. 背景与动机</h4>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#intro">背景与动机</a>
+      <a href="#advantages">四项优势</a>
+      <a href="#models">主要模型</a>
+      <a href="#apps">实际应用</a>
+      <a href="#outlook">未来展望</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>总结：推荐系统的深度学习时代</h1>
+        <p class="dek">深度学习给推荐系统带来的不是单一模型，而是一组可复用的能力：更强的表达、更灵活的网结构、被 Embedding 简化的特征工程、以及自动的特征学习。</p>
+      </header>
+      <section id="intro" aria-labelledby="intro-h">
+        <h2 id="intro-h">背景与动机</h2>
 <p>深度学习在推荐系统中的应用，极大地改变了推荐系统的架构和性能。随着深度学习技术的不断进步，推荐系统也经历了一次次的革新，逐步迈入了深度学习时代。</p>
-<h4>2. 深度学习在推荐系统中的优势</h4>
+      </section>
+      <section id="advantages" aria-labelledby="advantages-h">
+        <h2 id="advantages-h">深度学习推荐系统的四项优势</h2>
 <p>深度学习推荐系统相比于传统推荐系统，具有以下显著优势：</p>
 <ol>
 <li>
@@ -38,7 +74,34 @@ Content: 10_3.11 总结——推荐系统的深度学习时代
 深度学习模型能够自动学习特征之间的关系，无需人工干预。这极大地减轻了特征工程师的工作负担，使得模型开发更加高效。</p>
 </li>
 </ol>
-<h4>3. 深度学习推荐系统的主要模型</h4>
+        <figure>
+          <svg viewBox="0 0 900 420" role="img" aria-labelledby="fig311-t fig311-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig311-t">深度学习推荐系统的四项优势</title>
+            <desc id="fig311-d">四张并列卡片：强大的表达能力（多层非线性结构）、灵活的模型结构（层数与激活可调）、高效的特征工程（Embedding 将离散特征低维稠密化）、自动化的特征学习（端到端训练减少人工）。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <rect x="20" y="20" width="420" height="180" rx="14" fill="#f3f9f6" stroke="#147f80"/>
+              <text x="42" y="64" font-size="18" font-weight="700" fill="#147f80">① 强大的表达能力</text>
+              <text x="42" y="104" font-size="14" fill="#203035">多层非线性结构</text>
+              <text x="42" y="132" font-size="14" fill="#53676d">捕捉数据中复杂的非线性关系</text>
+              <rect x="460" y="20" width="420" height="180" rx="14" fill="#f7f4fd" stroke="#7461ba"/>
+              <text x="482" y="64" font-size="18" font-weight="700" fill="#7461ba">② 灵活的模型结构</text>
+              <text x="482" y="104" font-size="14" fill="#203035">层数、激活、分支可调</text>
+              <text x="482" y="132" font-size="14" fill="#53676d">能快速适配不同业务场景</text>
+              <rect x="20" y="220" width="420" height="180" rx="14" fill="#fdf1ec" stroke="#d06d4d"/>
+              <text x="42" y="264" font-size="18" font-weight="700" fill="#d06d4d">③ 高效的特征工程</text>
+              <text x="42" y="304" font-size="14" fill="#203035">Embedding 技术</text>
+              <text x="42" y="332" font-size="14" fill="#53676d">将离散特征映射为低维稠密向量</text>
+              <rect x="460" y="220" width="420" height="180" rx="14" fill="#f7f3e6" stroke="#916c22"/>
+              <text x="482" y="264" font-size="18" font-weight="700" fill="#916c22">④ 自动化的特征学习</text>
+              <text x="482" y="304" font-size="14" fill="#203035">端到端训练</text>
+              <text x="482" y="332" font-size="14" fill="#53676d">自动学习特征间关系，减少人工干预</text>
+            </g>
+          </svg>
+          <figcaption>图 3.11-1（自绘）：深度学习带来的四项能力。①③④直接对应 3.2–3.10 中模型的共性改进，②指结构可按场景调整。</figcaption>
+        </figure>
+      </section>
+      <section id="models" aria-labelledby="models-h">
+        <h2 id="models-h">主要模型</h2>
 <p>在深度学习时代，涌现出了许多经典的推荐系统模型，它们在不同的应用场景中展示了强大的性能。以下是几种主要的深度学习推荐模型：</p>
 <ol>
 <li>
@@ -66,7 +129,9 @@ DIN模型引入了注意力机制，通过动态调整用户历史行为的权�
 DIEN模型结合了序列模型和注意力机制，能够模拟用户兴趣的演化过程，捕捉用户的动态兴趣变化。</p>
 </li>
 </ol>
-<h4>4. 深度学习推荐系统的实际应用</h4>
+      </section>
+      <section id="apps" aria-labelledby="apps-h">
+        <h2 id="apps-h">实际应用</h2>
 <p>深度学习推荐系统已经在多个领域取得了显著成果：</p>
 <ol>
 <li>
@@ -82,7 +147,9 @@ YouTube通过深度学习模型，推荐个性化视频内容，提高了用户�
 Facebook、Google等广告平台通过深度学习推荐系统，提高了广告点击率和转化率，实现了广告收益的最大化。</p>
 </li>
 </ol>
-<h4>5. 未来展望</h4>
+      </section>
+      <section id="outlook" aria-labelledby="outlook-h">
+        <h2 id="outlook-h">未来展望</h2>
 <p>深度学习推荐系统的发展仍在继续，未来的研究方向主要包括：</p>
 <ol>
 <li>
@@ -102,24 +169,21 @@ Facebook、Google等广告平台通过深度学习推荐系统，提高了广告
 引入强化学习方法，使得推荐系统能够自适应调整推荐策略，提高用户满意度。</p>
 </li>
 </ol>
-<h3>总结</h3>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
 <p>深度学习时代的推荐系统，通过强大的表达能力、灵活的模型结构和高效的特征工程，显著提升了推荐的精准度和用户体验。随着技术的不断进步，深度学习推荐系统将在更多领域发挥重要作用，为用户带来更好的服务体验。</p>
-
+        <div class="note"><strong>教学示意：</strong>本页为对第 3 章的小结性归纳：优势项与代表模型依据原书第 3 章「浪潮之巅」及各模型原始论文的公开描述，文中“显著提升”类表述为原书结论的转述，具体数值需回到对应论文与业务实验。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 3 章「浪潮之巅——深度学习在推荐系统中的应用」（3.2–3.11）。</li>
+          <li>本页图 3.11-1 为按原书叙述<strong>自绘</strong>的能力归纳图，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
