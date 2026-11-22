@@ -1,45 +1,81 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>06_4.7_总结——深度学习推荐系统的核心操作</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>4.7 总结——深度学习推荐系统的核心操作</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>06_4.7 总结——深度学习推荐系统的核心操作</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第4章 Embedding技术在推荐系统中的应用
-Content: 06_4.7 总结——深度学习推荐系统的核心操作
-&quot;&quot;&quot;</p>
-<h3>4.7 总结——深度学习推荐系统的核心操作</h3>
-<h4>背景与概述</h4>
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">背景与概述</a>
+      <a href="#methods">主要内容回顾</a>
+      <a href="#core">核心操作</a>
+      <a href="#conclusion">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>总结：Embedding——深度学习推荐系统的核心操作</h1>
+        <p class="dek">把高维稀疏特征变成低维稠密向量，是深度学习推荐系统反复使用的两个动作：<strong>特征表示</strong>与<strong>相似性搜索</strong>。本章的 Word2vec、Item2vec、Graph Embedding 与 LSH 都围绕它们展开。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">背景与概述</h2>
 <p>在推荐系统中，Embedding技术是深度学习的核心技术之一，广泛应用于特征表示和相似性搜索。通过将高维稀疏特征向量转换为低维稠密特征向量，Embedding技术极大地提高了推荐系统的效率和准确性。本章总结了深度学习推荐系统的核心操作，包括Embedding技术的应用、局部敏感哈希（LSH）技术的引入等。</p>
-<h4>主要内容回顾</h4>
-<h5>Word2vec</h5>
+      </section>
+      <section id="methods" aria-labelledby="methods-h">
+        <h2 id="methods-h">主要内容回顾</h2>
+<h3>Word2vec</h3>
 <ul>
 <li><strong>定义</strong>：Word2vec是一种将词语映射到高维向量空间的方法，通过上下文关系来捕捉词语之间的语义相似性。</li>
 <li><strong>训练过程</strong>：通过负采样等技术，Word2vec能够高效地训练大规模文本数据，生成具有良好语义表示的词向量。</li>
 </ul>
-<h5>Item2vec</h5>
+<h3>Item2vec</h3>
 <ul>
 <li><strong>推广</strong>：将Word2vec的思想推广到推荐系统领域，称为Item2vec，用于捕捉物品之间的相似性。</li>
 <li><strong>应用场景</strong>：在电商、音乐推荐等场景中，通过用户的行为序列来训练Item2vec模型，进而实现个性化推荐。</li>
 </ul>
-<h5>Graph Embedding</h5>
+<h3>Graph Embedding</h3>
 <ul>
 <li><strong>引入图结构</strong>：为了解决推荐系统中数据稀疏性和冷启动问题，引入Graph Embedding技术，将更多的结构信息融入到Embedding表示中。</li>
 <li><strong>DeepWalk和Node2vec</strong>：这两种方法通过随机游走的方式，在图结构上生成节点的Embedding向量，分别侧重于同质性和结构性。</li>
 </ul>
-<h5>局部敏感哈希（LSH）</h5>
+<h3>局部敏感哈希（LSH）</h3>
 <ul>
 <li><strong>快速相似性搜索</strong>：LSH通过将高维数据映射到低维空间，并利用哈希函数将相似的数据点放入同一个桶中，实现快速的相似性搜索。</li>
 <li><strong>多桶策略</strong>：通过构建多个哈希函数，并采用“与”或“或”操作组合哈希值，提高搜索的准确性和效率。</li>
 </ul>
-<h4>深度学习推荐系统的核心操作</h4>
+      </section>
+      <section id="core" aria-labelledby="core-h">
+        <h2 id="core-h">深度学习推荐系统的核心操作</h2>
 <ol>
 <li>
 <p><strong>特征表示</strong>：</p>
@@ -63,24 +99,51 @@ Content: 06_4.7 总结——深度学习推荐系统的核心操作
 </ul>
 </li>
 </ol>
-<h4>结论</h4>
+        <figure>
+          <svg viewBox="0 0 900 380" role="img" aria-labelledby="fig47-t fig47-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig47-t">Embedding 在推荐系统中的位置：从稀疏特征到相似性搜索</title>
+            <desc id="fig47-d">流水线：高维稀疏特征（one-hot / multi-hot）→ Embedding 层（由 Word2vec、Item2vec、Graph Embedding 训练得到）→ 低维稠密向量，随后分为两支：召回阶段用 LSH 做近邻搜索，排序阶段作为神经网络输入。</desc>
+            <defs><marker id="emb-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#53676d"/></marker></defs>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif" font-size="15">
+              <rect x="14" y="140" width="180" height="100" rx="12" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="104" y="182" text-anchor="middle" font-size="16" font-weight="700" fill="#147f80">高维稀疏特征</text>
+              <text x="104" y="208" text-anchor="middle" font-size="13" fill="#203035">one-hot / multi-hot</text>
+              <line x1="194" y1="190" x2="234" y2="190" stroke="#53676d" stroke-width="2" marker-end="url(#emb-arw)"/>
+              <rect x="234" y="140" width="190" height="100" rx="12" fill="#f7f4fd" stroke="#7461ba" stroke-width="2"/>
+              <text x="329" y="176" text-anchor="middle" font-size="16" font-weight="700" fill="#7461ba">Embedding 层</text>
+              <text x="329" y="202" text-anchor="middle" font-size="13" fill="#203035">Word2vec / Item2vec</text>
+              <text x="329" y="224" text-anchor="middle" font-size="13" fill="#203035">/ Graph Embedding</text>
+              <line x1="424" y1="190" x2="464" y2="190" stroke="#53676d" stroke-width="2" marker-end="url(#emb-arw)"/>
+              <rect x="464" y="140" width="180" height="100" rx="12" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="554" y="182" text-anchor="middle" font-size="16" font-weight="700" fill="#147f80">低维稠密向量</text>
+              <text x="554" y="208" text-anchor="middle" font-size="13" fill="#203035">用户 / 物品表示</text>
+              <line x1="644" y1="190" x2="700" y2="80" stroke="#53676d" stroke-width="2" marker-end="url(#emb-arw)"/>
+              <line x1="644" y1="190" x2="700" y2="300" stroke="#53676d" stroke-width="2" marker-end="url(#emb-arw)"/>
+              <rect x="700" y="34" width="186" height="96" rx="12" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <text x="793" y="72" text-anchor="middle" font-size="15" font-weight="700" fill="#d06d4d">召回：相似性搜索</text>
+              <text x="793" y="98" text-anchor="middle" font-size="13" fill="#203035">LSH 近邻 / 多桶策略</text>
+              <rect x="700" y="254" width="186" height="96" rx="12" fill="#f7f3e6" stroke="#916c22" stroke-width="2"/>
+              <text x="793" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#916c22">排序：模型输入</text>
+              <text x="793" y="318" text-anchor="middle" font-size="13" fill="#203035">与其它特征拼接入 MLP</text>
+            </g>
+          </svg>
+          <figcaption>图 4.7-1（自绘）：Embedding 把稀疏特征压缩为稠密向量后，同一份向量既服务于召回阶段的 LSH 近邻搜索，也作为排序模型的输入特征。颜色区分“表示学习”（青/紫）与两种下游用途（橙/黄）。</figcaption>
+        </figure>
+      </section>
+      <section id="conclusion" aria-labelledby="conclusion-h">
+        <h2 id="conclusion-h">小结</h2>
 <p>Embedding技术在推荐系统中的应用极大地提升了特征表示和相似性搜索的效率和准确性。通过引入LSH技术和多桶策略，进一步提高了推荐系统的实时性和搜索性能。未来，随着深度学习技术的不断发展，推荐系统将在更多场景中发挥重要作用，带来更好的用户体验和商业价值。</p>
-
+        <div class="note"><strong>教学示意：</strong>本页为对第 4 章的小结性归纳：Embedding 与 LSH 的原理、训练与多桶策略依据原书第 4 章的叙述整理；具体召回率/耗时数字需回到原书与对应实验。</div>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 4 章「Embedding 技术在推荐系统中的应用」（4.1–4.7）。</li>
+          <li>本页图 4.7-1 为按原书叙述<strong>自绘</strong>的流水线示意图，非原书插图翻版。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
   
