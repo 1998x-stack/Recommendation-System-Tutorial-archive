@@ -1,117 +1,149 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>04_6.6.5_处理好整体和局部的关系</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>6.6.5 处理好整体和局部的关系</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,4.6vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link,.control-row{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>04_6.6.5 处理好整体和局部的关系</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第6章 深度学习推荐系统的工程实现/6.6 工程与理论之间的权衡
-Content: 04_6.6.5 处理好整体和局部的关系
-&quot;&quot;&quot;</p>
-<h3>6.6.5 处理好整体和局部的关系</h3>
-<h4>概述</h4>
-<p>在深度学习推荐系统的工程实现中，处理好整体和局部的关系是确保系统高效运行和可维护性的关键。整体与局部的关系体现在系统设计、模型开发、数据处理等多个方面。工程师需要综合考虑全局优化和局部优化的平衡，确保系统的整体性能和各个模块的独立性。</p>
-<h4>整体与局部的关系</h4>
-<ol>
-<li>
-<p><strong>系统设计</strong>：</p>
-<ul>
-<li><strong>整体架构设计</strong>：整体架构设计决定了系统的基本结构和功能模块的分布，确保系统的可扩展性和可靠性。</li>
-<li><strong>局部模块设计</strong>：局部模块设计则关注每个功能模块的具体实现，确保模块的高效性和独立性。</li>
-</ul>
-</li>
-<li>
-<p><strong>模型开发</strong>：</p>
-<ul>
-<li><strong>整体模型性能</strong>：在模型开发过程中，需要关注模型的整体性能，包括准确率、召回率、F1值等指标，确保模型在全局上的表现优异。</li>
-<li><strong>局部模型优化</strong>：同时，也需要对模型的各个子模块进行优化，如特征工程、参数调优等，提升局部性能，从而带动整体性能的提升。</li>
-</ul>
-</li>
-<li>
-<p><strong>数据处理</strong>：</p>
-<ul>
-<li><strong>整体数据处理流程</strong>：制定数据处理的整体流程，包括数据采集、预处理、存储和分析，确保数据处理的高效性和一致性。</li>
-<li><strong>局部数据处理步骤</strong>：在具体的数据处理步骤中，关注数据清洗、特征提取、数据变换等细节，确保每一步的高效和准确。</li>
-</ul>
-</li>
-</ol>
-<h4>处理整体与局部关系的策略</h4>
-<ol>
-<li>
-<p><strong>模块化设计</strong>：</p>
-<ul>
-<li><strong>定义</strong>：将系统划分为若干独立的功能模块，每个模块负责特定的功能。</li>
-<li><strong>优点</strong>：模块化设计提高了系统的可维护性和扩展性，便于功能的新增和调整。</li>
-</ul>
-</li>
-<li>
-<p><strong>接口标准化</strong>：</p>
-<ul>
-<li><strong>定义</strong>：为各功能模块定义统一的接口标准，确保模块之间的通信和数据交换顺畅。</li>
-<li><strong>优点</strong>：接口标准化有助于提高系统的可组合性和灵活性，简化模块集成过程。</li>
-</ul>
-</li>
-<li>
-<p><strong>全局优化与局部优化相结合</strong>：</p>
-<ul>
-<li><strong>策略</strong>：在系统设计和实现过程中，综合考虑全局优化和局部优化的需求，确保系统的整体性能和局部性能均达到最优。</li>
-<li><strong>实现</strong>：在进行全局优化时，关注系统的整体架构、性能指标和资源利用；在进行局部优化时，关注各模块的实现细节、算法选择和参数调优。</li>
-</ul>
-</li>
-<li>
-<p><strong>持续集成与持续交付（CI/CD）</strong>：</p>
-<ul>
-<li><strong>定义</strong>：采用持续集成和持续交付的方法，确保系统的每个改动都能及时集成和发布。</li>
-<li><strong>优点</strong>：CI/CD有助于提高开发效率和系统的稳定性，确保整体和局部的协调发展。</li>
-</ul>
-</li>
-</ol>
-<h4>实际应用案例</h4>
-<ol>
-<li>
-<p><strong>电商推荐系统</strong>：</p>
-<ul>
-<li>在某电商平台的推荐系统中，采用模块化设计，将推荐引擎、用户管理、商品管理等功能模块独立开发和部署。通过接口标准化，确保各模块之间的数据交换和功能调用顺畅。全局优化和局部优化相结合，提升推荐系统的整体性能和用户体验。</li>
-</ul>
-</li>
-<li>
-<p><strong>内容推荐系统</strong>：</p>
-<ul>
-<li>在某内容平台的推荐系统中，采用CI/CD方法，实现推荐模型的快速迭代和发布。通过模块化设计和接口标准化，确保推荐系统的各功能模块能够独立开发和测试，提升系统的可维护性和扩展性。</li>
-</ul>
-</li>
-<li>
-<p><strong>金融风险评估系统</strong>：</p>
-<ul>
-<li>在某金融机构的风险评估系统中，通过模块化设计和全局优化策略，提升系统的整体性能和稳定性。局部优化各风险评估模型的参数和特征工程，提高模型的准确性和鲁棒性。</li>
-</ul>
-</li>
-</ol>
-<h3>总结</h3>
-<p>在深度学习推荐系统的工程实现中，处理好整体和局部的关系是确保系统高效运行和可维护性的关键。通过模块化设计、接口标准化、全局优化与局部优化相结合以及CI/CD方法，工程师可以在系统设计、模型开发和数据处理等方面，综合考虑整体和局部的需求，确保系统的整体性能和各个模块的独立性。在未来，随着技术的发展，处理好整体和局部关系的策略将进一步推动深度学习推荐系统的广泛应用和优化。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#tension">整体与局部的张力</a>
+      <a href="#layers">三个层面的整体与局部</a>
+      <a href="#strategy">四种协调策略</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>处理好整体和局部的关系</h1>
+        <p class="dek">把推荐系统当成一棵“系统的整体—模块的局部”树：整体决定模块边界与接口，局部决定整体能达到的水平；工程权衡的核心，就是让两者互相成就而不是互相拖累。</p>
+      </header>
+      <section id="tension" aria-labelledby="tension-h">
+        <h2 id="tension-h">整体与局部的张力</h2>
+        <p>在深度学习推荐系统的工程实现里，“整体”指整条推荐流水线的端到端效果与可维护性，“局部”指其中单个模块（数据管道、特征、模型训练、在线服务、存储）的性能与独立性。两者经常矛盾：</p>
+        <ul>
+          <li>只盯局部：每个模块都调到自己最好，但接口对不上、数据口径不一致，整体反而变差。</li>
+          <li>只看整体：为了端到端指标堆一座臃肿的单体，局部无法替换与复用，后续迭代越来越慢。</li>
+        </ul>
+        <p>因此工程师需要在系统设计、模型开发、数据处理三个层面上同时考虑两种视角，而不是二选一。</p>
+      </section>
+      <section id="layers" aria-labelledby="layers-h">
+        <h2 id="layers-h">三个层面的整体与局部</h2>
+        <figure>
+          <svg viewBox="0 0 900 430" role="img" aria-labelledby="fig665-t fig665-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig665-t">推荐系统的整体与局部：一个整体由多个模块局部组成</title>
+            <desc id="fig665-d">顶部一个“推荐系统整体”节点，向下通过接口总线连到五个局部模块：数据流、特征工程、模型训练、在线服务、存储；每个模块都有标准化接口与整体相连。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <rect x="300" y="40" width="300" height="64" rx="12" fill="#e8f1ee" stroke="#147f80" stroke-width="2"/>
+              <text x="450" y="80" text-anchor="middle" font-size="17" font-weight="700" fill="#203035">推荐系统（整体）</text>
+              <line x1="450" y1="104" x2="450" y2="160" stroke="#53676d" stroke-width="2"/>
+              <line x1="95" y1="160" x2="805" y2="160" stroke="#53676d" stroke-width="2"/>
+              <g stroke="#53676d" stroke-width="2">
+                <line x1="95" y1="160" x2="95" y2="230"/><line x1="272" y1="160" x2="272" y2="230"/>
+                <line x1="450" y1="160" x2="450" y2="230"/><line x1="628" y1="160" x2="628" y2="230"/>
+                <line x1="805" y1="160" x2="805" y2="230"/>
+              </g>
+              <text x="450" y="152" text-anchor="middle" font-size="12" fill="#916c22">标准化接口（数据/模型格式、服务契约）</text>
+              <g fill="#ece7fb" stroke="#7461ba" stroke-width="2">
+                <rect x="20" y="230" width="150" height="80" rx="10"/><rect x="197" y="230" width="150" height="80" rx="10"/>
+                <rect x="375" y="230" width="150" height="80" rx="10"/><rect x="553" y="230" width="150" height="80" rx="10"/>
+                <rect x="730" y="230" width="150" height="80" rx="10"/>
+              </g>
+              <g font-size="14" fill="#203035" text-anchor="middle">
+                <text x="95" y="276">数据流</text><text x="272" y="276">特征工程</text><text x="450" y="276">模型训练</text><text x="628" y="276">在线服务</text><text x="805" y="276">存储</text>
+              </g>
+              <text x="450" y="350" text-anchor="middle" font-size="12" fill="#53676d">局部：各自可独立替换与复用</text>
+              <text x="450" y="372" text-anchor="middle" font-size="12" fill="#147f80">整体：端到端效果、可维护性与交付节奏</text>
+              <text x="450" y="400" text-anchor="middle" font-size="12" fill="#916c22">接口标准化是连接“整体”与“局部”的接缝</text>
+            </g>
+          </svg>
+          <figcaption>图 6.6-1（自绘）：整体与局部的关系可以看成一棵树。整体负责定义模块边界与接口，局部负责在边界内做到最好。接口标准化就是两者的“接缝”；接缝设计不好，任何一处局部优化都难以传递到整体。</figcaption>
+        </figure>
+      </section>
+      <section id="strategy" aria-labelledby="strategy-h">
+        <h2 id="strategy-h">四种协调策略</h2>
+        <ol>
+          <li><strong>模块化设计</strong>：把系统划分为职责单一的功能模块，每个模块可独立开发、测试、替换；优点是提高可维护性与可扩展性，代价是需要额外定义边界。</li>
+          <li><strong>接口标准化</strong>：为模块之间定义统一的数据格式与服务契约，使“换掉一个局部”不会牵动全局；这是整体与局部之间最重要的接缝。</li>
+          <li><strong>全局优化与局部优化相结合</strong>：先确定端到端目标（如点击率、时长），再把目标拆解到各模块的可衡量指标上；避免局部最优而整体不优。</li>
+          <li><strong>持续集成与持续交付（CI/CD）</strong>：让每个局部改动都能及时集成与发布，用自动化测试守住接口，确保整体与局部同步演进。</li>
+        </ol>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 6.6-1：三个层面上“整体”与“局部”的关注点（按 6.6.5 叙述整理）</caption>
+          <thead><tr><th style="width:22%">层面</th><th style="width:39%">整体视角</th><th>局部视角</th></tr></thead>
+          <tbody>
+            <tr><td>系统设计</td><td>架构决定模块分布与可扩展性、可靠性</td><td>单模块的实现效率与独立性</td></tr>
+            <tr><td>模型开发</td><td>端到端指标（准确率、召回率、F1 等）</td><td>特征工程、参数调优等子模块优化</td></tr>
+            <tr><td>数据处理</td><td>采集→预处理→存储→分析的整体流程一致</td><td>清洗、特征提取、变换每一步的正确与高效</td></tr>
+          </tbody>
+        </table>
+        <div class="control-row" role="group" aria-label="选择关注的层面">
+          <button type="button" data-layer="design" aria-pressed="false">系统设计</button>
+          <button type="button" data-layer="model" aria-pressed="false">模型开发</button>
+          <button type="button" data-layer="data" aria-pressed="false">数据处理</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">选择上方层面，查看该层面下整体与局部的协调重点。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>处理好整体和局部的关系，不是把二者排个优先级，而是把它们接起来：整体定义边界与接口，局部在边界内追求效率与独立性，再用全局指标把各局部拉回同一个目标。模块化设计、接口标准化、全局与局部优化相结合以及 CI/CD，是四条可操作的策略。本页为第 6 章 6.6.5 节观点的归纳与整理，具体工程细节请参见本书第 6 章相关小节。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 6 章「深度学习推荐系统的工程实现」6.6 节「工程与理论之间的权衡」，含 6.6.5 处理好整体和局部的关系。</li>
+          <li>本页图 6.6-1 与表 6.6-1 为按 6.6.5 节观点<strong>自绘／整理</strong>，非原书插图或表格翻版。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var tips = {
+        design: '系统设计：先用架构定下模块边界与可靠性/可扩展性目标，再让各模块在边界内追求实现效率。',
+        model: '模型开发：以端到端指标为总目标，把其拆解到特征工程、参数调优等子模块，避免局部最优。',
+        data: '数据处理：先统一采集→预处理→存储→分析的整体流程，再保证清洗、特征提取每一步的正确与高效。'
+      };
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-layer]'));
+      var status = document.querySelector('.status');
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var layer = b.getAttribute('data-layer');
+          buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          if (status) status.textContent = tips[layer];
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
-  
