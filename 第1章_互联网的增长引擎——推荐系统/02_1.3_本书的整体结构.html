@@ -1,246 +1,171 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>02_1.3_本书的整体结构</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>1.3 本书的整体结构</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+.path-item.active{background:var(--surface);border-left:4px solid var(--accent);padding-left:.7rem;border-radius:0 .4rem .4rem 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>02_1.3 本书的整体结构</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第1章 互联网的增长引擎——推荐系统
-Content: 02_1.3 本书的整体结构
-&quot;&quot;&quot;</p>
-<h3>本书的整体结构详细表格</h3>
-<table>
-<thead>
-<tr>
-<th><strong>章节</strong></th>
-<th><strong>章节标题</strong></th>
-<th><strong>详细内容描述</strong></th>
-<th><strong>主要内容</strong></th>
-<th><strong>目标与意义</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>第1章</strong></td>
-<td>推荐系统概述</td>
-<td>介绍推荐系统作为互联网增长引擎的重要性，分析其对用户体验和平台收益的影响。</td>
-<td>推荐系统的定义、重要性、架构及整体结构。</td>
-<td>帮助读者理解推荐系统在互联网中的作用及本书的整体结构。</td>
-</tr>
-<tr>
-<td><strong>1.1</strong></td>
-<td>互联网的增长引擎</td>
-<td>详细介绍推荐系统作为互联网增长引擎的重要性。</td>
-<td>分析推荐系统对用户体验和平台收益的影响。</td>
-<td>提供推荐系统在商业和用户体验中的核心价值。</td>
-</tr>
-<tr>
-<td><strong>1.2</strong></td>
-<td>推荐系统的架构</td>
-<td>详细讲解推荐系统的逻辑框架、技术架构、数据部分、模型部分以及深度学习的贡献。</td>
-<td>推荐系统的各个组成部分和其实现方法。</td>
-<td>帮助读者理解推荐系统的具体实现和技术架构。</td>
-</tr>
-<tr>
-<td><strong>1.3</strong></td>
-<td>本书的整体结构</td>
-<td>概述本书的章节安排和内容分布，为读者提供阅读指引。</td>
-<td>本书的章节概览及每章的重点内容。</td>
-<td>为读者提供明确的阅读路径和预期目标。</td>
-</tr>
-<tr>
-<td><strong>第2章</strong></td>
-<td>推荐系统的数据处理</td>
-<td>讲解用户数据、物品数据和上下文数据的收集方法与预处理技术。</td>
-<td>数据收集与预处理、特征工程、数据存储与管理。</td>
-<td>帮助读者掌握推荐系统的数据处理流程和技术。</td>
-</tr>
-<tr>
-<td><strong>2.1</strong></td>
-<td>数据收集与预处理</td>
-<td>详细介绍用户数据、物品数据和上下文数据的收集方法与预处理技术。</td>
-<td>数据收集的方法和预处理技术。</td>
-<td>确保推荐系统的数据质量和完整性。</td>
-</tr>
-<tr>
-<td><strong>2.2</strong></td>
-<td>特征工程</td>
-<td>介绍如何从原始数据中提取有用特征，包括特征选择、特征转换和特征提取等方法。</td>
-<td>特征选择、特征转换、特征提取。</td>
-<td>提供高质量的输入特征供推荐模型使用。</td>
-</tr>
-<tr>
-<td><strong>2.3</strong></td>
-<td>数据存储与管理</td>
-<td>探讨大规模数据存储与管理的解决方案，如Hadoop、Spark等分布式系统。</td>
-<td>数据存储技术和管理策略。</td>
-<td>提高推荐系统的数据存储和管理效率。</td>
-</tr>
-<tr>
-<td><strong>第3章</strong></td>
-<td>推荐算法基础</td>
-<td>详细讲解基于用户和基于物品的协同过滤算法，及其优缺点和改进方法。</td>
-<td>协同过滤、矩阵分解、基于内容的推荐。</td>
-<td>帮助读者理解推荐算法的基础理论和实现方法。</td>
-</tr>
-<tr>
-<td><strong>3.1</strong></td>
-<td>协同过滤</td>
-<td>详细讲解基于用户和基于物品的协同过滤算法，及其优缺点和改进方法。</td>
-<td>UserCF、ItemCF的原理和应用。</td>
-<td>提供推荐系统的基础推荐方法和改进策略。</td>
-</tr>
-<tr>
-<td><strong>3.2</strong></td>
-<td>矩阵分解</td>
-<td>介绍SVD、ALS等矩阵分解技术，及其在推荐系统中的应用。</td>
-<td>矩阵分解技术的实现和应用。</td>
-<td>提供处理稀疏数据的有效方法。</td>
-</tr>
-<tr>
-<td><strong>3.3</strong></td>
-<td>基于内容的推荐</td>
-<td>探讨如何利用物品的内容信息进行推荐，适用场景和实现方法。</td>
-<td>基于内容的推荐方法和技术。</td>
-<td>提供基于物品内容信息的推荐策略。</td>
-</tr>
-<tr>
-<td><strong>第4章</strong></td>
-<td>高级推荐算法</td>
-<td>介绍混合推荐系统、基于图的推荐和深度学习在推荐中的应用。</td>
-<td>混合推荐系统、图模型推荐、深度学习推荐。</td>
-<td>帮助读者掌握高级推荐算法和最新技术。</td>
-</tr>
-<tr>
-<td><strong>4.1</strong></td>
-<td>混合推荐系统</td>
-<td>介绍混合推荐系统的原理和实现方法，如加权混合、级联混合、切换混合等。</td>
-<td>混合推荐策略及其实现。</td>
-<td>提供多种推荐方法的融合策略。</td>
-</tr>
-<tr>
-<td><strong>4.2</strong></td>
-<td>基于图的推荐</td>
-<td>探讨图模型在推荐系统中的应用，如图卷积网络（GCN）、随机游走等。</td>
-<td>图模型在推荐系统中的应用。</td>
-<td>提供处理复杂网络关系的推荐方法。</td>
-</tr>
-<tr>
-<td><strong>4.3</strong></td>
-<td>深度学习在推荐中的应用</td>
-<td>详细讲解深度学习模型在推荐系统中的应用，包括DNN、RNN、CNN、Transformer等。</td>
-<td>深度学习在推荐系统中的应用。</td>
-<td>提供利用深度学习提升推荐效果的技术。</td>
-</tr>
-<tr>
-<td><strong>第5章</strong></td>
-<td>推荐系统的评价与优化</td>
-<td>介绍推荐系统的评价指标、离线评估与在线实验及推荐系统的优化方法。</td>
-<td>评价指标、评估方法、优化策略。</td>
-<td>帮助读者掌握推荐系统的评估和优化技巧。</td>
-</tr>
-<tr>
-<td><strong>5.1</strong></td>
-<td>推荐系统评价指标</td>
-<td>介绍评估推荐系统效果的常用指标，如准确率、召回率、F1值、NDCG等。</td>
-<td>常用评价指标及其计算方法。</td>
-<td>提供评估推荐系统效果的标准。</td>
-</tr>
-<tr>
-<td><strong>5.2</strong></td>
-<td>离线评估与在线实验</td>
-<td>探讨如何通过离线评估和在线A/B测试评估推荐系统的性能。</td>
-<td>离线评估方法和在线实验设计。</td>
-<td>提供评估推荐系统性能的具体方法。</td>
-</tr>
-<tr>
-<td><strong>5.3</strong></td>
-<td>推荐系统的优化</td>
-<td>介绍常用的优化方法，如超参数调优、模型集成、在线学习等。</td>
-<td>优化推荐系统的方法和策略。</td>
-<td>提供提高推荐系统性能的具体措施。</td>
-</tr>
-<tr>
-<td><strong>第6章</strong></td>
-<td>推荐系统的实际应用</td>
-<td>分析电商、社交网络和媒体推荐系统的应用场景和技术实现。</td>
-<td>电商推荐、社交网络推荐、媒体推荐。</td>
-<td>帮助读者理解推荐系统的实际应用及其技术实现。</td>
-</tr>
-<tr>
-<td><strong>6.1</strong></td>
-<td>电商推荐系统</td>
-<td>分析电商平台中推荐系统的应用场景和技术实现，如商品推荐、个性化营销等。</td>
-<td>电商推荐系统的应用和实现。</td>
-<td>提供电商平台中的推荐解决方案。</td>
-</tr>
-<tr>
-<td><strong>6.2</strong></td>
-<td>社交网络推荐系统</td>
-<td>探讨社交网络中好友推荐、内容推荐等应用，及其实现方法。</td>
-<td>社交网络推荐系统的应用和实现。</td>
-<td>提供社交网络中的推荐策略。</td>
-</tr>
-<tr>
-<td><strong>6.3</strong></td>
-<td>媒体推荐系统</td>
-<td>介绍新闻、视频等媒体平台中的推荐系统应用，及其技术实现。</td>
-<td>媒体推荐系统的应用和实现。</td>
-<td>提供媒体平台中的推荐方法。</td>
-</tr>
-<tr>
-<td><strong>第7章</strong></td>
-<td>推荐系统的前沿研究</td>
-<td>介绍推荐系统的前沿研究方向，如解释性推荐、公平性与多样性及隐私保护。</td>
-<td>解释性推荐、公平性与多样性、隐私保护。</td>
-<td>帮助读者了解推荐系统的最新研究动态和未来发展方向。</td>
-</tr>
-<tr>
-<td><strong>7.1</strong></td>
-<td>解释性推荐</td>
-<td>探讨如何提高推荐系统的可解释性，使用户理解推荐结果的原因。</td>
-<td>提高推荐系统的透明度和可解释性。</td>
-<td>提供可解释性推荐的解决方案。</td>
-</tr>
-<tr>
-<td><strong>7.2</strong></td>
-<td>公平性与多样性</td>
-<td>研究推荐系统中的公平性问题和多样性策略，确保推荐结果的公正和丰富。</td>
-<td>提高推荐结果的公平性和多样性。</td>
-<td>提供公平性和多样性推荐的策略。</td>
-</tr>
-<tr>
-<td><strong>7.3</strong></td>
-<td>隐私保护</td>
-<td>介绍如何在推荐系统中保护用户隐私，避免数据泄露和滥用。</td>
-<td>保护用户隐私的技术和策略。</td>
-<td>提供隐私保护推荐的解决方案。</td>
-</tr>
-</tbody>
-</table>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">为什么要先看全书结构</a>
+      <a href="#map">八章地图</a>
+      <a href="#lines">贯穿全书的三条主线</a>
+      <a href="#path">三种阅读路径</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>本书的整体结构</h1>
+        <p class="dek">先建立一张“全书地图”：八章沿着“传统方法 → 深度模型 → Embedding → 工程与评估 → 前沿实践”的脉络展开，每一章都在回答上一章留下的问题。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">为什么要先看全书结构</h2>
+        <p>推荐系统不是一个孤立模型，而是一条从数据到模型再到线上服务的流水线。若只记住某一个算法（例如矩阵分解或 Wide&amp;Deep），遇到新问题时很难判断该替换整条流水线的哪一环。因此在进入公式与代码之前，先弄清全书各章解决的是同一问题的哪个侧面，阅读时才有“挂靠点”。</p>
+        <p>本书的叙述顺序可以概括为四个问题：<strong>推荐系统为什么重要</strong>（第 1 章）→ <strong>深度学习之前怎么做</strong>（第 2 章）→ <strong>深度学习带来了什么</strong>（第 3、4 章）→ <strong>如何把它做成可评估、可上线的系统</strong>（第 5、6、7、8 章）。这四步环环相扣：第 2 章暴露的协同过滤与特征工程局限，正是第 3 章深度模型要解决的问题；第 3 章的 Embedding 又成为第 4 章召回与近邻搜索的核心工具。</p>
+      </section>
+      <section id="map" aria-labelledby="map-h">
+        <h2 id="map-h">八章地圖</h2>
+        <figure>
+          <svg viewBox="0 0 900 470" role="img" aria-labelledby="fig13-t fig13-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig13-t">全书八章的阅读路线图</title>
+            <desc id="fig13-d">两行卡片：第一行从第1章到第4章，第二行从第5章到第8章；箭头表示阅读顺序，颜色区分“前深度学习时代”“深度学习时代”与“系统与前沿”。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="38" font-size="18" font-weight="700" fill="#203035">全书八章：一条从传统方法到深度系统再到前沿实践的路线</text>
+              <rect x="15" y="70" width="190" height="86" rx="12" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <rect x="235" y="70" width="190" height="86" rx="12" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <rect x="455" y="70" width="190" height="86" rx="12" fill="#e8f1ee" stroke="#147f80" stroke-width="2"/>
+              <rect x="675" y="70" width="190" height="86" rx="12" fill="#e8f1ee" stroke="#147f80" stroke-width="2"/>
+              <rect x="15" y="250" width="190" height="86" rx="12" fill="#ece7fb" stroke="#7461ba" stroke-width="2"/>
+              <rect x="235" y="250" width="190" height="86" rx="12" fill="#ece7fb" stroke="#7461ba" stroke-width="2"/>
+              <rect x="455" y="250" width="190" height="86" rx="12" fill="#ece7fb" stroke="#7461ba" stroke-width="2"/>
+              <rect x="675" y="250" width="190" height="86" rx="12" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <g font-size="15" font-weight="700" fill="#203035" text-anchor="middle">
+                <text x="110" y="106">第1章</text><text x="330" y="106">第2章</text><text x="550" y="106">第3章</text><text x="770" y="106">第4章</text>
+                <text x="110" y="286">第5章</text><text x="330" y="286">第6章</text><text x="550" y="286">第7章</text><text x="770" y="286">第8章</text>
+              </g>
+              <g font-size="12" fill="#53676d" text-anchor="middle">
+                <text x="110" y="128">增长引擎与架构</text><text x="330" y="128">前深度学习时代</text><text x="550" y="128">深度学习推荐模型</text><text x="770" y="128">Embedding 技术</text>
+                <text x="110" y="308">多角度审视系统</text><text x="330" y="308">工程实现</text><text x="550" y="308">评估体系</text><text x="770" y="308">前沿实践</text>
+                <text x="110" y="142" fill="#916c22">阅 读 起 点</text><text x="770" y="322" fill="#916c22">案 例 落 地</text>
+              </g>
+              <g stroke="#53676d" stroke-width="2.5" fill="none" marker-end="none">
+                <path d="M205 113 H235"/><path d="M425 113 H455"/><path d="M645 113 H675"/>
+                <path d="M205 293 H235"/><path d="M425 293 H455"/><path d="M645 293 H675"/>
+              </g>
+              <path d="M770 156 q0 60 -60 60 H110 q-60 0 -60 -60" fill="none" stroke="#916c22" stroke-width="2" stroke-dasharray="7 6"/>
+              <text x="430" y="228" font-size="12" fill="#916c22" text-anchor="middle">从“模型”转向“系统”（第 4 章 → 第 5 章）</text>
+            </g>
+          </svg>
+          <figcaption>图 1.3-1（自绘）：八章可以看成两排卡片。上排建立“为什么需要推荐、深度学习前后各用什么方法”的认知；青色代表深度学习相关章节，橙色代表传统方法与前沿案例，紫色代表系统层面的多角度审视、工程与评估。虚线提醒读者：读完第 4 章的 Embedding 后，视角要从单个模型转向整条推荐流水线。</figcaption>
+        </figure>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 1.3-1：八章的分工与承接关系（章节标题取自本仓章节目录）</caption>
+          <thead>
+            <tr><th style="width:16%">章节</th><th style="width:30%">主题</th><th>在全书中的作用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>第 1 章</td><td>互联网的增长引擎——推荐系统</td><td>回答“为什么需要推荐系统”，给出逻辑框架与技术架构，建立全书的地图。</td></tr>
+            <tr><td>第 2 章</td><td>前深度学习时代——推荐系统的进化之路</td><td>梳理协同过滤、矩阵分解、逻辑回归、FM/FFM、GBDT+LR 等传统模型，引出它们各自的局限。</td></tr>
+            <tr><td>第 3 章</td><td>浪潮之巅——深度学习在推荐系统中的应用</td><td>以 AutoRec、Deep&nbsp;Crossing、NeuralCF、Wide&amp;Deep、DeepFM、DIN、DIEN 等展示深度模型如何逐步加强特征交叉与序列建模。</td></tr>
+            <tr><td>第 4 章</td><td>Embedding 技术在推荐系统中的应用</td><td>把“向量化”作为核心工具：Word2vec、Item2vec、Graph Embedding、Embedding 召回与局部敏感哈希。</td></tr>
+            <tr><td>第 5 章</td><td>多角度审视推荐系统</td><td>跳出单个模型，讨论特征工程、召回策略、实时性、优化目标、冷启动与探索利用等系统级问题。</td></tr>
+            <tr><td>第 6 章</td><td>深度学习推荐系统的工程实现</td><td>从数据流、Spark、Parameter Server、TensorFlow 到上线部署，讨论工程与理论之间的权衡。</td></tr>
+            <tr><td>第 7 章</td><td>推荐系统的评估</td><td>离线评估指标、Replay、A/B 测试与 Interleaving，回答“如何判断一次改动真的有效”。</td></tr>
+            <tr><td>第 8 章</td><td>深度学习推荐系统的前沿实践</td><td>以 Facebook、Airbnb、YouTube、阿里巴巴的工业案例收尾，展示前面各章的工程化组合。</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="lines" aria-labelledby="lines-h">
+        <h2 id="lines-h">贯穿全书的三条主线</h2>
+        <p>把八章重新排一遍，会看到三条反复出现的线索。它们比具体模型更重要，因为模型会过时，问题不会。</p>
+        <ol>
+          <li><strong>特征交叉的自动化</strong>：从人工构造交叉特征的逻辑回归（第 2 章），到 FM/FFM 的隐向量交叉，再到 Wide&amp;Deep、DeepFM、PNN、DIN 让网络自己学交叉（第 3 章）。主线是“把特征工程从人手里交给模型”。</li>
+          <li><strong>用户与物品的向量化</strong>：第 4 章的 Embedding 把离散 ID 映射为稠密向量，使“相似”可以被度量，也使得召回层可以用近邻搜索完成；第 3 章的深度模型又大量依赖 Embedding 层作为输入。</li>
+          <li><strong>从离线指标到线上收益</strong>：第 5 章的实时性与优化目标、第 6 章的工程实现、第 7 章的离线/在线评估、第 8 章的工业案例，共同回答“一个模型改动是否真的提升了业务指标”。</li>
+        </ol>
+        <div class="note"><strong>教学示意：</strong>本页为对全书章节结构的归纳，章节标题取自本仓目录；三条主线的归纳属于对全书叙述的整理，不是原书原文的章节划分。</div>
+      </section>
+      <section id="path" aria-labelledby="path-h">
+        <h2 id="path-h">三种阅读路径</h2>
+        <p>不必从头到尾线性阅读。根据目标，可以参考以下三种路径（均为建议，非原书规定）：</p>
+        <ul class="path-list">
+          <li id="path-all" class="path-item"><strong>快速了解全貌</strong>：第 1 章 → 第 2 章 2.1（演化关系图）→ 第 3 章 3.1（演化关系图）→ 第 4 章 4.7 → 第 5 章 5.3.4 → 第 7 章 7.6。先看每章的开篇与总结，建立地图。</li>
+          <li id="path-algo" class="path-item"><strong>偏算法与模型</strong>：第 2 章 → 第 3 章 → 第 4 章，重点是各模型的演化动机与结构差异。</li>
+          <li id="path-sys" class="path-item"><strong>偏系统与落地</strong>：第 5 章 → 第 6 章 → 第 7 章 → 第 8 章，重点是召回/排序流程、工程权衡与评估方法。</li>
+        </ul>
+        <div class="control-row" role="group" aria-label="高亮一种阅读路径">
+          <button type="button" data-path="path-all" aria-pressed="true">全貌线</button>
+          <button type="button" data-path="path-algo" aria-pressed="false">算法线</button>
+          <button type="button" data-path="path-sys" aria-pressed="false">系统线</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">当前高亮：全貌线。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>本书的八章并非并列的知识点，而是一条递进的线索：先理解推荐系统的价值（第 1 章），再看传统方法怎么做及其局限（第 2 章），接着看深度学习如何逐层解决这些问题（第 3、4 章），最后回到真实的系统里讨论特征、召回、实时性、工程与评估（第 5、6、7 章），并以工业案例收尾（第 8 章）。带着这张地图去读后续章节，每个模型都能落到“它在解决哪一步的问题”上。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》各章标题与目录，本仓对应的八个章节目录（第 1–8 章）。</li>
+          <li>本页图 1.3-1 为按全书目录<strong>自绘</strong>的路线图，表 1.3-1 根据本仓章节目录整理。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-path]'));
+      var status = document.querySelector('.status');
+      function activate(id, label) {
+        buttons.forEach(function (b) {
+          var on = b.getAttribute('data-path') === id;
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        document.querySelectorAll('.path-item').forEach(function (li) {
+          li.classList.toggle('active', li.id === id);
+        });
+        if (status) status.textContent = '当前高亮：' + label + '。';
+      }
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          activate(b.getAttribute('data-path'), b.textContent.trim());
+        });
       });
-    });
+      activate('path-all', '全貌线');
+    })();
   </script>
 </body>
 </html>
-  
