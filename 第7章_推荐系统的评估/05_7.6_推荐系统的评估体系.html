@@ -1,301 +1,159 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>05_7.6_推荐系统的评估体系</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>7.6 推荐系统的评估体系</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.1rem,5vw,3.1rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll,[data-math-scroll]{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible,[data-math-scroll]:focus-visible{outline:3px solid #147f80;outline-offset:2px}
+.math-scroll math[display="block"],[data-math-scroll] math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>05_7.6 推荐系统的评估体系</h1>
-<p>&quot;&quot;&quot;
-Lecture: /第7章 推荐系统的评估
-Content: 05_7.6 推荐系统的评估体系
-&quot;&quot;&quot;</p>
-<h3>7.6 推荐系统的评估体系</h3>
-<h4>概述</h4>
-<p>推荐系统的评估体系是指通过一系列指标和方法，全面评估推荐系统的性能和效果。一个完整的评估体系应包括离线评估、在线评估、用户体验评估等多个方面，以确保推荐系统在各种环境下的表现优异。</p>
-<h4>评估体系的组成部分</h4>
-<ol>
-<li>
-<p><strong>离线评估</strong></p>
-<ul>
-<li><strong>定义</strong>：在实验室环境下，使用历史数据对推荐系统进行评估，主要关注算法的准确性和效率。</li>
-<li><strong>重要性</strong>：离线评估能够快速筛选出表现较好的算法，节省在线测试的成本。</li>
-<li><strong>常用指标</strong>：准确率（Precision）、召回率（Recall）、F1值（F1-Score）、平均精度均值（MAP）、ROC曲线、AUC等。</li>
-</ul>
-</li>
-<li>
-<p><strong>在线评估</strong></p>
-<ul>
-<li><strong>定义</strong>：在实际运行环境下，通过用户的真实行为数据对推荐系统进行评估。</li>
-<li><strong>重要性</strong>：在线评估能够反映推荐系统在真实场景中的表现，确保算法在实际应用中的有效性。</li>
-<li><strong>常用指标</strong>：点击率（CTR）、转化率（CR）、用户留存率、跳出率、会话时长等。</li>
-</ul>
-</li>
-<li>
-<p><strong>用户体验评估</strong></p>
-<ul>
-<li><strong>定义</strong>：通过用户反馈和调查，评估推荐系统的用户体验和满意度。</li>
-<li><strong>重要性</strong>：用户体验评估能够反映用户对推荐系统的主观感受，是衡量推荐系统成功与否的重要标准。</li>
-<li><strong>常用方法</strong>：用户问卷调查、用户访谈、可用性测试、净推荐值（NPS）等。</li>
-</ul>
-</li>
-<li>
-<p><strong>综合评估</strong></p>
-<ul>
-<li><strong>定义</strong>：结合离线评估、在线评估和用户体验评估的结果，全面评估推荐系统的整体性能。</li>
-<li><strong>重要性</strong>：综合评估能够提供一个全局视角，帮助全面了解推荐系统的优劣势，指导系统的改进和优化。</li>
-</ul>
-</li>
-</ol>
-<h4>评估体系的关键指标</h4>
-<ol>
-<li>
-<p><strong>准确率（Precision）</strong></p>
-<ul>
-<li><strong>定义</strong>：推荐结果中正确推荐的比例。</li>
-<li><strong>计算公式</strong>：$$ \text{Precision} = \frac{\text{正确推荐数}}{\text{推荐总数}} $$</li>
-<li><strong>重要性</strong>：衡量推荐系统的精确性，反映推荐结果的相关性。</li>
-</ul>
-</li>
-<li>
-<p><strong>召回率（Recall）</strong></p>
-<ul>
-<li><strong>定义</strong>：在所有相关项目中，被推荐出的比例。</li>
-<li><strong>计算公式</strong>：$$ \text{Recall} = \frac{\text{正确推荐数}}{\text{相关项目总数}} $$</li>
-<li><strong>重要性</strong>：衡量推荐系统的覆盖能力，反映推荐结果的全面性。</li>
-</ul>
-</li>
-<li>
-<p><strong>F1值（F1-Score）</strong></p>
-<ul>
-<li><strong>定义</strong>：准确率和召回率的调和平均数。</li>
-<li><strong>计算公式</strong>：$$ \text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} $$</li>
-<li><strong>重要性</strong>：综合评估推荐系统的准确性和覆盖能力。</li>
-</ul>
-</li>
-<li>
-<p><strong>平均精度均值（MAP）</strong></p>
-<ul>
-<li><strong>定义</strong>：所有查询平均精度的均值。</li>
-<li><strong>计算公式</strong>：$$ \text{MAP} = \frac{1}{Q} \sum_{i=1}^{Q} \text{AP}(i) $$</li>
-<li><strong>重要性</strong>：衡量推荐系统在多个查询上的整体表现。</li>
-</ul>
-</li>
-<li>
-<p><strong>ROC曲线和AUC</strong></p>
-<ul>
-<li><strong>定义</strong>：ROC曲线表示不同阈值下的真阳性率和假阳性率的关系，AUC为曲线下的面积。</li>
-<li><strong>重要性</strong>：衡量推荐系统在各种阈值下的分类性能。</li>
-</ul>
-</li>
-<li>
-<p><strong>点击率（CTR）</strong></p>
-<ul>
-<li><strong>定义</strong>：用户点击推荐内容的比例。</li>
-<li><strong>计算公式</strong>：$$ \text{CTR} = \frac{\text{点击数}}{\text{展示数}} $$</li>
-<li><strong>重要性</strong>：衡量推荐内容的吸引力。</li>
-</ul>
-</li>
-<li>
-<p><strong>转化率（CR）</strong></p>
-<ul>
-<li><strong>定义</strong>：用户完成特定操作的比例。</li>
-<li><strong>计算公式</strong>：$$ \text{CR} = \frac{\text{转化数}}{\text{点击数}} $$</li>
-<li><strong>重要性</strong>：衡量推荐内容的有效性。</li>
-</ul>
-</li>
-<li>
-<p><strong>用户留存率</strong></p>
-<ul>
-<li><strong>定义</strong>：在一定时间内继续使用推荐系统的用户比例。</li>
-<li><strong>计算公式</strong>：$$ \text{用户留存率} = \frac{\text{留存用户数}}{\text{总用户数}} $$</li>
-<li><strong>重要性</strong>：衡量用户对推荐系统的满意度和忠诚度。</li>
-</ul>
-</li>
-<li>
-<p><strong>净推荐值（NPS）</strong></p>
-<ul>
-<li><strong>定义</strong>：用户推荐推荐系统的可能性评分。</li>
-<li><strong>计算公式</strong>：$$ \text{NPS} = \text{推荐者比例} - \text{贬损者比例} $$</li>
-<li><strong>重要性</strong>：衡量用户的整体满意度和忠诚度。</li>
-</ul>
-</li>
-</ol>
-<h4>实际应用案例</h4>
-<ol>
-<li>
-<p><strong>电商平台</strong></p>
-<ul>
-<li>通过离线评估快速筛选出表现较好的推荐算法，然后通过在线评估验证算法在实际环境中的效果，最后通过用户体验评估和综合评估，优化推荐系统，提升用户体验和销售额。</li>
-</ul>
-</li>
-<li>
-<p><strong>内容推荐系统</strong></p>
-<ul>
-<li>采用离线评估指标如准确率和召回率评估推荐算法，然后通过点击率和转化率的在线评估验证算法的实际效果，结合用户反馈进行用户体验评估，全面优化推荐系统，提高用户的阅读量和停留时间。</li>
-</ul>
-</li>
-<li>
-<p><strong>社交网络</strong></p>
-<ul>
-<li>通过离线评估和在线评估相结合的方式评估好友推荐算法，结合用户的互动频率和留存率进行综合评估，优化推荐算法，提高用户的互动频率和平台留存率。</li>
-</ul>
-</li>
-</ol>
-<h4>关键技术和工具</h4>
-<ol>
-<li>
-<p><strong>数据采集工具</strong></p>
-<ul>
-<li>使用Google Analytics等工具实时收集用户的点击、浏览和购买行为数据。</li>
-</ul>
-</li>
-<li>
-<p><strong>统计分析工具</strong></p>
-<ul>
-<li>采用R、Python等工具进行数据清洗和统计分析，使用t检验等方法比较不同推荐算法的效果。</li>
-</ul>
-</li>
-<li>
-<p><strong>实验管理工具</strong></p>
-<ul>
-<li>使用Optimizely等A/B测试工具管理实验流程，确保实验按计划进行。</li>
-</ul>
-</li>
-</ol>
-<h3>总结</h3>
-<p>推荐系统的评估体系是通过一系列指标和方法，全面评估推荐系统的性能和效果。通过离线评估、在线评估和用户体验评估等多方面的结合，能够全面了解推荐系统的优劣势，为优化提供科学依据，提高用户体验和业务效果。在实际应用中，通过选择合适的评估方法和技术工具，能够更准确地评估推荐系统的效果，为优化提供科学依据，提高用户体验和业务效果。</p>
-<hr>
-<h3>推荐系统的评估体系详细表格</h3>
-<table>
-<thead>
-<tr>
-<th><strong>评估类别</strong></th>
-<th><strong>定义</strong></th>
-<th><strong>重要性</strong></th>
-<th><strong>常用指标</strong></th>
-<th><strong>实例</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>离线评估</strong></td>
-<td>在实验室环境下，使用历史数据对推荐系统进行评估，主要关注算法的准确性和效率。</td>
-<td>快速筛选出表现较好的算法，节省在线测试的成本。</td>
-<td>准确率（Precision）、召回率（Recall）、F1值（F1-Score）、平均精度均值（MAP）、ROC曲线、AUC等</td>
-<td>电商平台通过离线评估，快速筛选出点击率和转化率较高的推荐算法。</td>
-</tr>
-<tr>
-<td><strong>在线评估</strong></td>
-<td>在实际运行环境下，通过用户的真实行为数据对推荐系统进行评估。</td>
-<td>反映推荐系统在真实场景中的表现，确保算法在实际应用中的有效性。</td>
-<td>点击率（CTR）、转化率（CR）、用户留存率、跳出率、会话时长等</td>
-<td>内容推荐系统通过在线评估，验证新推荐算法在用户阅读量和停留时间上的提升。</td>
-</tr>
-<tr>
-<td><strong>用户体验评估</strong></td>
-<td>通过用户反馈和调查，评估推荐系统的用户体验和满意度。</td>
-<td>反映用户对推荐系统的主观感受，是衡量推荐系统成功与否的重要标准。</td>
-<td>用户问卷调查、用户访谈、可用性测试、净推荐值（NPS）等</td>
-<td>社交网络通过用户体验评估，收集用户对新推荐算法的反馈，提高用户满意度和留存率。</td>
-</tr>
-<tr>
-<td><strong>综合评估</strong></td>
-<td>结合离线评估、在线评估和用户体验评估的结果，全面评估推荐系统的整体性能。</td>
-<td>提供一个全局视角，帮助全面了解推荐系统的优劣势，指导系统的改进和优化。</td>
-<td>离线评估指标 + 在线评估指标 + 用户体验评估方法</td>
-<td>电商平台通过综合评估，全面了解新推荐算法的性能和用户反馈，指导推荐系统的优化。</td>
-</tr>
-</tbody>
-</table>
-<h3>关键指标和计算公式</h3>
-<table>
-<thead>
-<tr>
-<th><strong>指标</strong></th>
-<th><strong>定义</strong></th>
-<th><strong>计算公式</strong></th>
-<th><strong>重要性</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>准确率（Precision）</strong></td>
-<td>推荐结果中正确推荐的比例。</td>
-<td>$$ \text{Precision} = \frac{\text{正确推荐数}}{\text{推荐总数}} $$</td>
-<td>衡量推荐系统的精确性，反映推荐结果的相关性。</td>
-</tr>
-<tr>
-<td><strong>召回率（Recall）</strong></td>
-<td>在所有相关项目中，被推荐出的比例。</td>
-<td>$$ \text{Recall} = \frac{\text{正确推荐数}}{\text{相关项目总数}} $$</td>
-<td>衡量推荐系统的覆盖能力，反映推荐结果的全面性。</td>
-</tr>
-<tr>
-<td><strong>F1值（F1-Score）</strong></td>
-<td>准确率和召回率的调和平均数。</td>
-<td>$$ \text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} $$</td>
-<td>综合评估推荐系统的准确性和覆盖能力。</td>
-</tr>
-<tr>
-<td><strong>平均精度均值（MAP）</strong></td>
-<td>所有查询平均精度的均值。</td>
-<td>$$ \text{MAP} = \frac{1}{Q} \sum_{i=1}^{Q} \text{AP}(i) $$</td>
-<td>衡量推荐系统在多个查询上的整体表现。</td>
-</tr>
-<tr>
-<td><strong>ROC曲线和AUC</strong></td>
-<td>ROC曲线表示不同阈值下的真阳性率和假阳性率的关系，AUC为曲线下的面积。</td>
-<td>-</td>
-<td>衡量推荐系统在各种阈值下的分类性能。</td>
-</tr>
-<tr>
-<td><strong>点击率（CTR）</strong></td>
-<td>用户点击推荐内容的比例。</td>
-<td>$$ \text{CTR} = \frac{\text{点击数}}{\text{展示数}} $$</td>
-<td>衡量推荐内容的吸引力。</td>
-</tr>
-<tr>
-<td><strong>转化率（CR）</strong></td>
-<td>用户完成特定操作的比例。</td>
-<td>$$ \text{CR} = \frac{\text{转化数}}{\text{点击数}} $$</td>
-<td>衡量推荐内容的有效性。</td>
-</tr>
-<tr>
-<td><strong>用户留存率</strong></td>
-<td>在一定时间内继续使用推荐系统的用户比例。</td>
-<td>$$ \text{用户留存率} = \frac{\text{留存用户数}}{\text{总用户数}} $$</td>
-<td>衡量用户对推荐系统的满意度和忠诚度。</td>
-</tr>
-<tr>
-<td><strong>净推荐值（NPS）</strong></td>
-<td>用户推荐推荐系统的可能性评分。</td>
-<td>$$ \text{NPS} = \text{推荐者比例} - \text{贬损者比例} $$</td>
-<td>衡量用户的整体满意度和忠诚度。</td>
-</tr>
-</tbody>
-</table>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#layers">评估为什么要分层</a>
+      <a href="#offline">离线评估：方法与指标</a>
+      <a href="#sequence">面向序列的指标与 Replay</a>
+      <a href="#online">在线评估：A/B 与 Interleaving</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>推荐系统的评估体系</h1>
+        <p class="dek">从“算得快”的离线指标，到“跑得真”的线上实验，再到更贴近真实反馈的 Replay 与 Interleaving：评估是一层层缩小“离线涨了、线上没涨”这类落差的阶梯。</p>
+      </header>
+      <section id="layers" aria-labelledby="layers-h">
+        <h2 id="layers-h">评估为什么要分层</h2>
+        <p>只用一个指标评估推荐系统很容易出错：离线准确率高的模型，上线后未必带来更高的点击率，甚至可能损害长期留存。原因是离线数据只能看到“历史上发生过的选择”，看不到新策略会引发什么反应。因此本书把评估拆成层层递进的几类：先离线筛掉明显不好的方案，再用线上实验验证真实收益，必要时用 Replay、Interleaving 等更接近线上环境的方法提高判断效率。</p>
+        <figure>
+          <svg viewBox="0 0 900 430" role="img" aria-labelledby="fig76-t fig76-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig76-t">推荐系统评估的三层阶梯：离线、在线、长期用户价值</title>
+            <desc id="fig76-d">三个自上而下变窄的矩形：离线评估（快、便宜、可能与线上不一致）、在线 A/B 测试（真实但慢且贵）、长期与用户价值（全面但滞后），箭头表示逐层收窄的验证强度。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <rect x="150" y="60" width="600" height="88" rx="14" fill="#e6eeea" stroke="#53676d" stroke-width="2"/>
+              <rect x="230" y="180" width="440" height="88" rx="14" fill="#e8f1ee" stroke="#147f80" stroke-width="2"/>
+              <rect x="310" y="300" width="280" height="88" rx="14" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <g font-size="17" font-weight="700" fill="#203035" text-anchor="middle">
+                <text x="450" y="94">离线评估</text><text x="450" y="214">在线评估（A/B 测试）</text><text x="450" y="334">长期与用户价值</text>
+              </g>
+              <g font-size="13" fill="#53676d" text-anchor="middle">
+                <text x="450" y="118">快、便宜、可反复跑；但可能“离线涨、线上不涨”</text>
+                <text x="450" y="238">真实行为数据；但周期长、成本高、一次只能验证少量方案</text>
+                <text x="450" y="358">留存、满意度、公平性；但反馈滞后，难归因</text>
+              </g>
+              <g stroke="#916c22" stroke-width="3" fill="none">
+                <path d="M450 152 L450 172"/><path d="M443 165 L450 176 L457 165"/>
+                <path d="M450 272 L450 292"/><path d="M443 285 L450 296 L457 285"/>
+              </g>
+              <text x="466" y="168" font-size="12" fill="#916c22">验证强度递增</text>
+              <text x="466" y="288" font-size="12" fill="#916c22">验证强度递增</text>
+            </g>
+          </svg>
+          <figcaption>图 7.6-1（自绘）：三层评估的典型取舍。越往下越接近真实收益，代价是周期、成本与归因难度上升。实际工程中三者并不是互斥的，而是逐层筛选的组合。</figcaption>
+        </figure>
+      </section>
+      <section id="offline" aria-labelledby="offline-h">
+        <h2 id="offline-h">离线评估：方法与指标</h2>
+        <p>离线评估用历史数据分工。常见做法包括<strong>留出法（Holdout）</strong>、<strong>交叉验证</strong>和<strong>留一法</strong>（见 7.1.1）；需要预测未来行为时，还要注意按时间切分而不是随机切分，否则会泄露未来信息。</p>
+        <p>最基础的一组指标是准确率、召回率与 F1 值（见 7.1.2）。它们分别回答“推的东西有多管用”“该推的推到了多少”“两者是否平衡”：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="准确率、召回率与 F1 的公式，可横向滚动">
+            <math display="block" aria-label="准确率等于正确推荐数除以推荐总数"><mrow><mi>Precision</mi><mo>=</mo><mfrac><mtext>正确推荐数</mtext><mtext>推荐总数</mtext></mfrac></mrow></math>
+            <math display="block" aria-label="召回率等于正确推荐数除以相关项目总数"><mrow><mi>Recall</mi><mo>=</mo><mfrac><mtext>正确推荐数</mtext><mtext>相关项目总数</mtext></mfrac></mrow></math>
+            <math display="block" aria-label="F1 等于两倍准确率乘召回率除以准确率加召回率"><mrow><mi>F1</mi><mo>=</mo><mfrac><mrow><mn>2</mn><mo>&#x00D7;</mo><mi>Precision</mi><mo>&#x00D7;</mo><mi>Recall</mi></mrow><mrow><mi>Precision</mi><mo>+</mo><mi>Recall</mi></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <p>当需要评估排序质量而不只是“选没选中”时，ROC 曲线与 AUC（7.2.2）衡量分类阈值变化下的区分能力，MAP 与 NDCG 一类指标则更关心正确项排在多靠前的位置。7.2.4 特别提醒：不同指标适用于不同场景，需结合业务目标合理选择，而不是只看一个分数。</p>
+        <div class="note"><strong>教学示意：</strong>上方公式为 Precision / Recall / F1 的标准定义，用于说明指标含义；具体实验数值请回到第 7 章对应小节与原书。</div>
+      </section>
+      <section id="sequence" aria-labelledby="sequence-h">
+        <h2 id="sequence-h">面向序列的指标与 Replay</h2>
+        <p>推荐结果是一个有序列表，因此“把正确项排得更靠前”比“是否选中”更重要，这就是 MAP、NDCG 这类序列指标存在的意义（7.2.3）。但即便用上序列指标，离线数据仍来自旧策略，无法回答“如果我改成新策略，用户会怎么反应”。</p>
+        <p>本书用第 7.3 节的 <strong>Replay</strong> 方法缩小这一差距：它把历史上的真实曝光与反馈当作“环境”，让新模型重新做出选择，再根据实际是否发生交互来评估（7.3.1–7.3.2）。Netflix 的 Replay 实践（7.3.3）是该方法在工业中的一个例子。Replay 比传统离线评估更接近真实反馈，但仍受限于历史数据中“只有被曝光过的物品才有反馈”这一事实。</p>
+      </section>
+      <section id="online" aria-labelledby="online-h">
+        <h2 id="online-h">在线评估：A/B 与 Interleaving</h2>
+        <p>要确认真实收益，最终要看线上实验。A/B 测试把流量随机分到对照组与实验组（7.4.1），关键在于<strong>分桶独立且互不影响</strong>（7.4.2）；评估指标除了点击率，还包括转化率、人均时长、留存率等（7.4.3）。</p>
+        <p>A/B 测试的代价是：需要较大流量、较长周期，且一次能对比的方案很有限。第 7.5 节介绍的 <strong>Interleaving</strong> 方法试图缓解这一问题——把多个算法的结果混合成同一个列表让用户交互，再根据各算法的贡献比较优劣（7.5.2）。相比传统 A/B 测试，它在相同样本量下通常更灵敏（7.5.3），但也要注意它与 A/B 指标的相关性（7.5.4）以及自身的适用范围与缺点（7.5.5）。</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 7.6-1：各层评估方法的典型取舍（依据第 7 章各节叙述整理）</caption>
+          <thead><tr><th style="width:22%">方法</th><th style="width:39%">优势</th><th>主要局限</th></tr></thead>
+          <tbody>
+            <tr><td>离线 Holdout / 交叉验证（7.1.1）</td><td>快、便宜、可反复调参</td><td>与线上真实收益可能不一致，存在数据泄露风险</td></tr>
+            <tr><td>序列指标 MAP / NDCG（7.2）</td><td>考虑排序位置，比单点准确率更贴近体验</td><td>仍基于历史数据，不反映新策略引发的反应</td></tr>
+            <tr><td>Replay（7.3）</td><td>比传统离线更接近真实反馈</td><td>受限于历史曝光，未被曝光项无法评估</td></tr>
+            <tr><td>A/B 测试（7.4）</td><td>直接衡量真实收益，结论可信</td><td>需大流量与长周期，一次可对比方案少</td></tr>
+            <tr><td>Interleaving（7.5）</td><td>同样本量下更灵敏，可同时比多个算法</td><td>指标与 A/B 不完全一致，适用场景有限</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>推荐系统的评估体系不是一张指标清单，而是一套“逐层逼近真实收益”的工作流：用离线方法与指标（7.1–7.2）快速筛选，用 Replay（7.3）缩小离线与线上之间的差距，再用 A/B 测试（7.4）确认真实收益，必要时用 Interleaving（7.5）提高比较效率。关键认识是：没有任何单一指标能代表系统的全部价值，指标的选择必须回到业务目标。本页为第 7 章各节内容的归纳，具体方法细节与实验结论请参见对应小节。</p>
+        <div class="control-row" role="group" aria-label="按目标选择评估方法">
+          <button type="button" data-goal="filter" aria-pressed="false">快速筛模型</button>
+          <button type="button" data-goal="truth" aria-pressed="false">验证真实收益</button>
+          <button type="button" data-goal="compare" aria-pressed="false">小流量比多种方案</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">选择上方目标，查看对应的评估方法建议。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 7 章「推荐系统的评估」，含 7.1 离线评估方法、7.2 序列离线指标、7.3 Replay、7.4 A/B 测试、7.5 Interleaving。</li>
+          <li>本页图 7.6-1 与表 7.6-1 为按第 7 章各节内容<strong>自绘／整理</strong>，非原书插图或表格翻版；公式为 Precision / Recall / F1 的标准定义。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var tips = {
+        filter: '快速筛模型：用离线 Holdout / 交叉验证加 P/R/F1、MAP 等指标（7.1–7.2），成本低、可反复跑。',
+        truth: '验证真实收益：用在线 A/B 测试（7.4），把流量随机分桶，看点击率、转化率、留存等指标。',
+        compare: '小流量比多种方案：可考虑 Interleaving（7.5），相同样本量下更灵敏，但要注意与 A/B 指标的相关性。'
+      };
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-goal]'));
+      var status = document.querySelector('.status');
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var goal = b.getAttribute('data-goal');
+          buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          if (status) status.textContent = tips[goal];
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
-  
