@@ -1,81 +1,144 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>04_8.4.5_阿里巴巴推荐技术架构总结</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>8.4.5 阿里巴巴推荐技术架构总结</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(1.7rem,4.2vw,2.6rem);line-height:1.17;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link,.control-row{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>04_8.4.5 阿里巴巴推荐技术架构总结</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第8章 深度学习推荐系统的前沿实践/8.4 阿里巴巴深度学习推荐系统的进化
-Content: 04_8.4.5 阿里巴巴推荐技术架构总结
-&quot;&quot;&quot;</p>
-<h3>8.4.5 阿里巴巴推荐技术架构总结</h3>
-<h4>引言</h4>
-<p>从2016年到2019年，阿里巴巴广告推荐团队发表了一系列论文，构筑起了一整套推荐技术架构，无论是在深度学习理论方面还是在工程实践方面，都是行业内的重要参考。本节将对阿里巴巴推荐技术架构进行总结，重点分析其工程实践性、用户行为的观察以及模型的微创新。</p>
-<h4>工程实践性</h4>
-<ol>
-<li><strong>实际应用场景</strong>：阿里巴巴的推荐系统广泛应用于天猫和淘宝，通过推荐系统提高了用户的购买体验和平台的销售额。其应用场景涵盖了从用户登录到购买完成的全过程，包括搜索、浏览、点击、加入购物车和支付等阶段  。</li>
-<li><strong>解决实际问题</strong>：阿里巴巴推荐系统的论文和技术分享注重解决实际问题，这得益于阿里巴巴丰富的业务和数据环境，以及优秀工程师团队的持续输出。通过工程实践性强的解决方案，阿里巴巴在推荐系统中不断创新，提高了推荐系统的实际效果  。</li>
-</ol>
-<h4>用户行为的精准观察</h4>
-<ol>
-<li><strong>用户行为建模</strong>：在改进推荐系统的过程中，阿里巴巴团队通过精准观察用户行为，开发出了一系列推荐模型，如DIN、DIEN和MIMN等。这些模型能够准确捕捉用户的行为习惯，从而提高推荐的精准度和用户满意度  。</li>
-<li><strong>技术映射用户习惯</strong>：通过将用户的行为和习惯映射到技术上，阿里巴巴团队在推荐系统中实现了细致且有效的用户兴趣捕捉，确保了推荐结果的相关性和及时性  。</li>
-</ol>
-<h4>模型的微创新</h4>
-<ol>
-<li><strong>多维创新</strong>：阿里巴巴的推荐模型从低维到高维、从离散到连续、从单一到融合，进行了多方面的创新。例如，基于注意力机制的DIN模型以及其进化版本DIEN和MIMN，通过技术细节的改进，不断提升了推荐模型的性能和效果  。</li>
-<li><strong>工程优化</strong>：每次模型的迭代更新都不是推倒重建，而是在之前模型的基础上进行微创新。这种渐进式的优化策略确保了模型的稳定性和持续改进  。</li>
-</ol>
-<h3>总结</h3>
-<p>阿里巴巴的推荐技术架构通过工程实践性、用户行为的精准观察以及模型的微创新，不断提升了推荐系统的效果和用户体验。这些技术架构不仅在实际应用中取得了显著成效，还为其他电商平台的推荐系统开发提供了宝贵的经验和参考  。</p>
-<h4>推荐技术架构总结表格</h4>
-<table>
-<thead>
-<tr>
-<th>分类</th>
-<th>详细描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>工程实践性</strong></td>
-<td>&lt;ul&gt;&lt;li&gt;<strong>实际应用场景</strong>：广泛应用于天猫和淘宝，从用户登录到购买完成，涵盖搜索、浏览、点击、加入购物车和支付等阶段  。&lt;/li&gt;&lt;li&gt;<strong>解决实际问题</strong>：注重解决实际问题，得益于丰富的业务和数据环境，以及优秀工程师团队的持续输出  。&lt;/li&gt;&lt;/ul&gt;</td>
-</tr>
-<tr>
-<td><strong>用户行为的精准观察</strong></td>
-<td>&lt;ul&gt;&lt;li&gt;<strong>用户行为建模</strong>：通过精准观察用户行为，开发出DIN、DIEN和MIMN等模型，准确捕捉用户的行为习惯，提高推荐精准度  。&lt;/li&gt;&lt;li&gt;<strong>技术映射用户习惯</strong>：将用户行为和习惯映射到技术上，实现了细致且有效的用户兴趣捕捉  。&lt;/li&gt;&lt;/ul&gt;</td>
-</tr>
-<tr>
-<td><strong>模型的微创新</strong></td>
-<td>&lt;ul&gt;&lt;li&gt;<strong>多维创新</strong>：从低维到高维、从离散到连续、从单一到融合，进行了多方面的创新，提升了推荐模型的性能和效果  。&lt;/li&gt;&lt;li&gt;<strong>工程优化</strong>：每次模型迭代更新都在之前模型的基础上进行微创新，确保模型的稳定性和持续改进  。&lt;/li&gt;&lt;/ul&gt;</td>
-</tr>
-</tbody>
-</table>
-<h4>总结</h4>
-<p>通过对阿里巴巴推荐技术架构的总结，可以看出其在工程实践、用户行为观察和模型创新方面的深厚积累。这些经验不仅提升了阿里巴巴的推荐系统效果，还为整个行业提供了宝贵的参考  。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">为什么研究阿里的技术架构</a>
+      <a href="#evolution">模型进化的时间线</a>
+      <a href="#three">三条经验</a>
+      <a href="#serving">模型服务模块的技术架构</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>阿里巴巴推荐技术架构总结</h1>
+        <p class="dek">从 LS-PLM 到 DIN、DIEN、MIMN，阿里巴巴把“观察用户行为 → 微创新模型结构 → 工程落地”做成了一条可持续的流水线，这比任何单个模型都更值得借鉴。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">为什么研究阿里的技术架构</h2>
+        <p>第 8 章 8.4 节回顾了阿里巴巴广告推荐团队从 2016 年到 2019 年的一系列论文与工程实践。它值得单独总结，不是因为某一个模型特别强，而是因为它展示了一整套“做推荐系统的方法”：在真实且庞大的电商场景（天猫、淘宝）中，把业务问题持续转化为模型改进，再用工程手段把它落地。</p>
+        <p>8.4.1 介绍应用场景，8.4.2 梳理推荐模型体系，8.4.3 讲清模型的进化过程，8.4.4 则给出了模型服务模块的技术架构。本节（8.4.5）把这些线索归拢成三条经验。</p>
+      </section>
+      <section id="evolution" aria-labelledby="evolution-h">
+        <h2 id="evolution-h">模型进化的时间线</h2>
+        <figure>
+          <svg viewBox="0 0 900 380" role="img" aria-labelledby="fig845-t fig845-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig845-t">阿里巴巴推荐模型的进化时间线</title>
+            <desc id="fig845-d">一条水平时间轴，从左到右依次是 LS-PLM、DIN、DIEN、MIMN 四个模型节点，每个节点下方标注其引入的关键想法：特征交叉、注意力、序列兴趣进化、记忆网络。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="20" y="40" font-size="16" font-weight="700" fill="#203035">从特征工程化到用户兴趣建模：阿里巴巴推荐模型的演进</text>
+              <line x1="60" y1="180" x2="840" y2="180" stroke="#53676d" stroke-width="3"/>
+              <g fill="#147f80">
+                <circle cx="150" cy="180" r="12"/><circle cx="380" cy="180" r="12"/><circle cx="580" cy="180" r="12"/><circle cx="780" cy="180" r="12"/>
+              </g>
+              <g font-size="15" font-weight="700" fill="#203035" text-anchor="middle">
+                <text x="150" y="150">LS-PLM</text><text x="380" y="150">DIN</text><text x="580" y="150">DIEN</text><text x="780" y="150">MIMN</text>
+              </g>
+              <g font-size="12" fill="#916c22" text-anchor="middle">
+                <text x="150" y="218">分片线性 + 特征交叉</text><text x="380" y="218">注意力机制</text><text x="580" y="218">序列兴趣进化</text><text x="780" y="218">用户兴趣记忆网络</text>
+              </g>
+              <g font-size="11" fill="#53676d" text-anchor="middle">
+                <text x="150" y="242">（传统模型的代表）</text><text x="380" y="242">（局部激活历史行为）</text><text x="580" y="242">（建模兴趣随时间的演化）</text><text x="780" y="242">（长序列兴趣建模）</text>
+              </g>
+              <text x="450" y="320" text-anchor="middle" font-size="12" fill="#53676d">每次迭代都不是推倒重建，而是在上一代基础上做“微创新”</text>
+            </g>
+          </svg>
+          <figcaption>图 8.4-1（自绘，教学示意）：按 8.4.3 节“模型进化过程”的叙述整理的代表性节点。每一代都继承上一代的结构，只替换或新增一个关键模块，这正是“微创新”策略的体现。具体年份与模型细节请参见 8.4.3 节原文。</figcaption>
+        </figure>
+      </section>
+      <section id="three" aria-labelledby="three-h">
+        <h2 id="three-h">三条经验</h2>
+        <ol>
+          <li><strong>工程实践性</strong>：阿里推荐的论文与技术分享都围绕天猫、淘宝的真实业务问题（从搜索、浏览、点击到加入购物车与支付），而不是为了刷榜。丰富的业务与数据环境，使解决方案能直接被验证。</li>
+          <li><strong>用户行为的精准观察</strong>：DIN、DIEN、MIMN 等一系列模型，都是在“观察用户行为”之后提出的。把用户的行为习惯映射到技术上（如注意力、序列建模、记忆网络），才能细致地捕捉兴趣。</li>
+          <li><strong>模型的微创新</strong>：模型的迭代从低维到高维、从离散到连续、从单一到融合；但每一次都不是推倒重建，而是在上一代基础上改动一小块，保证稳定与可持续。</li>
+        </ol>
+        <div class="note"><strong>教学示意：</strong>本页对阿里三条经验的归纳为对 8.4 节叙述的整理；具体模型结构、实验与指标请回到第 8 章 8.4 节与对应论文。</div>
+      </section>
+      <section id="serving" aria-labelledby="serving-h">
+        <h2 id="serving-h">模型服务模块的技术架构</h2>
+        <p>模型再好也要能服务。8.4.4 节介绍了阿里推荐系统模型服务模块的分层思路：把“模型的训练与更新”与“线上的推理服务”解耦，让模型可以频繁迭代而不必每次都改动线上系统。这条工程经验与第 6 章的“预训练 + 轻量级线上模型”“离线与在线权衡”是同一个思路在工业级场景下的具体化。</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 8.4-1：三条经验对应的关注点（按 8.4 节叙述整理）</caption>
+          <thead><tr><th style="width:30%">经验</th><th>核心关注点</th></tr></thead>
+          <tbody>
+            <tr><td>工程实践性</td><td>面向真实业务问题与全链路场景（搜索→浏览→点击→加购→支付）</td></tr>
+            <tr><td>用户行为观察</td><td>把用户行为习惯映射到模型结构（注意力、序列、记忆）</td></tr>
+            <tr><td>模型微创新</td><td>渐进式迭代，不推倒重建，兼顾稳定与持续改进</td></tr>
+          </tbody>
+        </table>
+        <div class="control-row" role="group" aria-label="选择阿里经验中的一条">
+          <button type="button" data-exp="engineering" aria-pressed="false">工程实践性</button>
+          <button type="button" data-exp="behavior" aria-pressed="false">用户行为观察</button>
+          <button type="button" data-exp="micro" aria-pressed="false">模型微创新</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">选择上方一条经验，查看它的具体含义。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>阿里巴巴推荐技术架构的价值，不在某一个模型，而在于一套可复制的方法：用真实业务提出问题，用对用户行为的观察找到改进方向，再用微创新的方式逐步迭代模型，并用解耦的模型服务架构把它持续送上线上。这正好呼应了第 5 章“比模型结构更重要的是什么”与第 6 章“工程与理论之间的权衡”。本页为第 8 章 8.4 节内容的归纳，具体细节请参见对应小节。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 8 章「深度学习推荐系统的前沿实践」8.4 节「阿里巴巴深度学习推荐系统的进化」，含 8.4.1 应用场景、8.4.2 模型体系、8.4.3 进化过程、8.4.4 模型服务模块技术架构。</li>
+          <li>本页图 8.4-1 与表 8.4-1 为按 8.4 节叙述<strong>自绘／整理</strong>，非原书插图或表格翻版；模型年份与细节以 8.4.3 节原文为准。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var tips = {
+        engineering: '工程实践性：所有方案都面向天猫、淘宝的真实业务问题，能被全链路场景直接检验。',
+        behavior: '用户行为观察：先看清用户怎么选、看多久，再把行为习惯映射成模型结构上的改动。',
+        micro: '模型微创新：每一代只改动一小块，在上一代基础上迭代，既有变化又保持稳定。'
+      };
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-exp]'));
+      var status = document.querySelector('.status');
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var exp = b.getAttribute('data-exp');
+          buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          if (status) status.textContent = tips[exp];
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
-  
