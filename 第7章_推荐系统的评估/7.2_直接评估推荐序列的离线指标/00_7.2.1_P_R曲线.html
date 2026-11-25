@@ -1,133 +1,148 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_7.2.1_P_R曲线</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>7.2.1 P-R 曲线</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll,[data-math-scroll]{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible,[data-math-scroll]:focus-visible{outline:3px solid #147f80;outline-offset:2px}
+.math-scroll math[display="block"],[data-math-scroll] math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link,.control-row{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_7.2.1 P-R曲线</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第7章 推荐系统的评估/7.2 直接评估推荐序列的离线指标
-Content: 00_7.2.1 P-R曲线
-&quot;&quot;&quot;</p>
-<h3>7.2.1 P-R曲线</h3>
-<h4>概述</h4>
-<p>P-R曲线，即精确率-召回率曲线（Precision-Recall Curve），是评估推荐系统性能的一种重要工具。P-R曲线展示了在不同的阈值下，推荐系统的精确率和召回率的变化关系。通过分析P-R曲线，可以更全面地了解推荐系统在不同条件下的表现，从而优化推荐算法。</p>
-<h4>精确率和召回率</h4>
-<ol>
-<li>
-<p><strong>精确率（Precision）</strong>：</p>
-<ul>
-<li><strong>定义</strong>：精确率是指推荐结果中相关项目所占的比例。</li>
-<li><strong>计算公式</strong>：<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mi>r</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">Precision = \frac{TP}{TP + FP}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.36033em;"></span><span class="strut bottom" style="height:2.1296600000000003em;vertical-align:-0.7693300000000001em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mord mathit">e</span><span class="mord mathit">c</span><span class="mord mathit">i</span><span class="mord mathit">s</span><span class="mord mathit">i</span><span class="mord mathit">o</span><span class="mord mathit">n</span><span class="mrel">=</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">+</span><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-其中，TP为真正例数，FP为假正例数。</li>
-<li><strong>作用</strong>：反映推荐结果的准确性，适用于推荐结果较短的情况。</li>
-</ul>
-</li>
-<li>
-<p><strong>召回率（Recall）</strong>：</p>
-<ul>
-<li><strong>定义</strong>：召回率是指实际相关项目中被推荐的比例。</li>
-<li><strong>计算公式</strong>：<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mi>e</mi><mi>c</mi><mi>a</mi><mi>l</mi><mi>l</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">Recall = \frac{TP}{TP + FN}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.36033em;"></span><span class="strut bottom" style="height:2.1296600000000003em;vertical-align:-0.7693300000000001em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mord mathit">e</span><span class="mord mathit">c</span><span class="mord mathit">a</span><span class="mord mathit" style="margin-right:0.01968em;">l</span><span class="mord mathit" style="margin-right:0.01968em;">l</span><span class="mrel">=</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">+</span><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.10903em;">N</span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-其中，TP为真正例数，FN为假负例数。</li>
-<li><strong>作用</strong>：反映推荐系统的覆盖能力，适用于需要全面推荐的情况。</li>
-</ul>
-</li>
-</ol>
-<h4>P-R曲线的绘制</h4>
-<ol>
-<li>
-<p><strong>数据准备</strong>：</p>
-<ul>
-<li><strong>预测评分</strong>：推荐系统对所有候选项目进行预测评分。</li>
-<li><strong>实际标签</strong>：实际的用户行为数据，表示哪些项目是相关的，哪些是无关的。</li>
-</ul>
-</li>
-<li>
-<p><strong>计算精确率和召回率</strong>：</p>
-<ul>
-<li>设定不同的评分阈值，对每个阈值计算相应的精确率和召回率。</li>
-<li>生成一组精确率和召回率的点，作为P-R曲线的坐标点。</li>
-</ul>
-</li>
-<li>
-<p><strong>绘制P-R曲线</strong>：</p>
-<ul>
-<li>将所有坐标点绘制在二维平面上，横轴为召回率，纵轴为精确率。</li>
-<li>连接这些点，形成P-R曲线。</li>
-</ul>
-</li>
-</ol>
-<h4>P-R曲线的分析</h4>
-<ol>
-<li>
-<p><strong>曲线形状</strong>：</p>
-<ul>
-<li>曲线越接近右上角，表示推荐系统的性能越好，即在高召回率的同时，能够保持高精确率。</li>
-<li>曲线的变化反映了推荐系统在不同阈值下的性能表现，帮助识别最佳的评分阈值。</li>
-</ul>
-</li>
-<li>
-<p><strong>AUC值</strong>：</p>
-<ul>
-<li>P-R曲线下的面积（Area Under Curve, AUC）可以量化推荐系统的整体性能。</li>
-<li>AUC值越大，表示推荐系统的综合性能越好。</li>
-</ul>
-</li>
-<li>
-<p><strong>对比分析</strong>：</p>
-<ul>
-<li>不同推荐算法的P-R曲线可以放在一起对比，评估不同算法的优劣。</li>
-<li>通过对比，可以选择性能最优的推荐算法。</li>
-</ul>
-</li>
-</ol>
-<h4>实际应用案例</h4>
-<ol>
-<li>
-<p><strong>电商推荐系统</strong>：</p>
-<ul>
-<li>某电商平台在优化推荐算法时，使用P-R曲线评估不同算法的性能。通过对比不同算法的P-R曲线，选择在高召回率下仍能保持高精确率的算法，提升用户的购物体验。</li>
-</ul>
-</li>
-<li>
-<p><strong>内容推荐系统</strong>：</p>
-<ul>
-<li>某内容平台在推荐文章和视频时，使用P-R曲线分析推荐结果的精确率和召回率。通过调整评分阈值，找到最佳的推荐策略，确保用户能够看到更多相关的内容。</li>
-</ul>
-</li>
-<li>
-<p><strong>社交网络推荐系统</strong>：</p>
-<ul>
-<li>某社交网络平台在好友推荐和群组推荐中，使用P-R曲线评估推荐系统的性能。通过分析P-R曲线，优化推荐算法，提高用户的互动和参与度。</li>
-</ul>
-</li>
-</ol>
-<h3>总结</h3>
-<p>P-R曲线是评估推荐系统性能的重要工具，通过展示精确率和召回率在不同阈值下的变化关系，帮助工程师更全面地了解推荐系统的表现。通过分析P-R曲线的形状和AUC值，可以优化推荐算法，提升推荐系统的性能。在未来，随着推荐系统技术的发展，P-R曲线将继续在评估和优化推荐系统中发挥重要作用。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">为什么不能只看一个指标</a>
+      <a href="#pr">精确率与召回率</a>
+      <a href="#draw">P-R 曲线怎么画</a>
+      <a href="#read">怎么读 P-R 曲线</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>P-R 曲线</h1>
+        <p class="dek">精确率与召回率总是此消彼长。P-R 曲线把“调高阈值”这一路的取舍画成一条曲线，让我们能一眼看出：哪种算法在同样召回率下依然更准。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">为什么不能只看一个指标</h2>
+        <p>推荐系统输出的是一个有序列表，但“推了多少”和“推得多准”是两个方向相反的目标。如果为了提高准确率只推很保守的物品，召回率就会很低；反之尽量覆盖所有可能相关的物品，准确率又会下降。因此单独看准确率或召回率都无法完整描述一个模型。</p>
+        <p>P-R 曲线（Precision-Recall Curve）把这种取舍完整地画出来：横轴是召回率，纵轴是精确率，曲线上的每一个点对应一个评分阈值。</p>
+      </section>
+      <section id="pr" aria-labelledby="pr-h">
+        <h2 id="pr-h">精确率与召回率</h2>
+        <p>在二分类的推荐场景里，需要先区分四种预测结果：TP（真正例，推荐且相关）、FP（假正例，推荐但不相关）、FN（假负例，相关但没推荐）、TN（真负例）。于是：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="精确率与召回率公式，可横向滚动">
+            <math display="block" aria-label="精确率等于真正例除以真正例加假正例"><mrow><mi>Precision</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac></mrow></math>
+            <math display="block" aria-label="召回率等于真正例除以真正例加假负例"><mrow><mi>Recall</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <p>精确率关注“推荐出去的有多准”，适合推荐结果较短、位置靠前更重要的场景；召回率关注“该推的推到了多少”，适合尽量不漏的召回层。两者定义互为补充，但随阈值同向变化的方向相反。</p>
+      </section>
+      <section id="draw" aria-labelledby="draw-h">
+        <h2 id="draw-h">P-R 曲线怎么画</h2>
+        <ol>
+          <li><strong>数据准备</strong>：推荐模型对候选物品给出预测评分，并取到每个物品“是否相关”的真实标签。</li>
+          <li><strong>扫阈值并算点</strong>：从高到低不断调整评分阈值，每个阈值下把所有高于它的物品当作推荐结果，计算一对（召回率，精确率）。</li>
+          <li><strong>连成曲线</strong>：把所有点画在横轴召回率、纵轴精确率的平面上，依次相连即得 P-R 曲线。</li>
+        </ol>
+        <figure>
+          <svg viewBox="0 0 900 470" role="img" aria-labelledby="fig721-t fig721-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig721-t">两张 P-R 曲线对比：同样召回率下精确率更高者更优</title>
+            <desc id="fig721-d">横轴为召回率（0 到 1），纵轴为精确率（0 到 1）。曲线 A 始终位于曲线 B 上方，表示在同样召回率下精确率更高。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <line x1="120" y1="400" x2="820" y2="400" stroke="#203035" stroke-width="2"/>
+              <line x1="120" y1="400" x2="120" y2="80" stroke="#203035" stroke-width="2"/>
+              <text x="820" y="428" text-anchor="end" font-size="13" fill="#53676d">召回率 Recall →</text>
+              <text x="112" y="72" text-anchor="start" font-size="13" fill="#53676d">↑ 精确率 Precision</text>
+              <g font-size="11" fill="#9aa8ab">
+                <text x="116" y="416">0</text><text x="812" y="416">1</text>
+                <text x="100" y="404" text-anchor="end">0</text><text x="100" y="86" text-anchor="end">1</text>
+              </g>
+              <path d="M120 80 C 360 88 520 140 640 240 C 700 292 762 358 820 400" fill="none" stroke="#147f80" stroke-width="3"/>
+              <path d="M120 80 C 240 150 340 240 460 318 C 560 380 700 398 820 408" fill="none" stroke="#d06d4d" stroke-width="3" stroke-dasharray="8 6"/>
+              <text x="650" y="228" font-size="14" font-weight="700" fill="#147f80">曲线 A（更优）</text>
+              <text x="470" y="350" font-size="14" font-weight="700" fill="#d06d4d">曲线 B</text>
+              <line x1="640" y1="240" x2="640" y2="400" stroke="#916c22" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <text x="648" y="392" font-size="11" fill="#916c22">同一召回率下，A 的精确率更高</text>
+            </g>
+          </svg>
+          <figcaption>图 7.2-1（自绘，教学示意）：横轴召回率、纵轴精确率。曲线越靠近右上角，说明在同样召回率下精确率越高。两条曲线对比时，若一条始终在另一条之上，则在任何召回率需求下它都更优。曲线形状为示意，不代表具体实验数值。</figcaption>
+        </figure>
+      </section>
+      <section id="read" aria-labelledby="read-h">
+        <h2 id="read-h">怎么读 P-R 曲线</h2>
+        <ul>
+          <li><strong>看位置</strong>：曲线越靠右上，综合性能越好——在高召回率时仍能维持高精确率。</li>
+          <li><strong>看面积</strong>：曲线下的面积（AUC，此处指 P-R 曲线下面积）可以量化整体性能，面积越大越好。</li>
+          <li><strong>看对比</strong>：把不同算法的 P-R 曲线画在一起，可直接比较优劣；若两条曲线交叉，则要看业务更在意高精确率还是高召回率。</li>
+        </ul>
+        <div class="control-row" role="group" aria-label="按业务关注点选择读曲线的方式">
+          <button type="button" data-focus="prec" aria-pressed="false">更看重精确率</button>
+          <button type="button" data-focus="recall" aria-pressed="false">更看重召回率</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">选择业务关注点，查看该看曲线的哪一段。</p>
+        <div class="note"><strong>教学示意：</strong>本页公式为精确率与召回率的标准定义（对应原书 7.1.2 节），曲线为按 7.2.1 节描述<strong>自绘</strong>的示意，非实验数据。</div>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>P-R 曲线用一个二维图形同时呈现精确率与召回率的取舍：通过扫描评分阈值得到一系列（查全、查准）点，再连成曲线。它比单个数字更能说明模型在不同“推荐多少”下的表现，也便于横向对比不同算法。本页为第 7 章 7.2.1 节内容的整理，具体指标细节请参见对应小节。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 7 章 7.2 节「直接评估推荐序列的离线指标」，含 7.2.1 P-R 曲线与 7.1.2 离线评估指标。</li>
+          <li>本页图 7.2-1 为按 7.2.1 节描述<strong>自绘</strong>的示意曲线；公式为精确率与召回率的标准定义。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var tips = {
+        prec: '更看重精确率：关注曲线靠右的部分——在召回率较高时精确率是否仍能保持。',
+        recall: '更看重召回率：关注曲线整体能覆盖到多大的召回率——曲线是否尽早到达右侧且不陡降。'
+      };
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-focus]'));
+      var status = document.querySelector('.status');
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var focus = b.getAttribute('data-focus');
+          buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          if (status) status.textContent = tips[focus];
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
-  
