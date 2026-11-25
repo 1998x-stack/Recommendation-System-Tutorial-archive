@@ -1,104 +1,154 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>04_5.5.5_算法工程师不能只是一个“炼金术士”</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>5.5.5 算法工程师不能只是一个“炼金术士”</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(1.75rem,4.4vw,2.7rem);line-height:1.16;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.control-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}button{font:inherit;font-size:.9rem;cursor:pointer;padding:.5rem .8rem;border:1px solid var(--border);border-radius:.5rem;background:#fff;color:var(--ink)}button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status{min-height:1.5em;color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link,.control-row{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>04_5.5.5 算法工程师不能只是一个“炼金术士”</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第5章 多角度审视推荐系统/5.5 推荐系统中比模型结构更重要的是什么
-Content: 04_5.5.5 算法工程师不能只是一个“炼金术士”
-&quot;&quot;&quot;</p>
-<h3>5.5.5 算法工程师不能只是一个“炼金术士”</h3>
-<p>在推荐系统的开发中，算法工程师的角色至关重要。然而，算法工程师不仅需要掌握复杂的算法和模型，还需要深刻理解业务需求和用户行为，以实现真正有价值的推荐系统。以下是对这一观点的详细分析。</p>
-<h4>一、算法工程师的常见误区</h4>
-<ol>
-<li>
-<p><strong>过度依赖技术细节</strong>：</p>
-<ul>
-<li>许多算法工程师过于关注算法的超参数调整和模型结构的细微变化，例如是否使用dropout、更改激活函数、增加正则化项等。</li>
-<li>虽然这些技术细节对模型性能有一定影响，但如果忽视了业务需求和用户行为的本质，就无法真正提高推荐系统的整体效果。</li>
-</ul>
-</li>
-<li>
-<p><strong>缺乏对业务场景的理解</strong>：</p>
-<ul>
-<li>推荐系统的效果不仅依赖于模型的复杂度，还依赖于对用户需求的精准把握和业务逻辑的深入理解。如果算法工程师只是单纯地进行技术上的尝试，而不考虑实际的应用场景，就会导致“本末倒置”的情况。</li>
-</ul>
-</li>
-</ol>
-<h4>二、从用户角度构建模型</h4>
-<ol>
-<li>
-<p><strong>理解用户行为</strong>：</p>
-<ul>
-<li>优秀的算法工程师需要从用户的角度思考问题，深刻理解用户的行为特点和偏好。例如，天猫和淘宝的工程师在开发DIN模型时，就是基于对用户历史行为的深入分析，发现只有与候选物品相关的用户行为记录才是有价值的。</li>
-<li>通过引入注意力机制，工程师们能够更好地捕捉用户的兴趣点，从而提高推荐的精准度和用户满意度。</li>
-</ul>
-</li>
-<li>
-<p><strong>业务需求驱动技术选择</strong>：</p>
-<ul>
-<li>技术的应用应该服务于业务需求，而不是为了技术而技术。例如，阿里巴巴的工程师在设计推荐系统时，首先明确了电商平台的核心需求，即提高用户的购买转化率，然后基于这一需求选择和优化技术手段。</li>
-</ul>
-</li>
-</ol>
-<h4>三、案例分析</h4>
-<ol>
-<li>
-<p><strong>阿里巴巴的经验</strong>：</p>
-<ul>
-<li>阿里巴巴在开发DIN模型时，工程师们并不是单纯地从技术角度出发，而是深入分析了用户的行为特点，结合电商平台的业务需求，最终提出了具有创新性的注意力机制模型。</li>
-<li>这种从业务需求出发、结合技术实现的方式，使得阿里巴巴的推荐系统在实际应用中表现出色，显著提升了用户的购买转化率和整体体验。</li>
-</ul>
-</li>
-<li>
-<p><strong>实践中的技术权衡</strong>：</p>
-<ul>
-<li>在实际的推荐系统开发中，工程师们需要在技术先进性和实际应用效果之间进行权衡。例如，在模型上线时，需要考虑硬件环境、数据处理能力、实时性需求等各种实际条件，确保技术方案的可行性和有效性。</li>
-</ul>
-</li>
-</ol>
-<h4>四、成为优秀算法工程师的关键</h4>
-<ol>
-<li>
-<p><strong>全面的技能储备</strong>：</p>
-<ul>
-<li>一个优秀的算法工程师不仅需要扎实的机器学习和深度学习基础，还需要熟悉大数据处理工具（如Spark、Flink）和模型服务工具（如TensorFlow、PyTorch）。</li>
-<li>逻辑思维能力和业务洞察力也是必不可少的。工程师需要具备解决复杂问题的条理性和发散思维，同时深刻理解业务场景和用户需求。</li>
-</ul>
-</li>
-<li>
-<p><strong>从技术到业务的跨越</strong>：</p>
-<ul>
-<li>算法工程师应当不断提升自身的业务理解能力，能够从技术细节中跳出来，站在用户和业务的角度思考问题。这种能力的提升需要通过实际项目的积累和多方面的学习。</li>
-</ul>
-</li>
-</ol>
-<h4>总结</h4>
-<p>算法工程师不能只是一个“炼金术士”，仅仅关注技术细节和模型结构的调整是不够的。真正优秀的工程师需要深刻理解业务需求和用户行为，从用户的角度出发，结合技术手段，实现有价值的推荐系统。通过这种方式，才能在实际应用中取得最佳效果，提升用户满意度和商业价值。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#problem">“炼金术士”式的误区</a>
+      <a href="#user">从用户与业务出发</a>
+      <a href="#din">案例：DIN 的改进动机</a>
+      <a href="#skills">优秀算法工程师的关键能力</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>算法工程师不能只是一个“炼金术士”</h1>
+        <p class="dek">把推荐效果寄托在反复调参上，就像炼金术：动作很多，因果不明。真正的进步往往来自对用户行为的观察——先知道“用户为什么点”，再决定模型该改哪里。</p>
+      </header>
+      <section id="problem" aria-labelledby="problem-h">
+        <h2 id="problem-h">“炼金术士”式的误区</h2>
+        <p>算法工程师最容易陷入的两种误区，都与“只看模型、不看用户”有关（见第 5 章 5.5 节）：</p>
+        <ol>
+          <li><strong>过度依赖技术细节</strong>：把精力花在 dropout、激活函数、正则项这类超参与结构微调上，期待“下一个 trick”带来提升，却不清楚它为什么有效。</li>
+          <li><strong>缺乏对业务场景的理解</strong>：推荐效果不只取决于模型复杂度，还取决于对用户需求的把握。不考虑应用场景地堆模型，容易本末倒置。</li>
+        </ol>
+        <p>两者的共同特征是：动作很多，但因果关系不明——改进无法解释，也无法复制到下一个问题。</p>
+      </section>
+      <section id="user" aria-labelledby="user-h">
+        <h2 id="user-h">从用户与业务出发</h2>
+        <figure>
+          <svg viewBox="0 0 900 440" role="img" aria-labelledby="fig555-t fig555-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig555-t">两种工作方式：“炼金术士”调参循环与用户/业务驱动的改进</title>
+            <desc id="fig555-d">左图是一个闭死的调参循环：调参→训练→看指标→再调参；右图是用户与业务驱动：观察用户行为→提出假设→改模型结构→用离线/在线验证，并把结论回馈到观察。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <rect x="20" y="40" width="400" height="360" rx="16" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/>
+              <text x="220" y="74" text-anchor="middle" font-size="15" font-weight="700" fill="#d06d4d">调参循环（炼金术士）</text>
+              <g fill="#fff" stroke="#d06d4d" stroke-width="2">
+                <rect x="110" y="100" width="220" height="52" rx="10"/><rect x="110" y="180" width="220" height="52" rx="10"/>
+                <rect x="110" y="260" width="220" height="52" rx="10"/>
+              </g>
+              <g font-size="14" fill="#203035" text-anchor="middle">
+                <text x="220" y="132">调超参 / 换激活函数</text><text x="220" y="212">训练模型、看离线指标</text><text x="220" y="292">指标没涨 → 再调参</text>
+              </g>
+              <path d="M330 286 q60 0 60 -86 q0 -86 -60 -86" fill="none" stroke="#d06d4d" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="220" y="360" text-anchor="middle" font-size="12" fill="#53676d">因果不明、难以解释与复用</text>
+              <rect x="480" y="40" width="400" height="360" rx="16" fill="#e8f1ee" stroke="#147f80" stroke-width="2"/>
+              <text x="680" y="74" text-anchor="middle" font-size="15" font-weight="700" fill="#147f80">用户 / 业务驱动</text>
+              <g fill="#fff" stroke="#147f80" stroke-width="2">
+                <rect x="570" y="100" width="220" height="52" rx="10"/><rect x="570" y="180" width="220" height="52" rx="10"/>
+                <rect x="570" y="260" width="220" height="52" rx="10"/>
+              </g>
+              <g font-size="14" fill="#203035" text-anchor="middle">
+                <text x="680" y="132">观察用户行为</text><text x="680" y="212">提出假设、改模型结构</text><text x="680" y="292">离线 + 在线验证</text>
+              </g>
+              <path d="M790 286 q60 0 60 -86 q0 -86 -60 -86" fill="none" stroke="#147f80" stroke-width="2"/>
+              <text x="680" y="360" text-anchor="middle" font-size="12" fill="#53676d">因果可解释、结论可积累</text>
+            </g>
+          </svg>
+          <figcaption>图 5.5-1（自绘）：两种工作方式都是循环，但驱动循环的“出发点”不同。左图从超参出发，改进难以解释；右图从用户行为出发，每一次改动都对应一个可验证的假设。没有用户与业务这一环，再复杂的模型也只是在闭死的循环里打转。</figcaption>
+        </figure>
+      </section>
+      <section id="din" aria-labelledby="din-h">
+        <h2 id="din-h">案例：DIN 的改进动机</h2>
+        <p>第 5 章 5.5 节用一个具体例子说明“从用户出发”能带来什么。Netflix 通过对用户行为的观察发现（5.5.2）：用户点击什么、看了多久，与他当下的兴趣高度相关，而不是简单等于“历史看过的都算数”。把这个观察落实到模型里（5.5.3），就引出了 DIN（Deep Interest Network）的改进动机（5.5.4）：</p>
+        <ul>
+          <li><strong>不是所有历史行为都同等重要</strong>：只有与当前候选物品相关的历史行为才应该被赋予更高权重。DIN 引入注意力机制，让模型自己判断哪些历史行为对当前推荐更有用。</li>
+          <li><strong>技术选择服务于业务需求</strong>：注意力机制并不是为了“用上新技术”，而是在明确了“要捕捉用户当前兴趣”这一需求之后的自然选择。</li>
+        </ul>
+        <div class="note"><strong>教学示意：</strong>本页对 Netflix 观察与 DIN 动机的描述为对第 5 章 5.5 节叙述的转述与简化；模型细节与实验结论请参见 3.8 节 DIN 与 5.5 节原文。</div>
+      </section>
+      <section id="skills" aria-labelledby="skills-h">
+        <h2 id="skills-h">优秀算法工程师的关键能力</h2>
+        <p>“不再是炼金术士”并不意味着只讲业务、不讲技术。它要求两手都要：既有机器学习和深度学习的底子，也能从技术细节中跳出来，站在用户和业务的角度提问。把常见的“误区”与对应的“做法”对比一下：</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 5.5-1：“炼金术士”误区与用户驱动的做法对比</caption>
+          <thead><tr><th style="width:44%">误区</th><th>用户驱动的做法</th></tr></thead>
+          <tbody>
+            <tr><td>先把模型结构改复杂，再看指标</td><td>先观察用户行为，提出可验证的假设，再选择结构</td></tr>
+            <tr><td>改进无法解释，只能“试了才知道”</td><td>每处改动对应一个明确的问题，结论可积累</td></tr>
+            <tr><td>只熟悉算法本身</td><td>同时具备大数据处理与模型服务能力（如 Spark、TensorFlow 一类工具）</td></tr>
+            <tr><td>上线时才考虑工程约束</td><td>在技术先进性与实时性、硬件、数据能力之间权衡</td></tr>
+          </tbody>
+        </table>
+        <div class="control-row" role="group" aria-label="选择视角">
+          <button type="button" data-view="problem" aria-pressed="false">只看模型会怎样</button>
+          <button type="button" data-view="user" aria-pressed="false">从用户出发会怎样</button>
+        </div>
+        <p class="status" role="status" aria-live="polite">选择上方视角，查看对应的结果。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>算法工程师不能只是一个“炼金术士”：只盯着超参与模型结构，改进既难解释也难复用。真正拉开差距的，是先理解用户行为与业务需求，再把它翻译成模型层面的改动——DIN 的注意力机制就是从这一动机出发的。技术能力与业务洞察力缺一不可。本页为第 5 章 5.5 节观点的归纳，具体案例与细节请参见对应小节。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 5 章「多角度审视推荐系统」5.5 节「推荐系统中比模型结构更重要的是什么」，含 5.5.5「算法工程师不能只是一个“炼金术士”」。</li>
+          <li>本页图 5.5-1 与表 5.5-1 为按 5.5 节观点<strong>自绘／整理</strong>；DIN 相关描述参见本书 3.8 节。</li>
+        </ul>
+      </section>
+    </main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
+    (function () {
+      var tips = {
+        problem: '只看模型：容易陷入调参循环，改进难以解释，也无法复制到下一个问题。',
+        user: '从用户出发：先观察用户行为、提出假设，再改模型结构，并用离线+在线验证，结论可积累。'
+      };
+      var buttons = Array.prototype.slice.call(document.querySelectorAll('.control-row button[data-view]'));
+      var status = document.querySelector('.status');
+      buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var view = b.getAttribute('data-view');
+          buttons.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          if (status) status.textContent = tips[view];
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>
-  
