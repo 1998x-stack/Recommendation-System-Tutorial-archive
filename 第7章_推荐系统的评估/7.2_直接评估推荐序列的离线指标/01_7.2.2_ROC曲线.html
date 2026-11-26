@@ -1,257 +1,138 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_7.2.2_ROC曲线</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>7.2.2 ROC 曲线</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_7.2.2 ROC曲线</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第7章 推荐系统的评估/7.2 直接评估推荐序列的离线指标
-Content: 01_7.2.2 ROC曲线
-&quot;&quot;&quot;</p>
-<h3>7.2.2 ROC曲线</h3>
-<h4>概述</h4>
-<p>ROC曲线，即受试者工作特征曲线（Receiver Operating Characteristic Curve），是评估二分类模型性能的重要工具。ROC曲线展示了在不同阈值下，分类模型的真阳性率（TPR）和假阳性率（FPR）之间的变化关系。通过分析ROC曲线，可以全面了解模型在不同条件下的表现，从而优化分类算法。</p>
-<h4>真阳性率和假阳性率</h4>
-<ol>
-<li>
-<p><strong>真阳性率（True Positive Rate, TPR）</strong>：</p>
-<ul>
-<li><strong>定义</strong>：真阳性率是指实际为正类的样本中，被正确分类为正类的比例。</li>
-<li><strong>计算公式</strong>：<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>T</mi><mi>P</mi><mi>R</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">TPR = \frac{TP}{TP + FN}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.36033em;"></span><span class="strut bottom" style="height:2.1296600000000003em;vertical-align:-0.7693300000000001em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">=</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">+</span><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.10903em;">N</span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-其中，TP为真正例数，FN为假负例数。</li>
-<li><strong>作用</strong>：反映模型对正类样本的识别能力。</li>
-</ul>
-</li>
-<li>
-<p><strong>假阳性率（False Positive Rate, FPR）</strong>：</p>
-<ul>
-<li><strong>定义</strong>：假阳性率是指实际为负类的样本中，被错误分类为正类的比例。</li>
-<li><strong>计算公式</strong>：<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>F</mi><mi>P</mi><mi>R</mi><mo>=</mo><mfrac><mrow><mi>F</mi><mi>P</mi></mrow><mrow><mi>F</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">FPR = \frac{FP}{FP + TN}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.36033em;"></span><span class="strut bottom" style="height:2.1296600000000003em;vertical-align:-0.7693300000000001em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">=</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">+</span><span class="mord mathit" style="margin-right:0.13889em;">T</span><span class="mord mathit" style="margin-right:0.10903em;">N</span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">F</span><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-其中，FP为假正例数，TN为真负例数。</li>
-<li><strong>作用</strong>：反映模型对负类样本的误识别情况。</li>
-</ul>
-</li>
-</ol>
-<h4>ROC曲线的绘制</h4>
-<ol>
-<li>
-<p><strong>数据准备</strong>：</p>
-<ul>
-<li><strong>预测评分</strong>：分类模型对所有样本进行预测评分。</li>
-<li><strong>实际标签</strong>：实际的样本标签数据，表示哪些样本为正类，哪些为负类。</li>
-</ul>
-</li>
-<li>
-<p><strong>计算TPR和FPR</strong>：</p>
-<ul>
-<li>设定不同的评分阈值，对每个阈值计算相应的TPR和FPR。</li>
-<li>生成一组TPR和FPR的点，作为ROC曲线的坐标点。</li>
-</ul>
-</li>
-<li>
-<p><strong>绘制ROC曲线</strong>：</p>
-<ul>
-<li>将所有坐标点绘制在二维平面上，横轴为假阳性率（FPR），纵轴为真阳性率（TPR）。</li>
-<li>连接这些点，形成ROC曲线。</li>
-</ul>
-</li>
-</ol>
-<h4>ROC曲线的分析</h4>
-<ol>
-<li>
-<p><strong>曲线形状</strong>：</p>
-<ul>
-<li>曲线越接近左上角，表示模型的性能越好，即在低假阳性率的同时，能够保持高真阳性率。</li>
-<li>曲线的变化反映了模型在不同阈值下的性能表现，帮助识别最佳的评分阈值。</li>
-</ul>
-</li>
-<li>
-<p><strong>AUC值</strong>：</p>
-<ul>
-<li>ROC曲线下的面积（Area Under Curve, AUC）可以量化分类模型的整体性能。</li>
-<li>AUC值越大，表示分类模型的综合性能越好。</li>
-</ul>
-</li>
-<li>
-<p><strong>对比分析</strong>：</p>
-<ul>
-<li>不同分类模型的ROC曲线可以放在一起对比，评估不同模型的优劣。</li>
-<li>通过对比，可以选择性能最优的分类模型。</li>
-</ul>
-</li>
-</ol>
-<h4>实际应用案例</h4>
-<ol>
-<li>
-<p><strong>医疗诊断系统</strong>：</p>
-<ul>
-<li>某医疗诊断系统在优化分类模型时，使用ROC曲线评估不同模型的性能。通过对比不同模型的ROC曲线，选择在低假阳性率下仍能保持高真阳性率的模型，提升诊断的准确性。</li>
-</ul>
-</li>
-<li>
-<p><strong>金融风控系统</strong>：</p>
-<ul>
-<li>某金融风控系统在信用评分和欺诈检测中，使用ROC曲线分析分类结果的真阳性率和假阳性率。通过调整评分阈值，找到最佳的风控策略，确保信用评分和欺诈检测的可靠性。</li>
-</ul>
-</li>
-<li>
-<p><strong>邮件过滤系统</strong>：</p>
-<ul>
-<li>某邮件过滤系统在垃圾邮件分类中，使用ROC曲线评估分类模型的性能。通过分析ROC曲线，优化分类算法，提高垃圾邮件的识别率，减少误报率。</li>
-</ul>
-</li>
-</ol>
-<h3>总结</h3>
-<p>ROC曲线是评估二分类模型性能的重要工具，通过展示真阳性率和假阳性率在不同阈值下的变化关系，帮助工程师全面了解模型的表现。通过分析ROC曲线的形状和AUC值，可以优化分类算法，提升分类模型的性能。在未来，随着分类模型技术的发展，ROC曲线将继续在评估和优化分类模型中发挥重要作用。</p>
-<hr>
-<h3>ROC曲线与P-R曲线对比详细表格</h3>
-<table>
-<thead>
-<tr>
-<th><strong>指标</strong></th>
-<th><strong>ROC曲线</strong></th>
-<th><strong>P-R曲线</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>定义</strong></td>
-<td>受试者工作特征曲线（Receiver Operating Characteristic Curve），展示TPR和FPR的关系。</td>
-<td>精确率-召回率曲线（Precision-Recall Curve），展示精确率和召回率的关系。</td>
-</tr>
-<tr>
-<td><strong>横轴</strong></td>
-<td>假阳性率（False Positive Rate, FPR）</td>
-<td>召回率（Recall）</td>
-</tr>
-<tr>
-<td><strong>纵轴</strong></td>
-<td>真阳性率（True Positive Rate, TPR）</td>
-<td>精确率（Precision）</td>
-</tr>
-<tr>
-<td><strong>重点关注</strong></td>
-<td>模型区分正负样本的能力</td>
-<td>模型在实际相关样本中的表现</td>
-</tr>
-<tr>
-<td><strong>适用场景</strong></td>
-<td>负类样本较多，正类样本较少的情况（如医疗诊断、信用评分）</td>
-<td>正类样本较多或不平衡数据集的情况（如信息检索、推荐系统）</td>
-</tr>
-<tr>
-<td><strong>曲线特点</strong></td>
-<td>曲线越接近左上角，表示模型性能越好。</td>
-<td>曲线越接近右上角，表示模型性能越好。</td>
-</tr>
-<tr>
-<td><strong>AUC解释</strong></td>
-<td>ROC曲线下的面积（AUC）越大，表示模型综合性能越好。</td>
-<td>P-R曲线下的面积（AUC）越大，表示模型综合性能越好。</td>
-</tr>
-<tr>
-<td><strong>优势</strong></td>
-<td>1. 在所有分类阈值上都能提供模型性能的全貌。                                       2. 易于比较不同模型的性能。</td>
-<td>1. 更关注正类样本的性能，适用于不平衡数据集。                                      2. 对于相关样本的表现评估更直观。</td>
-</tr>
-<tr>
-<td><strong>劣势</strong></td>
-<td>1. 在不平衡数据集上可能会产生误导性结论。                                        2. 对正类样本较少的情况敏感度较低。</td>
-<td>1. 在负类样本较多时，曲线可能不够直观。                                          2. 不能全面反映模型的区分能力。</td>
-</tr>
-<tr>
-<td><strong>计算复杂度</strong></td>
-<td>需要计算TPR和FPR，复杂度较高。</td>
-<td>需要计算精确率和召回率，复杂度较高。</td>
-</tr>
-<tr>
-<td><strong>适用性</strong></td>
-<td>适用于评价二分类模型的整体性能，特别是在处理正负样本分布均衡的数据集时表现优异。</td>
-<td>适用于评价二分类模型的实际相关样本性能，特别是在处理正负样本分布不均衡的数据集时表现优异。</td>
-</tr>
-<tr>
-<td><strong>典型应用</strong></td>
-<td>医疗诊断、信用评分、欺诈检测</td>
-<td>信息检索、推荐系统、文本分类</td>
-</tr>
-<tr>
-<td><strong>阈值调整</strong></td>
-<td>通过调整阈值可以观察模型在不同假阳性率下的表现。</td>
-<td>通过调整阈值可以观察模型在不同召回率下的表现。</td>
-</tr>
-<tr>
-<td><strong>结果解读</strong></td>
-<td>TPR越高、FPR越低，表示模型性能越好。</td>
-<td>精确率越高、召回率越高，表示模型性能越好。</td>
-</tr>
-<tr>
-<td><strong>主要评估指标</strong></td>
-<td>真阳性率（TPR）、假阳性率（FPR）、AUC</td>
-<td>精确率（Precision）、召回率（Recall）、F1值、AUC</td>
-</tr>
-<tr>
-<td><strong>曲线斜率解释</strong></td>
-<td>斜率越陡，表示模型在正负样本区分上的性能越好。</td>
-<td>斜率越陡，表示模型在正类样本识别上的性能越好。</td>
-</tr>
-<tr>
-<td><strong>对极端值的敏感性</strong></td>
-<td>对极端值不敏感，适用于不同类别样本比例变化的情况。</td>
-<td>对极端值敏感，适用于相关样本比例变化较大的情况。</td>
-</tr>
-<tr>
-<td><strong>真实案例</strong></td>
-<td>用于评估癌症诊断模型，观察在不同阈值下的TPR和FPR变化，选择最佳诊断阈值。</td>
-<td>用于评估商品推荐系统，观察在不同阈值下的精确率和召回率变化，优化推荐算法。</td>
-</tr>
-<tr>
-<td><strong>理解难度</strong></td>
-<td>理解相对简单，广泛使用于机器学习和统计学领域。</td>
-<td>理解相对复杂，需要对精确率和召回率的关系有深入理解。</td>
-</tr>
-<tr>
-<td><strong>可视化效果</strong></td>
-<td>图形直观，易于解释和对比不同模型。</td>
-<td>图形直观，易于解释和对比不同模型，特别是在不平衡数据集上。</td>
-</tr>
-<tr>
-<td><strong>偏好模型类型</strong></td>
-<td>偏好能够区分正负样本的模型，如Logistic回归、SVM。</td>
-<td>偏好能够提高正类样本识别率的模型，如神经网络、决策树。</td>
-</tr>
-</tbody>
-</table>
-<h3>表格字段解释</h3>
-<ul>
-<li><strong>指标</strong>：对比的具体项目或方面。</li>
-<li><strong>ROC曲线</strong>：ROC曲线在该项目或方面的特性和表现。</li>
-<li><strong>P-R曲线</strong>：P-R曲线在该项目或方面的特性和表现。</li>
-</ul>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">阀值一变，指标就变</a>
+      <a href="#rates">TPR 与 FPR</a>
+      <a href="#draw">怎么画 ROC 曲线</a>
+      <a href="#read">怎么读：形状与 AUC</a>
+      <a href="#compare">ROC 与 P-R 的取舍</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>ROC 曲线</h1>
+        <p class="dek">换一个分类阀值，准确率、精确率、召回率都会变——单点指标很难说明模型的真实水平。ROC 曲线把所有阀值下的“真阳性率 vs 假阳性率”连成一条线，用一条曲线看清模型区分正负样本的能力；曲线下的面积就是 AUC。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">阀值一变，指标就变</h2>
+        <p>二分类模型输出的往往是一个得分（如点击概率），要变成“正/负”判断就得设一个阀值。阀值调高，模型更保守，被判定为正的样本变少；阀值调低，模型更激进。因此单个阀值下的指标（如精确率、召回率）只能描述模型的一种工作状态。</p>
+        <p>ROC 曲线（Receiver Operating Characteristic Curve，受试者工作特征曲线）的思路是：不选一个阀值，而是让阀值从高到低滑动，把每个阀值对应的两个比率记下来，连成一条线。这样就能一次看到模型在“低假阳性—高真阳性”之间所有可能的权衡。</p>
+      </section>
+      <section id="rates" aria-labelledby="rates-h">
+        <h2 id="rates-h">TPR 与 FPR</h2>
+        <p>ROC 用的两个坐标分别是真阳性率与假阳性率。它们都先基于混淆矩阵的四个量：<em>TP</em>（真正例）、<em>FN</em>（假负例）、<em>FP</em>（假正例）、<em>TN</em>（真负例）。</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="真阳性率与假阳性率公式，可横向滚动">
+            <math display="block" aria-label="真阳性率等于真正例除以真正例加假负例；假阳性率等于假正例除以假正例加真负例"><mrow><mi>TPR</mi><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mo>,</mo><mspace width="1em"/><mi>FPR</mi><mo>=</mo><mfrac><mrow><mi>F</mi><mi>P</mi></mrow><mrow><mi>F</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <p><strong>TPR</strong>（也称召回率）是实际正类中被正确判正的比例，反映模型对正类样本的识别能力；<strong>FPR</strong> 是实际负类中被错判为正的比例，反映误识情况。横轴取 FPR、纵轴取 TPR，就得到 ROC 坐标。</p>
+      <section id="draw" aria-labelledby="draw-h">
+        <h2 id="draw-h">怎么画 ROC 曲线</h2>
+        <ol>
+          <li><strong>数据准备</strong>：得到模型对所有样本的预测评分，以及每个样本的真实标签。</li>
+          <li><strong>计算 TPR 和 FPR</strong>：设定不同的评分阀值，对每个阀值计算对应的 TPR 与 FPR，得到一组坐标点。</li>
+          <li><strong>绘制曲线</strong>：以 FPR 为横轴、TPR 为纵轴描点，把这些点依次连接，即得到 ROC 曲线。</li>
+        </ol>
+        <figure>
+          <svg viewBox="0 0 640 420" role="img" aria-labelledby="fig722-t fig722-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig722-t">ROC 曲线示意图</title>
+            <desc id="fig722-d">横轴为假阳性率、纵轴为真阳性率的坐标系；一条虚线对角线代表随机猜测，一条实线曲线趋向右上角代表较好的分类模型。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <line x1="80" y1="340" x2="560" y2="340" stroke="#53676d" stroke-width="1.5"/>
+              <line x1="80" y1="340" x2="80" y2="40" stroke="#53676d" stroke-width="1.5"/>
+              <text x="320" y="385" font-size="13" fill="#53676d" text-anchor="middle">假阳性率 FPR →</text>
+              <text x="30" y="190" font-size="13" fill="#53676d" text-anchor="middle" transform="rotate(-90 30 190)">真阳性率 TPR →</text>
+              <line x1="80" y1="340" x2="560" y2="40" stroke="#53676d" stroke-width="1.4" stroke-dasharray="7 6"/>
+              <text x="480" y="120" font-size="12" fill="#53676d">随机猜测（AUC = 0.5）</text>
+              <path d="M80 340 C150 180 220 90 340 62 C420 48 500 46 560 40" fill="none" stroke="#147f80" stroke-width="3"/>
+              <text x="300" y="120" font-size="13" fill="#147f80" font-weight="700">模型 A（更好，曲线靠左上）</text>
+              <path d="M80 340 C170 280 260 210 400 140 C470 108 520 82 560 40" fill="none" stroke="#d06d4d" stroke-width="2.4"/>
+              <text x="210" y="280" font-size="13" fill="#d06d4d" font-weight="700">模型 B（较弱）</text>
+              <circle cx="80" cy="340" r="3" fill="#53676d"/><circle cx="560" cy="40" r="3" fill="#53676d"/>
+              <text x="80" y="362" font-size="11" fill="#53676d" text-anchor="middle">(0,0)</text>
+              <text x="560" y="362" font-size="11" fill="#53676d" text-anchor="middle">(1,1)</text>
+            </g>
+          </svg>
+          <figcaption>图 7.2.2-1（自绘）：ROC 曲线示意。虚线对角线代表与随机猜测相当的水平（AUC = 0.5）；曲线越向左上角凸出，说明模型在低 FPR 下仍能保持高 TPR，区分能力越强。两条曲线仅为示意，纵轴/横轴刻度未标具体数值。</figcaption>
+        </figure>
+      </section>
+      <section id="read" aria-labelledby="read-h">
+        <h2 id="read-h">怎么读：形状与 AUC</h2>
+        <ul>
+          <li><strong>曲线形状</strong>：越接近左上角，模型性能越好——在同一低假阳性率下能取得更高的真阳性率；曲线还能帮助挑选合适的评分阀值。</li>
+          <li><strong>AUC 值</strong>：ROC 曲线下的面积（Area Under Curve）可以量化模型的整体性能，AUC 越大综合性能越好。</li>
+          <li><strong>对比分析</strong>：把不同模型的 ROC 曲线画在同一张图上，就能直观比较优劣，选出更优的模型。</li>
+        </ul>
+        <div class="note"><strong>对照：</strong>本仓 7.2.1 节已用 P-R 曲线讲过“精确率 vs 召回率”。两者都取不同阀值连成曲线，但横轴、适用场景与对不平衡数据的敏感度不同，下一节作对比。</div>
+      </section>
+      <section id="compare" aria-labelledby="compare-h">
+        <h2 id="compare-h">ROC 与 P-R 的取舍</h2>
+        <p>ROC 与 P-R（精确率-召回率）曲线都是“滑动阀值”得到的评估工具，但关注点不同。下表根据本仓同节讲义整理了几项关键差异。</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 7.2.2-1：ROC 曲线与 P-R 曲线对比（整理自本仓同节讲义）</caption>
+          <thead><tr><th style="width:20%">维度</th><th style="width:40%">ROC 曲线</th><th>P-R 曲线</th></tr></thead>
+          <tbody>
+            <tr><td>横轴 / 纵轴</td><td>FPR / TPR</td><td>召回率 / 精确率</td></tr>
+            <tr><td>重点关注</td><td>区分正负样本的能力</td><td>在实际相关样本中的表现</td></tr>
+            <tr><td>适用场景</td><td>负类样本较多、正类较少（如医疗诊断、信用评分）</td><td>正类较多或不平衡数据集（如信息检索、推荐系统）</td></tr>
+            <tr><td>不平衡数据</td><td>可能产生误导性结论</td><td>更关注正类，对不平衡更直观</td></tr>
+          </tbody>
+        </table>
+        <p>一个实用的经验是：样本极度不平衡、且更在意正类的命中情况时，P-R 曲线往往更能反映实际业务表现；若更关心模型在所有阀值下区分正负样本的稳定性，ROC（及 AUC）更合适。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>ROC 曲线把“阀值选择”这个难题变成了一张图：横轴 FPR、纵轴 TPR，阀值从高到低滑动就画出一条曲线。越靠左上越好，曲线下的面积 AUC 量化了整体区分能力。它与 P-R 曲线并非谁取代谁，而是两种看问题的角度：前者看区分正负样本的能力，后者更看正类的命中表现。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 7.2 节“直接评估推荐序列的离线指标”，本仓同目录讲义文本（<code>01_7.2.2_ROC曲线.md</code>）。</li>
+          <li>本页图 7.2.2-1 为按该节内容<strong>自绘</strong>的 ROC 示意图，曲线形状仅为示意；表 7.2.2-1 整理自同一节讲义的对比表。</li>
+          <li>P-R 曲线参见本仓 7.2.1 节。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
