@@ -1,144 +1,154 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_4.2.1_什么是Word2vec</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>4.2.1 什么是 Word2vec</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_4.2.1 什么是Word2vec</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第4章 Embedding技术在推荐系统中的应用/4.2 Word2vec——经典的Embedding方法
-Content: 00_4.2.1 什么是Word2vec
-&quot;&quot;&quot;</p>
-<h3>4.2.1 什么是Word2vec</h3>
-<h4>一、基本概念和背景</h4>
-<p>Word2vec是由Google于2013年提出的用于生成词向量的模型。它的核心思想是将词语映射到一个低维稠密向量空间，使得语义相近的词在向量空间中距离较近，而语义不相关的词距离较远。Word2vec模型的提出标志着自然语言处理（NLP）领域的一个重要里程碑，并为后续的Embedding技术奠定了基础。</p>
-<h4>二、Word2vec的模型结构</h4>
-<p>Word2vec模型有两种主要的结构：连续词袋模型（CBOW）和跳跃模型（Skip-Gram）。</p>
-<ol>
-<li>
-<p><strong>CBOW模型</strong>：</p>
-<ul>
-<li>目标：通过上下文词预测中心词。</li>
-<li>示例：在句子&quot;The cat sits on the mat&quot;中，通过上下文词[&quot;The&quot;, &quot;cat&quot;, &quot;on&quot;, &quot;the&quot;]预测中心词&quot;sits&quot;。</li>
-</ul>
-</li>
-<li>
-<p><strong>Skip-Gram模型</strong>：</p>
-<ul>
-<li>目标：通过中心词预测上下文词。</li>
-<li>示例：在句子&quot;The cat sits on the mat&quot;中，通过中心词&quot;sits&quot;预测上下文词[&quot;The&quot;, &quot;cat&quot;, &quot;on&quot;, &quot;the&quot;]。</li>
-</ul>
-</li>
-</ol>
-<p>经验上讲，Skip-Gram模型在处理大规模语料时效果较好，因此在实际应用中较为常用。</p>
-<h4>三、Word2vec的训练过程</h4>
-<ol>
-<li>
-<p><strong>构建训练样本</strong>：</p>
-<ul>
-<li>通过滑动窗口从语料库中抽取训练样本。假设窗口大小为2，则句子&quot;The cat sits on the mat&quot;会生成以下训练样本：[(&quot;The&quot;, &quot;cat&quot;), (&quot;cat&quot;, &quot;sits&quot;), (&quot;sits&quot;, &quot;on&quot;), (&quot;on&quot;, &quot;the&quot;), (&quot;the&quot;, &quot;mat&quot;)]。</li>
-</ul>
-</li>
-<li>
-<p><strong>定义优化目标</strong>：</p>
-<ul>
-<li>采用极大似然估计的方法，目标是最大化所有训练样本的条件概率之积。</li>
-<li>优化目标公式为：![](https://latex.codecogs.com/png.latex?\sum_{t=1}^{T}\sum_{-c\leq j\leq c, j\neq 0}\log{p(w_{t+j}|w_t)})。</li>
-</ul>
-</li>
-<li>
-<p><strong>计算条件概率</strong>：</p>
-<ul>
-<li>使用softmax函数计算条件概率。</li>
-<li>条件概率公式为：![](https://latex.codecogs.com/png.latex?p(w_O|w_I)=\frac{exp(v_{w_O}^T\cdot v_{w_I})}{\sum_{w=1}^{W}exp(v_w^T\cdot v_{w_I})})，其中<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mrow><msub><mi>w</mi><mi>O</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">v_{w_O}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.43056em;"></span><span class="strut bottom" style="height:0.68556em;vertical-align:-0.255em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">v</span><span class="vlist"><span style="top:0.15000000000000002em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.07142857142857144em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-scriptstyle scriptscriptstyle cramped"><span class="mord mathit" style="margin-right:0.02778em;">O</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mrow><msub><mi>w</mi><mi>I</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">v_{w_I}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.43056em;"></span><span class="strut bottom" style="height:0.68556em;vertical-align:-0.255em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">v</span><span class="vlist"><span style="top:0.15000000000000002em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.07142857142857144em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-scriptstyle scriptscriptstyle cramped"><span class="mord mathit" style="margin-right:0.07847em;">I</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>分别为输出词和输入词的向量表示。</li>
-</ul>
-</li>
-</ol>
-<h4>四、Word2vec的实现细节</h4>
-<ol>
-<li>
-<p><strong>负采样（Negative Sampling）</strong>：</p>
-<ul>
-<li>目的是简化softmax计算的复杂度。</li>
-<li>通过只计算采样出的负样本的预测误差，减少计算量。</li>
-<li>优化目标公式为：![](https://latex.codecogs.com/png.latex?L=\log{\sigma(v_{w_O}^T\cdot h)}+\sum_{i=1}^{k}E_{w_i\sim P_n(w)}[\log{\sigma(-v_{w_i}^T\cdot h)}])，其中<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi></mrow><annotation encoding="application/x-tex">h</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.69444em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit">h</span></span></span></span>为隐层向量，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>v</mi><mrow><msub><mi>w</mi><mi>O</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">v_{w_O}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.43056em;"></span><span class="strut bottom" style="height:0.68556em;vertical-align:-0.255em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">v</span><span class="vlist"><span style="top:0.15000000000000002em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.07142857142857144em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-scriptstyle scriptscriptstyle cramped"><span class="mord mathit" style="margin-right:0.02778em;">O</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>为输出词向量，<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">w_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.43056em;"></span><span class="strut bottom" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>为负样本。</li>
-</ul>
-</li>
-<li>
-<p><strong>层级softmax（Hierarchical Softmax）</strong>：</p>
-<ul>
-<li>通过构建霍夫曼树加快softmax计算。</li>
-<li>在每次预测时，只需计算从根节点到目标词的路径上的节点概率。</li>
-</ul>
-</li>
-</ol>
-<h4>五、Word2vec的应用</h4>
-<ol>
-<li>
-<p><strong>文本分类</strong>：</p>
-<ul>
-<li>通过将文本转换为词向量，输入到分类模型中进行文本分类。</li>
-<li>应用示例：垃圾邮件分类、新闻分类。</li>
-</ul>
-</li>
-<li>
-<p><strong>情感分析</strong>：</p>
-<ul>
-<li>通过词向量表示的文本数据，可以更好地捕捉文本中的情感信息。</li>
-<li>应用示例：电影评论情感分析、社交媒体情感分析。</li>
-</ul>
-</li>
-<li>
-<p><strong>机器翻译</strong>：</p>
-<ul>
-<li>通过将源语言和目标语言的词向量映射到相同的向量空间，实现跨语言的文本转换。</li>
-<li>应用示例：Google翻译、Bing翻译。</li>
-</ul>
-</li>
-</ol>
-<h4>六、Word2vec的优势和局限性</h4>
-<ol>
-<li>
-<p><strong>优势</strong>：</p>
-<ul>
-<li>能够捕捉词语的语义关系。</li>
-<li>计算效率高，适用于大规模语料。</li>
-</ul>
-</li>
-<li>
-<p><strong>局限性</strong>：</p>
-<ul>
-<li>无法处理多义词的不同语义。</li>
-<li>对于长距离依赖关系的捕捉能力有限。</li>
-</ul>
-</li>
-</ol>
-<h4>七、Word2vec对Embedding技术的影响</h4>
-<p>Word2vec的提出不仅在自然语言处理领域引起了广泛关注，还推动了Embedding技术在其他领域的应用。通过Word2vec，Embedding技术在广告、搜索、推荐系统等领域得到了广泛应用，成为深度学习知识框架中不可或缺的一部分。</p>
-<h3>总结</h3>
-<p>Word2vec作为经典的Embedding方法，通过将高维稀疏的文本数据转换为低维稠密的向量，使得计算机能够更高效地处理和理解文本。其模型结构、训练方法和优化目标对后续的Embedding研究具有重要的启发意义。掌握Word2vec的每一个细节，对于理解和应用Embedding技术至关重要。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">从 one-hot 到低维稠密向量</a>
+      <a href="#structures">两种结构：CBOW 与 Skip-Gram</a>
+      <a href="#objective">训练目标与条件概率</a>
+      <a href="#tricks">两个加速技巧</a>
+      <a href="#limits">优势与局限</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>什么是 Word2vec</h1>
+        <p class="dek">Word2vec 把词映射成低维稠密向量，让语义相近的词在向量空间里靠近。它有两种结构：CBOW 用上下文猜中心词，Skip-Gram 用中心词猜上下文；两者都用 softmax 定义条件概率，再靠负采样或层序 softmax 把计算量降下来。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">从 one-hot 到低维稠密向量</h2>
+        <p>把词当作离散符号时，常用 one-hot 表示：词表有多大，向量就有多长，只有一个 1。这种表示有两个麻烦：维度随词表膨胀，而且任意两个不同词的向量内积都是 0——“猫”和“狗”并不比“猫”和“飞机”更相近。</p>
+        <p>Word2vec 由 Google 于 2013 年提出，目标是把每个词映射到一个低维稠密向量，使得语义相近的词在向量空间中距离较近，不相关的词距离较远。一旦词变成向量，相似度、聚类、类比等操作就可以直接在几何空间里做。这一方法对 NLP 是里程碑，也为后续推荐系统里的 Embedding 技术奠定了基础。</p>
+      <section id="structures" aria-labelledby="structures-h">
+        <h2 id="structures-h">两种结构：CBOW 与 Skip-Gram</h2>
+        <p>Word2vec 的输入是一句话和两个超参：窗口大小 <em>c</em>（看中心词左右各多少个词）。同样一句话，两种结构的预测方向恰好相反：</p>
+        <ul>
+          <li><strong>CBOW（连续词袋）</strong>：用上下文词预测中心词。例：句子 “The cat sits on the mat” 中，用上下文 [“The”, “cat”, “on”, “the”] 预测中心词 “sits”。</li>
+          <li><strong>Skip-Gram（跳跃模型）</strong>：用中心词预测上下文词。同一句中，用中心词 “sits” 预测上下文 [“The”, “cat”, “on”, “the”]。</li>
+        </ul>
+        <p>讲义指出，经验上 Skip-Gram 在处理大规模语料时效果较好，因此实际应用中较为常用。</p>
+        <figure>
+          <svg viewBox="0 0 900 340" role="img" aria-labelledby="fig421-t fig421-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig421-t">滑动窗口下 CBOW 与 Skip-Gram 的预测方向</title>
+            <desc id="fig421-d">上方一行句子与窗口；左侧 CBOW 将上下文词汇集后预测中心词，右侧 Skip-Gram 由中心词分别预测各个上下文词。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="17" font-weight="700" fill="#203035">同一句话、同一个窗口，两个方向相反的训练任务</text>
+              <g font-size="14" text-anchor="middle">
+                <rect x="40" y="55" width="80" height="38" rx="6" fill="#f3f9f6" stroke="#dce8e4"/><text x="80" y="80">The</text>
+                <rect x="130" y="55" width="80" height="38" rx="6" fill="#f3f9f6" stroke="#dce8e4"/><text x="170" y="80">cat</text>
+                <rect x="220" y="55" width="80" height="38" rx="6" fill="#fdf1ec" stroke="#d06d4d" stroke-width="2"/><text x="260" y="80">sits</text>
+                <rect x="310" y="55" width="80" height="38" rx="6" fill="#f3f9f6" stroke="#dce8e4"/><text x="350" y="80">on</text>
+                <rect x="400" y="55" width="80" height="38" rx="6" fill="#f3f9f6" stroke="#dce8e4"/><text x="440" y="80">the</text>
+                <rect x="490" y="55" width="80" height="38" rx="6" fill="#f3f9f6" stroke="#dce8e4"/><text x="530" y="80">mat</text>
+              </g>
+              <text x="260" y="115" font-size="12" fill="#d06d4d" text-anchor="middle">中心词（橙色）</text>
+              <g font-size="13">
+                <text x="110" y="175" font-weight="700" fill="#147f80">CBOW：上下文 → 中心词</text>
+                <text x="110" y="205" fill="#53676d">[The, cat, on, the] → sits</text>
+                <text x="110" y="235" fill="#53676d">多个输入词向量汇总后预测一个词</text>
+                <text x="520" y="175" font-weight="700" fill="#7461ba">Skip-Gram：中心词 → 上下文</text>
+                <text x="520" y="205" fill="#53676d">sits → [The, cat, on, the]</text>
+                <text x="520" y="235" fill="#53676d">一个输入词分别预测多个词</text>
+              </g>
+              <path d="M200 130 H320" stroke="#147f80" stroke-width="1.5" marker-end="url(#arr421)"/>
+              <path d="M540 130 H660" stroke="#7461ba" stroke-width="1.5" marker-end="url(#arr421b)"/>
+              <defs>
+                <marker id="arr421" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#147f80"/></marker>
+                <marker id="arr421b" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#7461ba"/></marker>
+              </defs>
+            </g>
+          </svg>
+          <figcaption>图 4.2.1-1（自绘）：以 “The cat sits on the mat” 为例，窗口大小为 2 时中心词为 “sits”。CBOW 把窗口内的上下文词汇总后预测中心词；Skip-Gram 反过来，由中心词分别预测窗口内的上下文词。讲义指出大语料上 Skip-Gram 往往效果更好。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 4.2.1 节“什么是 Word2vec”的结构化讲解，例子与说明整理自本仓同目录讲义；图为按“窗口大小为 2”示意绘制。</div>
+      </section>
+      <section id="objective" aria-labelledby="objective-h">
+        <h2 id="objective-h">训练目标与条件概率</h2>
+        <p>Word2vec 依赖“词往往与其上下文共现”这一分布假设。训练前先用滑动窗口从语料中抽取词对，例如窗口大小为 2 时，句子 “The cat sits on the mat” 会生成相邻词对 (“The”, “cat”)、(“cat”, “sits”)、(“sits”, “on”)、(“on”, “the”)、(“the”, “mat”)。</p>
+        <p>训练目标是最大化所有样本的条件概率之积（等价于最大化对数似然）：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="对数似然目标函数，可横向滚动">
+            <math display="block" aria-label="最大化和：对每个位置 t，以及窗口内非零偏置 j，最大化上下文词在给定中心词下的对数条件概率"><mrow><munderover><mo>&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><munder><mo>&#x2211;</mo><mrow><mo>&#x2212;</mo><mi>c</mi><mo>&#x2264;</mo><mi>j</mi><mo>&#x2264;</mo><mi>c</mi><mo>,</mo><mi>j</mi><mo>&#x2260;</mo><mn>0</mn></mrow></munder><mi>log</mi><mspace width="0.2em"/><mi>p</mi><mrow><mo>(</mo><msub><mi>w</mi><mrow><mi>t</mi><mo>+</mo><mi>j</mi></mrow></msub><mo>&#x2223;</mo><msub><mi>w</mi><mi>t</mi></msub><mo>)</mo></mrow></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>T</em> 是语料长度，<em>c</em> 是窗口半径，<em>w<sub>t</sub></em> 是中心词，<em>w<sub>t+j</sub></em> 是其上下文词。条件概率用 softmax 定义：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="softmax 条件概率公式，可横向滚动">
+            <math display="block" aria-label="输出词在给定输入词下的概率，等于两词向量内积的指数除以词表上所有词内积指数之和"><mrow><mi>p</mi><mrow><mo>(</mo><msub><mi>w</mi><mi>O</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mi>I</mi></msub><mo>)</mo></mrow><mo>=</mo><mfrac><mrow><mi>exp</mi><mrow><mo>(</mo><msubsup><mi>v</mi><msub><mi>w</mi><mi>O</mi></msub><mi>T</mi></msubsup><mo>&#x22C5;</mo><msub><mi>v</mi><msub><mi>w</mi><mi>I</mi></msub></msub><mo>)</mo></mrow></mrow><mrow><munderover><mo>&#x2211;</mo><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow><mi>W</mi></munderover><mi>exp</mi><mrow><mo>(</mo><msubsup><mi>v</mi><mi>w</mi><mi>T</mi></msubsup><mo>&#x22C5;</mo><msub><mi>v</mi><msub><mi>w</mi><mi>I</mi></msub></msub><mo>)</mo></mrow></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>v<sub>w<sub>O</sub></sub></em> 与 <em>v<sub>w<sub>I</sub></sub></em> 分别是输出词与输入词的向量表示，<em>W</em> 是词表大小。分母要对整个词表求和，这正是下一步需要优化的地方。</p>
+      </section>
+      <section id="tricks" aria-labelledby="tricks-h">
+        <h2 id="tricks-h">两个加速技巧</h2>
+        <p>softmax 的分母要对全词表求和，词表很大时开销无法接受。Word2vec 用两个技巧绕开它：</p>
+        <ol>
+          <li><strong>负采样（Negative Sampling）</strong>：不再计算全词表的概率，而是只区分“真实上下文词”与若干个随机采样的“负样本”。目标函数（<em>h</em> 为隐层向量，<em>k</em> 为负样本数）：</li>
+        </ol>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="负采样目标函数，可横向滚动">
+            <math display="block" aria-label="L 等于真实输出词的对数 sigmoid 内积，加上采样的负样本的对数 sigmoid 负内积之和"><mrow><mi>L</mi><mo>=</mo><mi>log</mi><mspace width="0.2em"/><mi>&#x3C3;</mi><mrow><mo>(</mo><msubsup><mi>v</mi><msub><mi>w</mi><mi>O</mi></msub><mi>T</mi></msubsup><mo>&#x22C5;</mo><mi>h</mi><mo>)</mo></mrow><mo>+</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>E</mi><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>&#x223C;</mo><msub><mi>P</mi><mi>n</mi></msub><mrow><mo>(</mo><mi>w</mi><mo>)</mo></mrow></mrow></msub><mrow><mo>[</mo><mi>log</mi><mspace width="0.2em"/><mi>&#x3C3;</mi><mrow><mo>(</mo><mo>&#x2212;</mo><msubsup><mi>v</mi><msub><mi>w</mi><mi>i</mi></msub><mi>T</mi></msubsup><mo>&#x22C5;</mo><mi>h</mi><mo>)</mo></mrow><mo>]</mo></mrow></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>σ</em> 是 sigmoid 函数，<em>P<sub>n</sub></em>(<em>w</em>) 是负样本的采样分布。这样每次更新只需计算 1 个正样本与 <em>k</em> 个负样本，与词表大小无关。</p>
+        <p>另一个是<strong>层级 softmax（Hierarchical Softmax）</strong>：先构建一棵霍夫曼树，预测时只需计算从根节点到目标词路径上的节点概率，而不必遍历全词表。</p>
+      </section>
+      <section id="limits" aria-labelledby="limits-h">
+        <h2 id="limits-h">优势与局限</h2>
+        <p><strong>优势：</strong>能捕捉词语的语义关系（相近的词在向量空间里靠近）；计算效率高，适用于大规模语料——这正是负采样与层序 softmax 带来的。</p>
+        <p><strong>局限：</strong>同一个词只能对应一个向量，无法区分多义词的不同语义；“词袋”式的目标对长距离依赖关系的捕捉能力有限。</p>
+        <p>在推荐场景中，这套“把离散对象学成稠密向量”的方法被直接推广：把用户行为序列里的“物品”当成“词”，就是下一节的 Item2vec。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>Word2vec = 分布假设 + 滑动窗口 + 两种预测方向（CBOW / Skip-Gram）+ softmax 条件概率。它的核心贡献不在于多复杂的网络，而在于把“词→向量”学成一个可泛化的连续表示，并用负采样/层序 softmax 让它能在大语料上跑起来。理解它的目标函数与近似技巧，是理解后续所有 Embedding 方法（包括推荐系统里的物品 Embedding）的钥匙。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Mikolov, T. et al. <em>Efficient Estimation of Word Representations in Vector Space</em>（Word2vec 原始论文，Google, 2013）。</li>
+          <li>王喆《深度学习推荐系统》第 4.2 节“Word2vec——经典的 Embedding 方法”，本仓同目录讲义文本（<code>00_4.2.1_什么是Word2vec.md</code>）。</li>
+          <li>本页图 4.2.1-1 为按该节内容<strong>自绘</strong>的结构与预测方向示意图；公式整理自同一节讲义。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
