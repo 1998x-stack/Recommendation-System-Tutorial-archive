@@ -64,6 +64,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
           <li><strong>候选广告特征</strong>：广告对应的商品 ID、店铺 ID 等，经 Embedding 得到向量 <em>a</em>。</li>
         </ul>
         <p>注意，历史行为是一串<strong>变长</strong>的序列，而不是一个汇总值——这是 DIN 能“因广告而异”地加权的前提。</p>
+      </section>
       <section id="attn" aria-labelledby="attn-h">
         <h2 id="attn-h">注意力激活单元：让广告“唤醒”历史行为</h2>
         <p>DIN 用一个小的<strong>注意力激活单元</strong>（activation unit）计算每个历史行为与候选广告之间的注意力得分。先把两者拼接：</p>
