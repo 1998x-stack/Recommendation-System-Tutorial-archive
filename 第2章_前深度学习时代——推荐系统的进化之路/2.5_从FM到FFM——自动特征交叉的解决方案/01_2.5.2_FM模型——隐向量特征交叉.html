@@ -55,6 +55,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
         <h2 id="why-h">为什么需要特征交叉</h2>
         <p>用户的行为往往由多个因素共同决定：性别 × 年龄、年龄 × 商品类别、历史购买 × 品牌……单独看每个特征不够，特征之间的<strong>交互</strong>才能提升模型的表达能力。这正是第 2.5.1 节 POLY2 模型开始做特征交叉的动机。</p>
         <p>但 POLY2 的做法是为每一对特征组合学习一个显式权重 <em>w<sub>ij</sub></em>。特征维度是 <em>n</em>，交叉项就有 <em>n</em>(<em>n</em>−1)/2 个，参数量是 <em>O</em>(<em>n</em>²)；更麻烦的是高维稀疏场景下，很多组合在训练集里一次也没出现，对应的 <em>w<sub>ij</sub></em> 无法从数据中估计，模型在未见组合上就退化了。FM 要解决的就是这两点。</p>
+      </section>
       <section id="idea" aria-labelledby="idea-h">
         <h2 id="idea-h">FM 的核心：用隐向量内积代替交叉权重</h2>
         <p>FM 为每个特征 <em>x<sub>i</sub></em> 学一个 <em>k</em> 维隐向量 <em>v<sub>i</sub></em>。当特征 <em>i</em> 与 <em>j</em> 发生交叉时，不再学一个独立的 <em>w<sub>ij</sub></em>，而是用两个隐向量的内积 <em>&#x27E8;v<sub>i</sub>, v<sub>j</sub>&#x27E9;</em> 作为交叉特征的权重。FM 的预测形式为：</p>
