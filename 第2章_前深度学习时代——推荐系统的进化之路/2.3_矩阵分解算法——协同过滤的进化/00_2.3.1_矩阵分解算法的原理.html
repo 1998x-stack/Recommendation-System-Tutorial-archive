@@ -1,122 +1,157 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_2.3.1_矩阵分解算法的原理</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>2.3.1 矩阵分解算法的原理</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_2.3.1 矩阵分解算法的原理</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第2章 前深度学习时代——推荐系统的进化之路/2.3 矩阵分解算法——协同过滤的进化
-Content: 00_2.3.1 矩阵分解算法的原理
-&quot;&quot;&quot;</p>
-<h3>2.3.1 矩阵分解算法的原理</h3>
-<h4>概述</h4>
-<p>矩阵分解算法是一种通过将用户-物品评分矩阵分解为低维矩阵的乘积来进行推荐的技术。这种方法旨在发现隐藏在用户和物品之间的潜在特征，并利用这些特征进行推荐。矩阵分解技术在处理稀疏矩阵和提高推荐系统的泛化能力方面表现出色，是协同过滤算法的一种重要进化。</p>
-<h4>矩阵分解算法的基本原理</h4>
-<p>矩阵分解的基本思想是将一个高维的评分矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span></span></span></span> 分解为两个低维矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>Q</mi></mrow><annotation encoding="application/x-tex">Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="base textstyle uncramped"><span class="mord mathit">Q</span></span></span></span> 的乘积。具体来说，对于一个用户-物品评分矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span></span></span></span>，我们希望找到两个矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">P</span></span></span></span>（用户特征矩阵）和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>Q</mi></mrow><annotation encoding="application/x-tex">Q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="base textstyle uncramped"><span class="mord mathit">Q</span></span></span></span>（物品特征矩阵），使得 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mo>≈</mo><mi>P</mi><mo>×</mo><msup><mi>Q</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">R \approx P \times Q^T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.8413309999999999em;"></span><span class="strut bottom" style="height:1.035771em;vertical-align:-0.19444em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">≈</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">×</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:-0.363em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>。</p>
-<p>公式如下：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mo>≈</mo><mi>P</mi><mo>×</mo><msup><mi>Q</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">R \approx P \times Q^T 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.8913309999999999em;"></span><span class="strut bottom" style="height:1.0857709999999998em;vertical-align:-0.19444em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">≈</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mbin">×</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li>$ R $ 是用户-物品评分矩阵，维度为 $ m \times n $。</li>
-<li>$ P $ 是用户特征矩阵，维度为 $ m \times k $，其中 $ k $ 是潜在特征的数量。</li>
-<li>$ Q $ 是物品特征矩阵，维度为 $ n \times k $。</li>
-</ul>
-<p>通过这个分解，我们可以将高维的稀疏矩阵 $ R $ 表示为两个低维矩阵的乘积，从而大大减少计算和存储的复杂度。</p>
-<h4>矩阵分解的实现方法</h4>
-<h5>奇异值分解（Singular Value Decomposition, SVD）</h5>
-<p>SVD是一种经典的矩阵分解方法，其目标是将矩阵 $ R $ 分解为三个矩阵的乘积：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mo>=</mo><mi>U</mi><mi mathvariant="normal">Σ</mi><msup><mi>V</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">R = U \Sigma V^T 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.8913309999999999em;"></span><span class="strut bottom" style="height:0.8913309999999999em;vertical-align:0em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">=</span><span class="mord mathit" style="margin-right:0.10903em;">U</span><span class="mord mathrm">Σ</span><span class="mord"><span class="mord mathit" style="margin-right:0.22222em;">V</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li>$ U $ 是一个正交矩阵，维度为 $ m \times m $。</li>
-<li>$ \Sigma $ 是一个对角矩阵，维度为 $ m \times n $，其对角元素为奇异值。</li>
-<li>$ V $ 是一个正交矩阵，维度为 $ n \times n $。</li>
-</ul>
-<p>通过截取前 $ k $ 个奇异值和对应的奇异向量，可以得到低秩近似矩阵：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mo>≈</mo><msub><mi>U</mi><mi>k</mi></msub><msub><mi mathvariant="normal">Σ</mi><mi>k</mi></msub><msubsup><mi>V</mi><mi>k</mi><mi>T</mi></msubsup></mrow><annotation encoding="application/x-tex">R \approx U_k \Sigma_k V_k^T 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.8913309999999999em;"></span><span class="strut bottom" style="height:1.138331em;vertical-align:-0.247em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">≈</span><span class="mord"><span class="mord mathit" style="margin-right:0.10903em;">U</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.10903em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.03148em;">k</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathrm">Σ</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.03148em;">k</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit" style="margin-right:0.22222em;">V</span><span class="vlist"><span style="top:0.247em;margin-left:-0.22222em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.03148em;">k</span></span></span><span style="top:-0.4129999999999999em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-<p>其中，$ U_k $ 和 $ V_k $ 分别是 $ U $ 和 $ V $ 的前 $ k $ 列，$ \Sigma_k $ 是 $ \Sigma $ 的前 $ k $ 个奇异值组成的对角矩阵。</p>
-<h5>非负矩阵分解（Non-negative Matrix Factorization, NMF）</h5>
-<p>NMF是一种约束矩阵分解方法，其目标是将矩阵 $ R $ 分解为两个非负矩阵的乘积：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>R</mi><mo>≈</mo><mi>W</mi><mi>H</mi></mrow><annotation encoding="application/x-tex">R \approx WH 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="mrel">≈</span><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="mord mathit" style="margin-right:0.08125em;">H</span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li>$ W $ 是用户特征矩阵，维度为 $ m \times k $。</li>
-<li>$ H $ 是物品特征矩阵，维度为 $ k \times n $。</li>
-</ul>
-<p>NMF通过约束 $ W $ 和 $ H $ 的元素为非负值，使得分解结果更具有可解释性和物理意义。</p>
-<h5>随机梯度下降（Stochastic Gradient Descent, SGD）</h5>
-<p>SGD是一种优化算法，通过迭代更新用户和物品的特征矩阵来最小化误差。其目标函数为：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>min</mi><mrow><mi>P</mi><mo separator="true">,</mo><mi>Q</mi></mrow></msub><msub><mo>∑</mo><mrow><mo>(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo>)</mo><mo>∈</mo><mi>K</mi></mrow></msub><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><msup><mo>)</mo><mn>2</mn></msup><mo>+</mo><mi>λ</mi><mo>(</mo><mi mathvariant="normal">∥</mi><mi>P</mi><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>+</mo><mi mathvariant="normal">∥</mi><mi>Q</mi><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">\min_{P, Q} \sum_{(i,j) \in K} (R_{ij} - P_i Q_j^T)^2 + \lambda (\|P\|^2 + \|Q\|^2) 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.050005em;"></span><span class="strut bottom" style="height:2.5660100000000003em;vertical-align:-1.516005em;"></span><span class="base displaystyle textstyle uncramped"><span class="mop op-limits"><span class="vlist"><span style="top:0.644331em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mord mathit">Q</span></span></span></span><span style="top:2.7755575615628914e-17em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="mop">min</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mop op-limits"><span class="vlist"><span style="top:1.241005em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mopen">(</span><span class="mord mathit">i</span><span class="mpunct">,</span><span class="mord mathit" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mrel">∈</span><span class="mord mathit" style="margin-right:0.07153em;">K</span></span></span></span><span style="top:-0.000005000000000032756em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.00773em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.24700000000000003em;margin-left:0em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span style="top:-0.41300000000000003em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose"><span class="mclose">)</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathit">λ</span><span class="mopen">(</span><span class="mord mathrm">∥</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathrm">∥</span><span class="mord mathit">Q</span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li>$ K $ 是已知评分的集合。</li>
-<li>$ \lambda $ 是正则化参数，用于防止过拟合。</li>
-</ul>
-<p>通过随机梯度下降法，不断调整 $ P $ 和 $ Q $ 的值，使得目标函数收敛到最小值，从而获得最佳的特征矩阵。</p>
-<h4>矩阵分解的应用</h4>
-<h5>推荐系统</h5>
-<p>矩阵分解在推荐系统中的应用非常广泛。通过分解用户-物品评分矩阵，可以发现用户和物品的潜在特征，从而进行个性化推荐。例如，Netflix利用矩阵分解技术来推荐电影，Amazon利用矩阵分解技术来推荐商品。</p>
-<h5>图像处理</h5>
-<p>在图像处理中，矩阵分解技术可以用于降维、去噪和特征提取。例如，通过SVD对图像矩阵进行分解，可以提取图像的主要特征，从而实现图像压缩和去噪。</p>
-<h5>文本挖掘</h5>
-<p>在文本挖掘中，矩阵分解技术可以用于主题建模和信息检索。例如，通过NMF对文档-词矩阵进行分解，可以发现文档的潜在主题，从而实现文档聚类和主题提取。</p>
-<h4>矩阵分解的优缺点</h4>
-<h5>优点</h5>
-<ol>
-<li><strong>处理数据稀疏性</strong>：矩阵分解通过潜在特征的学习，可以填补评分矩阵中的空缺，减少数据稀疏性的影响。</li>
-<li><strong>提高推荐准确性和泛化能力</strong>：通过提取用户和物品的潜在特征，可以更准确地捕捉用户的兴趣偏好，提高推荐的准确性和泛化能力。</li>
-<li><strong>可解释性强</strong>：特别是非负矩阵分解（NMF），由于其非负约束，使得分解结果具有更好的可解释性，便于理解用户和物品的潜在特征。</li>
-</ol>
-<h5>缺点</h5>
-<ol>
-<li><strong>计算复杂度高</strong>：矩阵分解的计算过程涉及大量的矩阵运算和迭代优化，计算复杂度较高，特别是在大规模数据集上的应用。</li>
-<li><strong>对缺失数据敏感</strong>：矩阵分解方法对缺失数据较为敏感，缺失数据过多可能影响分解结果的准确性。</li>
-<li><strong>需要大量参数调优</strong>：矩阵分解方法需要调整多个参数，如潜在特征的维度 $ k $、正则化参数 $ \lambda $ 等，这些参数的选择对结果有较大影响，需要进行大量实验来确定最佳参数。</li>
-</ol>
-<h4>具体案例分析</h4>
-<h5>Netflix Prize</h5>
-<p>Netflix Prize是推荐系统领域的一个著名竞赛，参赛者需要基于用户的历史评分数据，预测他们对未评分电影的评分。最终获胜的团队采用了矩阵分解技术，通过将用户-物品评分矩阵分解为低维特征矩阵，取得了显著的效果。该案例展示了矩阵分解在实际推荐系统中的强大应用潜力。</p>
-<h5>Amazon商品推荐</h5>
-<p>Amazon利用矩阵分解技术，通过分析用户的购买历史数据，发现用户和商品的潜在特征，从而进行个性化推荐。矩阵分解技术帮助Amazon在大规模数据集上实现了高效的推荐，提高了用户的购物体验和满意度。</p>
-<h4>矩阵分解算法的未来发展</h4>
-<p>随着数据规模和复杂度的增加，矩阵分解算法在推荐系统中的应用前景广阔。以下是矩阵分解算法的一些未来发展方向：</p>
-<ol>
-<li><strong>结合深度学习</strong>：将矩阵分解与深度学习相结合，利用深度神经网络的强大表达能力，进一步提升推荐效果。例如，深度矩阵分解（Deep Matrix Factorization）通过引入深度学习模型，增强了矩阵分解的非线性表示能力。</li>
-<li><strong>处理多模态数据</strong>：未来的推荐系统需要处理多种类型的数据，如文本、图像、音频等。结合多模态数据的矩阵分解方法将能够提供更丰富和准确的推荐。</li>
-<li><strong>在线矩阵分解</strong>：随着用户行为的实时变化，在线矩阵分解技术可以动态更新用户和物品的特征矩阵，提高推荐系统的实时性和响应速度。</li>
-<li><strong>混合推荐系统</strong>：将矩阵分解与其他推荐算法（如协同过滤、基于内容的推荐）相结合，构建混合推荐系统，利用多种算法的优势，提高推荐效果。</li>
-</ol>
-<h3>结论</h3>
-<p>矩阵分解算法作为推荐系统中的一种重要技术，通过提取用户和物品的潜在特征，有效处理了数据稀疏性问题，提高了推荐的准确性和泛化能力。尽管矩阵分解存在计算复杂度高和参数调优难度大的问题，但其强大的特征表示能力和广泛的应用前景使其在推荐系统中具有重要地位。未来，随着深度学习和多模态数据处理技术的发展，矩阵分解算法将在推荐系统中发挥更加重要的作用。</p>
-<hr>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">从协同过滤到矩阵分解</a>
+      <a href="#idea">核心思想：拆成两个低维矩阵</a>
+      <a href="#methods">三种实现方法</a>
+      <a href="#pros">优点与局限</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>矩阵分解算法的原理</h1>
+        <p class="dek">共现矩阵太大、太稀疏，直接找“相似用户/相似物品”很难泛化。矩阵分解换了个抓手：把“用户×物品”的评分矩阵拆成两个低维矩阵的乘积，用一组潜在特征来解释评分，从而预测那些还没被评分的格子。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">从协同过滤到矩阵分解</h2>
+        <p>协同过滤（第 2.2 节）依赖“相似度”：要么找相似用户，要么找相似物品。它有一个天然弱点——用户-物品的共现矩阵非常稀疏，两个用户恰好共同评过同一批物品的机会很少，缺了共现就谈不上相似，推荐也就无法泛化到没见过的组合上。</p>
+        <p>矩阵分解（Matrix Factorization, MF）的目标正是把这种“靠共现来找相似”的做法，转成“靠一组连续潜在特征来刻画用户与物品”。一旦每个用户、每个物品都变成一条低维向量，任意一对用户-物品就有了可比较、可组合的表示，稀疏性问题被绕开。</p>
+      </section>
+      <section id="idea" aria-labelledby="idea-h">
+        <h2 id="idea-h">核心思想：把评分矩阵拆成两个低维矩阵</h2>
+        <p>设用户数为 <em>m</em>、物品数为 <em>n</em>，用户-物品评分矩阵记为 <em>R</em>（维度 <em>m</em>×<em>n</em>）。矩阵分解假设每个用户、每个物品都可以用 <em>k</em> 个潜在特征（latent factor）描述，于是找两个矩阵：用户特征矩阵 <em>P</em>（<em>m</em>×<em>k</em>）与物品特征矩阵 <em>Q</em>（<em>n</em>×<em>k</em>），使其乘积逼近原始评分矩阵：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="评分矩阵近似等于用户特征矩阵乘以物品特征矩阵的转置，可横向滚动">
+            <math display="block" aria-label="R 约等于 P 乘以 Q 的转置"><mrow><mi>R</mi><mo>&#x2248;</mo><mi>P</mi><msup><mi>Q</mi><mi>T</mi></msup></mrow></math>
+          </div>
+        </div>
+        <p>这里 <em>R</em> 是 <em>m</em>×<em>n</em> 的观测矩阵（大量格子为空），<em>P</em> 是 <em>m</em>×<em>k</em>，<em>Q</em> 是 <em>n</em>×<em>k</em>，<em>k</em> 远小于 <em>m</em>、<em>n</em>。用户 <em>i</em> 对物品 <em>j</em> 的预测评分，就是两条向量的内积 <em>P<sub>i</sub></em>·<em>Q<sub>j</sub><sup>T</sup></em>：</p>
+        <figure>
+          <svg viewBox="0 0 900 360" role="img" aria-labelledby="fig231-t fig231-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig231-t">评分矩阵分解为两个低维矩阵的乘积</title>
+            <desc id="fig231-d">左边是稀疏的用户-物品评分矩阵，中间乘以物品特征矩阵的转置，右边得到用户特征矩阵；颜色区分用户维度与物品维度。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="17" font-weight="700" fill="#203035">R (m×n) ≈ P (m×k) × Qᵀ (k×n)，k 远小于 m、n</text>
+              <g stroke="#53676d" stroke-width="1.5" fill="#fdf1ec">
+                <rect x="40" y="70" width="170" height="200" rx="8"/><path d="M96 70V270M152 70V270M40 120H210M40 170H210M40 220H210"/>
+              </g>
+              <text x="125" y="300" font-size="14" fill="#d06d4d" text-anchor="middle">观测评分（多为空）</text>
+              <text x="125" y="318" font-size="12" fill="#53676d" text-anchor="middle">R：用户 × 物品</text>
+              <text x="240" y="175" font-size="30" fill="#53676d" text-anchor="middle">≈</text>
+              <g stroke="#147f80" stroke-width="1.5" fill="#e8f1ee">
+                <rect x="300" y="70" width="150" height="200" rx="8"/><path d="M350 70V270M400 70V270"/>
+              </g>
+              <text x="375" y="300" font-size="14" fill="#147f80" text-anchor="middle">用户潜在特征</text>
+              <text x="375" y="318" font-size="12" fill="#53676d" text-anchor="middle">P：m × k</text>
+              <text x="475" y="175" font-size="26" fill="#53676d" text-anchor="middle">×</text>
+              <g stroke="#7461ba" stroke-width="1.5" fill="#ece7fb">
+                <rect x="510" y="70" width="150" height="200" rx="8"/><path d="M510 170H660"/>
+              </g>
+              <text x="585" y="300" font-size="14" fill="#7461ba" text-anchor="middle">物品潜在特征（转置）</text>
+              <text x="585" y="318" font-size="12" fill="#53676d" text-anchor="middle">Qᵀ：k × n</text>
+              <text x="700" y="175" font-size="26" fill="#53676d" text-anchor="middle">→</text>
+              <rect x="730" y="120" width="140" height="100" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.5"/>
+              <text x="800" y="160" font-size="13" fill="#203035" text-anchor="middle">预测评分</text>
+              <text x="800" y="184" font-size="13" fill="#203035" text-anchor="middle">R̂ᵢⱼ = Pᵢ · Qⱼᵀ</text>
+            </g>
+          </svg>
+          <figcaption>图 2.3.1-1（自绘）：矩阵分解的几何直觉。左端是稀疏的观测评分矩阵 <em>R</em>，中间是用户特征矩阵 <em>P</em> 与物品特征矩阵 <em>Q</em> 的转置；两者内积得到任意用户-物品的预测评分，空格子因此也能被“补”出估计值。图中格数仅为示意，实际 <em>k</em> 通常取几十到几百。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 2.3.1 节“矩阵分解算法的原理”的结构化讲解，公式与维度说明整理自本仓同目录的讲义文本；图中的格子数量、颜色为讲解用的示意，不代表任何真实数据集规模。</div>
+      <section id="methods" aria-labelledby="methods-h">
+        <h2 id="methods-h">三种实现方法</h2>
+        <p>“把 <em>R</em> 拆成两个低维矩阵”是目标，具体怎么得到 <em>P</em> 和 <em>Q</em> 则有好几种路线。下面三者分别代表：精确的线性代数分解、带约束的分解、以及直接面向预测误差的迭代优化。</p>
+        <h3>1. 奇异值分解（SVD）</h3>
+        <p>SVD 把评分矩阵分解成三个矩阵的乘积：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="SVD 分解公式，可横向滚动">
+            <math display="block" aria-label="R 等于 U 乘以 Sigma 乘以 V 的转置"><mrow><mi>R</mi><mo>=</mo><mi>U</mi><mi mathvariant="normal">&#x3A3;</mi><msup><mi>V</mi><mi>T</mi></msup></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>U</em>（<em>m</em>×<em>m</em>）与 <em>V</em>（<em>n</em>×<em>n</em>）是正交矩阵，<em>Σ</em>（<em>m</em>×<em>n</em>）是对角矩阵，对角元是奇异值。只保畁前 <em>k</em> 个奇异值与对应的奇异向量，就得到低秩近似 <em>R</em>≈<em>U<sub>k</sub>Σ<sub>k</sub>V<sub>k</sub><sup>T</sup></em>——这与“用 <em>P</em>、<em>Q</em> 两个低维矩阵逼近 <em>R</em>”是同一件事。</p>
+        <h3>2. 非负矩阵分解（NMF）</h3>
+        <p>NMF 要求分解出的两个矩阵元素非负：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="NMF 分解公式，可横向滚动">
+            <math display="block" aria-label="R 约等于 W 乘以 H"><mrow><mi>R</mi><mo>&#x2248;</mo><mi>W</mi><mi>H</mi></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>W</em>（<em>m</em>×<em>k</em>）与 <em>H</em>（<em>k</em>×<em>n</em>）均为非负矩阵。非负约束让每个潜在维度更像一种“可叠加的正向因素”，可解释性更强。</p>
+        <h3>3. 随机梯度下降（SGD）</h3>
+        <p>推荐场景更常用的是直接最小化预测误差。对已知评分集合 <em>K</em> 中的每对（<em>i</em>,<em>j</em>），目标函数为：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="带正则化的平方误差目标函数，可横向滚动">
+            <math display="block" aria-label="最小化已知评分上的平方误差加上用户与物品特征矩阵的 L2 正则"><mrow><munder><mo>min</mo><mrow><mi>P</mi><mo>,</mo><mi>Q</mi></mrow></munder><munder><mo>&#x2211;</mo><mrow><mo>(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>)</mo><mo>&#x2208;</mo><mi>K</mi></mrow></munder><msup><mrow><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>&#x2212;</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x3BB;</mi><mrow><mo>(</mo><mo>&#x2016;</mo><mi>P</mi><msup><mo>&#x2016;</mo><mn>2</mn></msup><mo>+</mo><mo>&#x2016;</mo><mi>Q</mi><msup><mo>&#x2016;</mo><mn>2</mn></msup><mo>)</mo></mrow></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>λ</em> 是正则化系数，用来抑制过拟合（防止特征值无限变大去拟合每一个观测）。用 SGD 逐个样本地反向调整 <em>P</em>、<em>Q</em>，目标函数收敛时即得到可用的特征矩阵。</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 2.3.1-1：三种方法的关键区别（整理自本仓同节讲义）</caption>
+          <thead><tr><th style="width:18%">方法</th><th style="width:34%">约束 / 目标</th><th>适用直觉</th></tr></thead>
+          <tbody>
+            <tr><td>SVD</td><td>无约束，保畁最大的奇异值</td><td>先补全/初始化矩阵后做低秩逼近，计算代价高。</td></tr>
+            <tr><td>NMF</td><td>元素非负</td><td>潜在维度需可解释为非负的可加因素。</td></tr>
+            <tr><td>SGD</td><td>最小化观测评分的平方误差 + 正则</td><td>只拿已知评分训练，天然适配稀疏且含缺失的数据。</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="pros" aria-labelledby="pros-h">
+        <h2 id="pros-h">优点与局限</h2>
+        <div class="note"><strong>优点：</strong>（1）用潜在特征填补评分矩阵中的空缺，缓解数据稀疏；（2）提取用户与物品的潜在特征，能捕捉兴趣偏好，提高推荐准确性与泛化能力；（3）特别是 NMF，非负约束使分解结果有较好的可解释性。</div>
+        <div class="note"><strong>局限：</strong>（1）涉及大量矩阵运算和迭代优化，大规模数据上计算复杂度高；（2）对缺失数据较敏感，缺失过多会影响分解质量；（3）需要调多个超参（潜在维度 <em>k</em>、正则系数 <em>λ</em> 等），往往要反复实验才能确定。</div>
+        <p>这些优缺点也解释了第 2.3.2 节之后为何要继续讨论“消除用户和物品打分的偏差”、以及后续深度学习模型为何要引入非线性与更多特征——它们都在补上矩阵分解的短板。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>矩阵分解把“相似度”这条协同过滤的老路，换成“潜在特征内积”这条新路：<em>R</em>≈<em>P Q<sup>T</sup></em>。它可以用 SVD、NMF 或 SGD 得到，其中 SGD 直接最小化已知评分的平方误差，天然适配稀疏数据。它的价值在于用低维向量替代庞大的共现矩阵，让预测可以泛化到未观测的组合；代价则是计算开销与超参调优。带着这个基本形式，就能理解为什么它是“协同过滤的进化”，也是后续 Embedding 与深度模型的先声。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 2.3 节“矩阵分解算法——协同过滤的进化”，本仓同目录讲义文本（<code>00_2.3.1_矩阵分解算法的原理.md</code>）。</li>
+          <li>本页图 2.3.1-1 为按该节内容<strong>自绘</strong>的分解示意图；公式与维度说明整理自同一节讲义。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
