@@ -1,65 +1,139 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_2.5.2_FM模型——隐向量特征交叉</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>2.5.2 FM模型——隐向量特征交叉</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_2.5.2 FM模型——隐向量特征交叉</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第2章 前深度学习时代——推荐系统的进化之路/2.5 从FM到FFM——自动特征交叉的解决方案
-Content: 01_2.5.2 FM模型——隐向量特征交叉
-&quot;&quot;&quot;</p>
-<h3>2.5.2 FM模型——隐向量特征交叉</h3>
-<h4>背景介绍</h4>
-<p>在推荐系统的发展过程中，特征交叉是提升模型表达能力的重要手段。然而，传统的特征交叉方法（如POLY2模型）存在数据稀疏和训练复杂度高的问题。为了解决这些问题，Rendle在2010年提出了因子分解机（Factorization Machines, FM）模型。</p>
-<h4>FM模型的基本原理</h4>
-<p>FM模型通过引入隐向量（latent vector），将特征交叉的权重从显式的特征组合转化为隐向量之间的内积。具体来说，FM为每个特征学习一个隐向量 $ \mathbf{v}_i $，在特征交叉时，使用两个特征的隐向量内积作为交叉特征的权重。其数学表达式如下：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>y</mi><mo>=</mo><msub><mi>w</mi><mn>0</mn></msub><mo>+</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></msubsup><msub><mi>w</mi><mi>i</mi></msub><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></msubsup><msubsup><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></msubsup><mo>⟨</mo><msub><mrow><mi mathvariant="bold">v</mi></mrow><mi>i</mi></msub><mo separator="true">,</mo><msub><mrow><mi mathvariant="bold">v</mi></mrow><mi>j</mi></msub><mo>⟩</mo><msub><mi>x</mi><mi>i</mi></msub><msub><mi>x</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">y = w_0 + \sum_{i=1}^{n} w_i x_i + \sum_{i=1}^{n} \sum_{j=i+1}^{n} \langle \mathbf{v}_i, \mathbf{v}_j \rangle x_i x_j 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.6513970000000007em;"></span><span class="strut bottom" style="height:3.0651740000000007em;vertical-align:-1.4137769999999998em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit" style="margin-right:0.03588em;">y</span><span class="mrel">=</span><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">0</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mop op-limits"><span class="vlist"><span style="top:1.1776689999999999em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mrel">=</span><span class="mord mathrm">1</span></span></span></span><span style="top:-0.000005000000000143778em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span style="top:-1.2500050000000003em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord scriptstyle uncramped"><span class="mord mathit">n</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit" style="margin-right:0.02691em;">w</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.02691em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">x</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mop op-limits"><span class="vlist"><span style="top:1.1776689999999999em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mrel">=</span><span class="mord mathrm">1</span></span></span></span><span style="top:-0.000005000000000143778em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span style="top:-1.2500050000000003em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord scriptstyle uncramped"><span class="mord mathit">n</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mop op-limits"><span class="vlist"><span style="top:1.1776689999999999em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span><span class="mrel">=</span><span class="mord mathit">i</span><span class="mbin">+</span><span class="mord mathrm">1</span></span></span></span><span style="top:-0.000005000000000254801em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span style="top:-1.2500050000000005em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord scriptstyle uncramped"><span class="mord mathit">n</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">⟨</span><span class=""><span class="mord displaystyle textstyle uncramped"><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mpunct">,</span><span class=""><span class="mord displaystyle textstyle uncramped"><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">⟩</span><span class="mord"><span class="mord mathit">x</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">x</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-<p>其中，$ y $ 为输出，$ w_0 $ 为偏置，$ w_i $ 为特征 $ x_i $ 的权重，$ \mathbf{v}_i $ 为特征 $ x_i $ 的隐向量，$ \langle \mathbf{v}_i, \mathbf{v}_j \rangle $ 为隐向量之间的内积。</p>
-<h4>特征交叉的必要性</h4>
-<p>特征交叉的主要目的是捕捉特征之间的交互信息，提升模型的表达能力。在推荐系统中，用户的行为受到多种因素的共同影响，这些因素之间的相互作用对用户行为的预测至关重要。例如，用户的购买决策可能受到性别、年龄、历史购买记录等多个因素的共同影响。</p>
-<h4>FM模型的优点</h4>
-<ol>
-<li><strong>减少参数数量</strong>：相比于POLY2模型中显式的二次特征组合，FM模型通过引入隐向量，将参数数量从 $ n^2 $ 级别减少到 $ nk $ 级别（其中 $ k $ 为隐向量的维度）。这显著降低了模型的复杂度。</li>
-<li><strong>处理稀疏数据</strong>：FM模型通过隐向量内积的方式实现特征交叉，即使在数据稀疏的情况下，依然能够有效地学习特征之间的关系。例如，即使某两个特征的组合在训练数据中很少出现，FM模型仍然可以通过各自的隐向量进行有效的交互学习。</li>
-<li><strong>良好的泛化能力</strong>：由于FM模型通过隐向量的内积捕捉特征交互信息，模型具有较强的泛化能力。即使在未见过的特征组合上，模型也能够通过隐向量的学习得到合理的预测结果。</li>
-</ol>
-<h4>FM模型的实现细节</h4>
-<ol>
-<li><strong>隐向量的学习</strong>：FM模型为每个特征学习一个隐向量。假设特征 $ x_i $ 的隐向量为 $ \mathbf{v}_i $，其维度为 $ k $。在训练过程中，通过优化目标函数来更新这些隐向量，使得模型能够更好地捕捉特征之间的交互信息。</li>
-<li><strong>梯度下降优化</strong>：在训练FM模型时，常用的优化方法是梯度下降。通过最小化损失函数，逐步更新模型参数（包括偏置 $ w_0 $，权重 $ w_i $ 以及隐向量 $ \mathbf{v}_i $）。梯度下降方法的复杂度为 $ O(nk) $，显著低于POLY2模型的 $ O(n^2) $ 复杂度。</li>
-</ol>
-<h4>FM模型的实际应用</h4>
-<p>在实际应用中，FM模型广泛用于推荐系统、点击率预测等领域。其主要优势在于能够有效处理高维稀疏数据，并通过隐向量捕捉特征之间的交互信息。例如，在电商推荐系统中，FM模型可以利用用户和商品的隐向量，通过内积计算用户对商品的兴趣度，从而实现个性化推荐。</p>
-<h4>例子解析</h4>
-<p>举例来说，在某电商平台的推荐系统中，用户和商品分别作为特征输入FM模型。假设用户特征包括性别、年龄、历史购买记录等，商品特征包括类别、价格、品牌等。通过FM模型，用户和商品的隐向量可以捕捉到其各自特征之间的交互信息，从而提高推荐的准确性。</p>
-<p>假设某用户的隐向量为 $ \mathbf{v}<em>{\text{user}} $，某商品的隐向量为 $ \mathbf{v}</em>{\text{item}} $。通过计算这两个隐向量的内积 $ \langle \mathbf{v}<em>{\text{user}}, \mathbf{v}</em>{\text{item}} \rangle $，可以得到该用户对该商品的兴趣度评分。模型通过优化这一评分，使其与用户的实际行为更为一致，从而实现精准推荐。</p>
-<h4>总结</h4>
-<p>FM模型通过引入隐向量，实现了高效的特征交叉，解决了POLY2模型在数据稀疏和训练复杂度方面的不足。其在推荐系统中的广泛应用，展示了其在处理高维稀疏数据和捕捉特征交互信息方面的优势。尽管FM模型已经取得了显著的效果，但在实际应用中仍需进一步优化和改进，以应对更复杂的推荐场景和更大规模的数据集。</p>
-<p>通过以上详细的分析，了解了FM模型的基本原理、优缺点及其在特征交叉中的应用。尽管FM模型具有良好的泛化能力和处理稀疏数据的优势，但在实际工程中仍需结合具体场景进行优化，以充分发挥其优势。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#why">为什么需要特征交叉</a>
+      <a href="#idea">FM 的核心：隐向量内积</a>
+      <a href="#params">参数量为何从 n² 降到 nk</a>
+      <a href="#pros">三个好处与实现细节</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>FM 模型——隐向量特征交叉</h1>
+        <p class="dek">POLY2 给每一对特征组合都单独存一个交叉权重 <em>w<sub>ij</sub></em>，参数是 <em>O</em>(<em>n</em>²)，而且没在训练数据里出现过的组合根本学不到权重。因子分解机（FM）换了个办法：每个特征只学一个 <em>k</em> 维隐向量，用两条隐向量的内积充当交叉权重——参数降到 <em>O</em>(<em>nk</em>)，还能泛化到没见过的组合。</p>
+      </header>
+      <section id="why" aria-labelledby="why-h">
+        <h2 id="why-h">为什么需要特征交叉</h2>
+        <p>用户的行为往往由多个因素共同决定：性别 × 年龄、年龄 × 商品类别、历史购买 × 品牌……单独看每个特征不够，特征之间的<strong>交互</strong>才能提升模型的表达能力。这正是第 2.5.1 节 POLY2 模型开始做特征交叉的动机。</p>
+        <p>但 POLY2 的做法是为每一对特征组合学习一个显式权重 <em>w<sub>ij</sub></em>。特征维度是 <em>n</em>，交叉项就有 <em>n</em>(<em>n</em>−1)/2 个，参数量是 <em>O</em>(<em>n</em>²)；更麻烦的是高维稀疏场景下，很多组合在训练集里一次也没出现，对应的 <em>w<sub>ij</sub></em> 无法从数据中估计，模型在未见组合上就退化了。FM 要解决的就是这两点。</p>
+      <section id="idea" aria-labelledby="idea-h">
+        <h2 id="idea-h">FM 的核心：用隐向量内积代替交叉权重</h2>
+        <p>FM 为每个特征 <em>x<sub>i</sub></em> 学一个 <em>k</em> 维隐向量 <em>v<sub>i</sub></em>。当特征 <em>i</em> 与 <em>j</em> 发生交叉时，不再学一个独立的 <em>w<sub>ij</sub></em>，而是用两个隐向量的内积 <em>&#x27E8;v<sub>i</sub>, v<sub>j</sub>&#x27E9;</em> 作为交叉特征的权重。FM 的预测形式为：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="FM 模型的预测公式，可横向滚动">
+            <math display="block" aria-label="y 等于偏置加一阶项，再加对每一对特征的隐向量内积乘以对应特征值"><mrow><mi>y</mi><mo>=</mo><msub><mi>w</mi><mn>0</mn></msub><mo>+</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>w</mi><mi>i</mi></msub><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>&#x27E8;</mo><msub><mi>v</mi><mi>i</mi></msub><mo>,</mo><msub><mi>v</mi><mi>j</mi></msub><mo>&#x27E9;</mo><msub><mi>x</mi><mi>i</mi></msub><msub><mi>x</mi><mi>j</mi></msub></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>w<sub>0</sub></em> 是偏置，<em>w<sub>i</sub></em> 是一阶特征权重，<em>x<sub>i</sub></em> 是特征取值（独热后大多为 0），<em>v<sub>i</sub></em>∈ℝ<em><sup>k</sup></em> 是特征 <em>i</em> 的隐向量。<strong>关键转变</strong>：交叉权重从“查表得到的 <em>w<sub>ij</sub></em>”变成了“由 <em>v<sub>i</sub></em>、<em>v<sub>j</sub></em> 算出来的量”。</p>
+        <figure>
+          <svg viewBox="0 0 900 380" role="img" aria-labelledby="fig252-t fig252-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig252-t">POLY2 的显式交叉权重与 FM 的隐向量内积对比</title>
+            <desc id="fig252-d">上排是 POLY2：每个特征对单独一个权重 w_ij，构成稠密的 n×n 权重表；下排是 FM：每个特征一个 k 维隐向量，交叉权重由两条隐向量内积得到，且可分解复用。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="17" font-weight="700" fill="#203035">从“每对组合一个权重”到“每个特征一个隐向量”</text>
+              <text x="40" y="72" font-size="14" font-weight="700" fill="#d06d4d">POLY2：交叉权重 wᵢⱼ</text>
+              <g stroke="#d06d4d" stroke-width="1.3" fill="#fdf1ec">
+                <rect x="40" y="84" width="150" height="110" rx="8"/><path d="M90 84V194M140 84V194M40 120H190M40 156H190"/>
+              </g>
+              <text x="210" y="130" font-size="13" fill="#53676d">每个格子 = 一个独立参数 O(n²)</text>
+              <text x="210" y="152" font-size="13" fill="#53676d">稀疏时大量格子学不到（“学不动”）</text>
+              <text x="40" y="250" font-size="14" font-weight="700" fill="#147f80">FM：每个特征一个隐向量 vᵢ ∈ ℝᵏ</text>
+              <g font-size="13" fill="#203035">
+                <rect x="40" y="262" width="40" height="46" rx="6" fill="#e8f1ee" stroke="#147f80"/><text x="60" y="290" text-anchor="middle">v₁</text>
+                <rect x="92" y="262" width="40" height="46" rx="6" fill="#e8f1ee" stroke="#147f80"/><text x="112" y="290" text-anchor="middle">v₂</text>
+                <rect x="144" y="262" width="40" height="46" rx="6" fill="#e8f1ee" stroke="#147f80"/><text x="164" y="290" text-anchor="middle">v₃</text>
+                <text x="196" y="290">…</text>
+              </g>
+              <text x="40" y="340" font-size="13" fill="#53676d">参数量 O(nk)；任意两个特征可复用隐向量算内积</text>
+              <g>
+                <text x="560" y="110" font-size="14" font-weight="700" fill="#7461ba">交叉权重 = 内积</text>
+                <rect x="560" y="128" width="290" height="64" rx="10" fill="#ece7fb" stroke="#7461ba" stroke-width="1.5"/>
+                <text x="705" y="160" font-size="16" fill="#203035" text-anchor="middle">⟨vᵢ, vⱼ⟩ = Σₖ vᵢₖ · vⱼₖ</text>
+                <text x="705" y="182" font-size="12" fill="#53676d" text-anchor="middle">即使 (i,j) 从未共现，也能用各自隐向量估计</text>
+                <line x1="705" y1="205" x2="705" y2="255" stroke="#53676d" stroke-width="1.5" stroke-dasharray="6 5"/>
+                <text x="705" y="280" font-size="13" fill="#147f80" text-anchor="middle">→ 泛化到未见组合</text>
+              </g>
+            </g>
+          </svg>
+          <figcaption>图 2.5.2-1（自绘）：POLY2（上）为每个特征对单独存一个 <em>w<sub>ij</sub></em>，构成一张稠密的 <em>n</em>×<em>n</em> 表；FM（下）只为每个特征存一个隐向量，交叉权重是两条隐向量的内积。由于隐向量可以被反复复用，未观测过的特征对也能得到一个合理的估计值。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 2.5.2 节“FM 模型——隐向量特征交叉”的结构化讲解，公式与参数说明整理自本仓同目录讲义；图中的格子与向量维度为讲解用的示意，不代表具体实验设置。</div>
+      </section>
+      <section id="params" aria-labelledby="params-h">
+        <h2 id="params-h">参数量为何从 n² 降到 nk</h2>
+        <p>把 FM 的二阶项写成矩阵形式会看得更清楚：若把所有特征的隐向量堆成矩阵 <em>V</em>（<em>n</em>×<em>k</em>），则任意两个特征的交叉权重可以看作 <em>V V<sup>T</sup></em> 的元素。也就是说，FM 不再直接估计一个 <em>n</em>×<em>n</em> 的稠密矩阵，而是估计它的一个低秩分解。</p>
+        <table>
+          <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 2.5.2-1：POLY2 与 FM 的参数对比（整理自本仓同节讲义）</caption>
+          <thead><tr><th style="width:16%">模型</th><th style="width:30%">交叉项参数</th><th>参数共享与泛化</th></tr></thead>
+          <tbody>
+            <tr><td>POLY2</td><td>交叉权重 <em>w<sub>ij</sub></em> 独立，共 O(<em>n</em>²)</td><td>不共享；未共现的特征对学不到权重。</td></tr>
+            <tr><td>FM</td><td>每个特征一个隐向量，共 O(<em>nk</em>)</td><td>隐向量全局共享；任意特征对都能靠内积估计。</td></tr>
+          </tbody>
+        </table>
+        <p>当 <em>k</em> 取几十到几百（远小于 <em>n</em>）时，<em>nk</em> 远小于 <em>n</em>²，存储与计算都大幅下降。代价是交叉关系被限制在一个秩不超过 <em>k</em> 的矩阵里，理论上比任意 <em>w<sub>ij</sub></em> 表达能力弱，但换来了对稀疏数据的鲁棒性。</p>
+      </section>
+      <section id="pros" aria-labelledby="pros-h">
+        <h2 id="pros-h">三个好处与实现细节</h2>
+        <ol>
+          <li><strong>减少参数</strong>：参数数量从 <em>n</em>² 级别降到 <em>nk</em> 级别，降低了模型复杂度。</li>
+          <li><strong>处理稀疏数据</strong>：即使某对特征组合很少出现，FM 仍能通过各自的隐向量进行有效交互学习。</li>
+          <li><strong>泛化能力强</strong>：遇到未见过的特征组合，也能用隐向量内积给出合理预测。</li>
+        </ol>
+        <p>训练上，FM 常用梯度下降：最小化损失函数，逐步更新偏置 <em>w<sub>0</sub></em>、一阶权重 <em>w<sub>i</sub></em> 和隐向量 <em>v<sub>i</sub></em>。它的复杂度是 <em>O</em>(<em>nk</em>)，显著低于 POLY2 的 <em>O</em>(<em>n</em>²)，这是 FM 能在大规模稀疏特征上落地的关键。</p>
+        <p>在电商推荐等场景中，用户与商品的特征（性别、年龄、历史购买、类别、价格、品牌……）一起输入 FM，隐向量内积就近似刻画了“这位用户对这个商品的兴趣度”。这种“隐向量当交叉权重”的思路也直接启发了第 3 章把 FM 与神经网络结合的 FNN/DeepFM/NFFM。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>FM 用一条式子把显式交叉换成了隐向量内积：交叉权重 <em>w<sub>ij</sub></em> → <em>&#x27E8;v<sub>i</sub>, v<sub>j</sub>&#x27E9;</em>，参数量 <em>O</em>(<em>n</em>²) → <em>O</em>(<em>nk</em>)，而且共享的隐向量使模型能在稀疏数据上泛化到未见组合。它把“特征交叉”从人工构造推进到了可学习的形式，为后续把特征交叉交给神经网络埋下了伏笔。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Rendle, S. <em>Factorization Machines</em>, 2010（FM 模型的原始出处）。</li>
+          <li>王喆《深度学习推荐系统》第 2.5 节“从 FM 到 FFM——自动特征交叉的解决方案”，本仓同目录讲义文本（<code>01_2.5.2_FM模型——隐向量特征交叉.md</code>）。</li>
+          <li>本页图 2.5.2-1 为按该节内容<strong>自绘</strong>的对比示意图；公式与参数说明整理自同一节讲义。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
