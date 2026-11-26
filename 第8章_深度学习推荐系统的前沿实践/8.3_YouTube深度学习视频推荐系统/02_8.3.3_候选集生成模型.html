@@ -1,118 +1,129 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>02_8.3.3_候选集生成模型</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>8.3.3 候选集生成模型</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>02_8.3.3 候选集生成模型</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第8章 深度学习推荐系统的前沿实践/8.3 YouTube深度学习视频推荐系统
-Content: 02_8.3.3 候选集生成模型
-&quot;&quot;&quot;</p>
-<h3>8.3.3 候选集生成模型</h3>
-<h4>引言</h4>
-<p>YouTube的视频推荐系统需要在海量的视频中筛选出用户可能感兴趣的候选视频集合，这是推荐系统的关键一步。为了实现这一目标，YouTube设计了一套基于深度学习的候选集生成模型，该模型通过用户的历史行为数据和搜索数据，生成一个高质量的候选视频集合。</p>
-<h4>模型架构</h4>
-<p>候选集生成模型的架构如图8-15所示，模型的底层输入是用户的历史观看视频Embedding向量和搜索词Embedding向量。模型架构主要包括以下几个部分：</p>
-<ol>
-<li>
-<p><strong>输入层</strong>：</p>
-<ul>
-<li><strong>用户历史观看视频Embedding</strong>：将用户过去观看过的视频转换为高维向量，这些向量捕捉了用户的观看偏好。</li>
-<li><strong>搜索词Embedding</strong>：将用户搜索过的关键词转换为高维向量，这些向量反映了用户的即时需求。</li>
-</ul>
-</li>
-<li>
-<p><strong>中间层</strong>：</p>
-<ul>
-<li><strong>Embedding层</strong>：模型中包含了一个Embedding层，用于将视频和搜索词进行预训练，生成高质量的特征向量。</li>
-<li><strong>ReLU神经网络</strong>：使用三层ReLU神经网络，对输入特征进行非线性变换，提高模型的表达能力。</li>
-</ul>
-</li>
-<li>
-<p><strong>输出层</strong>：</p>
-<ul>
-<li><strong>Softmax层</strong>：输出层使用softmax函数，将模型的输出转换为在所有候选视频上的概率分布。该模型将选择候选视频集的问题视为一个多分类问题，模型的最终输出是用户观看下一个视频的概率分布。</li>
-</ul>
-</li>
-</ol>
-<h4>Embedding技术的应用</h4>
-<p>为了生成视频Embedding和搜索词Embedding，YouTube采用了与Airbnb相似的方法。具体步骤如下：</p>
-<ol>
-<li>
-<p><strong>数据准备</strong>：</p>
-<ul>
-<li><strong>观看序列</strong>：收集用户的历史观看序列数据。</li>
-<li><strong>搜索序列</strong>：收集用户的历史搜索序列数据。</li>
-</ul>
-</li>
-<li>
-<p><strong>模型训练</strong>：</p>
-<ul>
-<li><strong>Word2vec方法</strong>：使用Word2vec方法对视频和搜索词进行Embedding，生成高维向量。</li>
-<li><strong>预训练Embedding层</strong>：在深度学习网络中增加Embedding层，与上层的DNN一起进行端到端训练。</li>
-</ul>
-</li>
-</ol>
-<h4>特征设计</h4>
-<p>候选集生成模型的特征设计包括以下几个方面：</p>
-<ol>
-<li>
-<p><strong>用户特征</strong>：</p>
-<ul>
-<li><strong>地理属性特征</strong>：将用户的地理位置、年龄、性别等信息进行Embedding，捕捉用户的背景信息。</li>
-<li><strong>历史行为特征</strong>：将用户的历史观看和搜索行为进行Embedding，反映用户的长期和短期兴趣。</li>
-</ul>
-</li>
-<li>
-<p><strong>视频特征</strong>：</p>
-<ul>
-<li><strong>视频内容特征</strong>：将视频的标题、描述、标签等信息进行Embedding，捕捉视频的语义信息。</li>
-<li><strong>视频属性特征</strong>：将视频的上传时间、观看次数、点赞数等信息进行Embedding，反映视频的受欢迎程度。</li>
-</ul>
-</li>
-</ol>
-<h4>模型训练与服务</h4>
-<ol>
-<li>
-<p><strong>模型训练</strong>：</p>
-<ul>
-<li><strong>负采样方法</strong>：在训练过程中，YouTube使用了负采样的方法，减少每次预测的分类数量，加快模型的收敛速度。</li>
-<li><strong>训练过程</strong>：通过深度神经网络进行端到端训练，优化模型参数，提高模型的泛化能力。</li>
-</ul>
-</li>
-<li>
-<p><strong>模型服务</strong>：</p>
-<ul>
-<li><strong>最近邻搜索方法</strong>：在实际应用中，YouTube采用了最近邻搜索的方法，通过内积运算和排序，生成候选视频集合。</li>
-<li><strong>在线服务效率</strong>：通过将用户和视频的Embedding存储在内存数据库中，使用局部敏感哈希等方法进行快速搜索，极大提高了推荐效率。</li>
-</ul>
-</li>
-</ol>
-<h4>总结</h4>
-<p>YouTube的候选集生成模型通过Embedding技术和深度神经网络的结合，实现了高效、精准的候选视频生成。模型的特征设计全面考虑了用户的历史行为和视频的语义信息，确保了推荐结果的准确性和个性化。通过这种方式，YouTube不仅提高了推荐系统的性能，也为其他视频推荐系统的开发提供了宝贵的经验和参考。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#position">这一步在系统里做什么</a>
+      <a href="#arch">模型架构：三层结构</a>
+      <a href="#embedding">Embedding 从哪里来</a>
+      <a href="#serve">训练与线上服务</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>候选集生成模型</h1>
+        <p class="dek">YouTube 要把海量视频缩到几百个候选交给排序层。候选集生成模型把这件事当成一个多分类问题：输入是用户的历史观看向量与搜索词向量，输出是在所有视频上的概率分布，取概率最高的一批作为候选。训练用负采样，线上用最近邻搜索。</p>
+      </header>
+      <section id="position" aria-labelledby="position-h">
+        <h2 id="position-h">这一步在系统里做什么</h2>
+        <p>如 8.3.2 节所述，YouTube 的推荐系统是<strong>两级漏斗</strong>：先用候选集生成（召回）从百万级视频库里筛出几百个，再由排序模型精细打分。候选集生成这一步的任务不是精确排序，而是“不漏掉大体相关的视频”，同时把规模降下来。</p>
+        <p>在 YouTube 的设计里，这被建模成一个<strong>多分类</strong>问题：给定用户当前的上下文，预测他下一个会观看哪个视频。类别数量等于视频库大小，模型的输出就是在这几十万/百万类别上的概率分布。</p>
+      </section>
+      <section id="arch" aria-labelledby="arch-h">
+        <h2 id="arch-h">模型架构：三层结构</h2>
+        <p>如图 8-15（本仓讲义引用的原书图）所示，模型从下到上可分为三层：</p>
+        <ol>
+          <li><strong>输入层</strong>：用户历史观看视频的 Embedding 向量与搜索词 Embedding 向量（以及其他用户特征）。前者捕捉长期观看偏好，后者反映即时需求。</li>
+          <li><strong>中间层</strong>：一个 Embedding 层（对视频与搜索词预训练）加上三层 ReLU 神经网络，对拼接后的特征做非线性变换。</li>
+          <li><strong>输出层</strong>：softmax 层把输出变成在所有候选视频上的概率分布，即“用户观看下一个视频的概率”。</li>
+        </ol>
+        <figure>
+          <svg viewBox="0 0 900 400" role="img" aria-labelledby="fig833-t fig833-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig833-t">YouTube 候选集生成模型的三层结构</title>
+            <desc id="fig833-d">底部输入层包含观看向量与搜索向量，向上经 Embedding 与三层 ReLU 全连接层，顶部 softmax 输出所有视频上的概率分布，取 Top-N 作为候选。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="17" font-weight="700" fill="#203035">输入向量 → Embedding + 三层 ReLU → softmax 多分类</text>
+              <rect x="60" y="300" width="200" height="60" rx="10" fill="#e8f1ee" stroke="#147f80" stroke-width="1.6"/>
+              <text x="160" y="325" font-size="13" fill="#203035" text-anchor="middle">历史观看视频 Embedding</text>
+              <text x="160" y="345" font-size="12" fill="#53676d" text-anchor="middle">长期偏好</text>
+              <rect x="290" y="300" width="200" height="60" rx="10" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.6"/>
+              <text x="390" y="325" font-size="13" fill="#203035" text-anchor="middle">搜索词 Embedding</text>
+              <text x="390" y="345" font-size="12" fill="#53676d" text-anchor="middle">即时需求</text>
+              <path d="M160 300 V250 H450" stroke="#147f80" stroke-width="1.5" fill="none"/>
+              <path d="M390 300 V250 H450" stroke="#d06d4d" stroke-width="1.5" fill="none"/>
+              <rect x="330" y="200" width="240" height="50" rx="10" fill="#ece7fb" stroke="#7461ba" stroke-width="1.6"/>
+              <text x="450" y="230" font-size="13" fill="#203035" text-anchor="middle">Embedding 层 + 三层 ReLU 全连接</text>
+              <path d="M450 200 V150" stroke="#7461ba" stroke-width="1.6"/>
+              <rect x="330" y="90" width="240" height="60" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="1.6"/>
+              <text x="450" y="117" font-size="13" fill="#203035" text-anchor="middle">softmax：所有视频上的概率</text>
+              <text x="450" y="137" font-size="12" fill="#53676d" text-anchor="middle">P(下一个观看的视频 | 用户上下文)</text>
+              <path d="M570 120 H700" stroke="#53676d" stroke-width="1.6"/>
+              <rect x="700" y="90" width="180" height="60" rx="10" fill="#e8f1ee" stroke="#147f80" stroke-width="1.6"/>
+              <text x="790" y="117" font-size="13" fill="#203035" text-anchor="middle">取 Top-N 概率</text>
+              <text x="790" y="137" font-size="12" fill="#53676d" text-anchor="middle">→ 候选集</text>
+            </g>
+          </svg>
+          <figcaption>图 8.3.3-1（自绘）：候选集生成的“漏斗上端”。历史观看与搜索向量送入 Embedding 层与三层 ReLU 网络，softmax 输出全视频库上的概率分布，取概率最高的一批作为候选集交给排序层。图中层数按讲义所述（三层 ReLU），宽度仅为示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 8.3.3 节“候选集生成模型”的结构化讲解，结构与特征说明整理自本仓同目录讲义；图为按该节内容自绘。</div>
+      </section>
+      <section id="embedding" aria-labelledby="embedding-h">
+        <h2 id="embedding-h">Embedding 从哪里来</h2>
+        <p>要让 softmax 能预测“下一个视频”，首先得把用户看过的视频、搜过的词变成向量。讲义指出，YouTube 生成视频 Embedding 与搜索词 Embedding 的方法与 Airbnb 相似：</p>
+        <ol>
+          <li><strong>数据准备</strong>：收集用户的历史观看序列与搜索序列。</li>
+          <li><strong>模型训练</strong>：用 Word2vec 方法对视频与搜索词做 Embedding；同时在网络中增加 Embedding 层，与上层的 DNN 一起端到端训练。</li>
+        </ol>
+        <p>除了行为序列，模型还使用两类特征：用户侧的地理位置、年龄、性别等信息（捕捉背景），以及视频侧的标题、描述、标签、上传时间、观看/点赞数等（捕捉语义与受欢迎程度）。</p>
+      </section>
+      <section id="serve" aria-labelledby="serve-h">
+        <h2 id="serve-h">训练与线上服务</h2>
+        <p><strong>训练时</strong>，若对百万级视频做完整 softmax，开销太大。YouTube 使用<strong>负采样</strong>：只对真实观看过的视频（正样本）与少量采样出来的视频（负样本）计算，从而减少每次预测的分类数量，加快收敛。这和第 4.2 节 Word2vec 的负采样是同一思路。</p>
+        <p><strong>线上服务时</strong>，不必真的跑一遍完整 softmax。既然网络后几层近似一个可分解的内积形式，就可以把用户向量与视频向量预先算好、存入内存数据库，再用<strong>最近邻搜索</strong>（内积运算 + 排序；讲义也提到局部敏感哈希等快速搜索方法）得到候选集。这与第 4.6 节“用 LSH 加速 Embedding 近邻搜索”的思路一致。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>候选集生成模型把“召回”写成了一个多分类问题：输入观测/搜索向量，中间三层 ReLU，顶部 softmax 输出全视频库概率；训练靠负采样，服务靠最近邻搜索。它的两大看点——把大规模候选生成转成分类问题、以及用 Embedding + 近邻搜索取代逐条打分——也是 Embedding 技术（第 4 章）在工业系统里最直接的落地。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Covington, P., Adams, J., Sargin, E. <em>Deep Neural Networks for YouTube Recommendations</em>, RecSys 2016（YouTube 候选集生成模型的原始论文）。</li>
+          <li>王喆《深度学习推荐系统》第 8.3 节“YouTube 深度学习视频推荐系统”，本仓同目录讲义文本（<code>02_8.3.3_候选集生成模型.md</code>）；原书图为图 8-15。</li>
+          <li>本页图 8.3.3-1 为按该节内容<strong>自绘</strong>的结构示意图。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
+  </div>
+</body>
+</html>
