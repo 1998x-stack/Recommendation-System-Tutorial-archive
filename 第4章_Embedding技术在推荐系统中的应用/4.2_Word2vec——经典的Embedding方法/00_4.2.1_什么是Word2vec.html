@@ -56,6 +56,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
         <h2 id="why-h">从 one-hot 到低维稠密向量</h2>
         <p>把词当作离散符号时，常用 one-hot 表示：词表有多大，向量就有多长，只有一个 1。这种表示有两个麻烦：维度随词表膨胀，而且任意两个不同词的向量内积都是 0——“猫”和“狗”并不比“猫”和“飞机”更相近。</p>
         <p>Word2vec 由 Google 于 2013 年提出，目标是把每个词映射到一个低维稠密向量，使得语义相近的词在向量空间中距离较近，不相关的词距离较远。一旦词变成向量，相似度、聚类、类比等操作就可以直接在几何空间里做。这一方法对 NLP 是里程碑，也为后续推荐系统里的 Embedding 技术奠定了基础。</p>
+      </section>
       <section id="structures" aria-labelledby="structures-h">
         <h2 id="structures-h">两种结构：CBOW 与 Skip-Gram</h2>
         <p>Word2vec 的输入是一句话和两个超参：窗口大小 <em>c</em>（看中心词左右各多少个词）。同样一句话，两种结构的预测方向恰好相反：</p>
