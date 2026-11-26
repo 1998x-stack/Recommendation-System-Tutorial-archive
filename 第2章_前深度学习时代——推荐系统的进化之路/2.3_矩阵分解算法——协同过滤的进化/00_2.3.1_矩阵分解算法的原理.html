@@ -97,6 +97,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
           <figcaption>图 2.3.1-1（自绘）：矩阵分解的几何直觉。左端是稀疏的观测评分矩阵 <em>R</em>，中间是用户特征矩阵 <em>P</em> 与物品特征矩阵 <em>Q</em> 的转置；两者内积得到任意用户-物品的预测评分，空格子因此也能被“补”出估计值。图中格数仅为示意，实际 <em>k</em> 通常取几十到几百。</figcaption>
         </figure>
         <div class="note"><strong>教学示意：</strong>本页为 2.3.1 节“矩阵分解算法的原理”的结构化讲解，公式与维度说明整理自本仓同目录的讲义文本；图中的格子数量、颜色为讲解用的示意，不代表任何真实数据集规模。</div>
+      </section>
       <section id="methods" aria-labelledby="methods-h">
         <h2 id="methods-h">三种实现方法</h2>
         <p>“把 <em>R</em> 拆成两个低维矩阵”是目标，具体怎么得到 <em>P</em> 和 <em>Q</em> 则有好几种路线。下面三者分别代表：精确的线性代数分解、带约束的分解、以及直接面向预测误差的迭代优化。</p>
@@ -107,7 +108,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
             <math display="block" aria-label="R 等于 U 乘以 Sigma 乘以 V 的转置"><mrow><mi>R</mi><mo>=</mo><mi>U</mi><mi mathvariant="normal">&#x3A3;</mi><msup><mi>V</mi><mi>T</mi></msup></mrow></math>
           </div>
         </div>
-        <p>其中 <em>U</em>（<em>m</em>×<em>m</em>）与 <em>V</em>（<em>n</em>×<em>n</em>）是正交矩阵，<em>Σ</em>（<em>m</em>×<em>n</em>）是对角矩阵，对角元是奇异值。只保畁前 <em>k</em> 个奇异值与对应的奇异向量，就得到低秩近似 <em>R</em>≈<em>U<sub>k</sub>Σ<sub>k</sub>V<sub>k</sub><sup>T</sup></em>——这与“用 <em>P</em>、<em>Q</em> 两个低维矩阵逼近 <em>R</em>”是同一件事。</p>
+        <p>其中 <em>U</em>（<em>m</em>×<em>m</em>）与 <em>V</em>（<em>n</em>×<em>n</em>）是正交矩阵，<em>Σ</em>（<em>m</em>×<em>n</em>）是对角矩阵，对角元是奇异值。只保留前 <em>k</em> 个奇异值与对应的奇异向量，就得到低秩近似 <em>R</em>≈<em>U<sub>k</sub>Σ<sub>k</sub>V<sub>k</sub><sup>T</sup></em>——这与“用 <em>P</em>、<em>Q</em> 两个低维矩阵逼近 <em>R</em>”是同一件事。</p>
         <h3>2. 非负矩阵分解（NMF）</h3>
         <p>NMF 要求分解出的两个矩阵元素非负：</p>
         <div class="math-equation">
@@ -128,7 +129,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
           <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 2.3.1-1：三种方法的关键区别（整理自本仓同节讲义）</caption>
           <thead><tr><th style="width:18%">方法</th><th style="width:34%">约束 / 目标</th><th>适用直觉</th></tr></thead>
           <tbody>
-            <tr><td>SVD</td><td>无约束，保畁最大的奇异值</td><td>先补全/初始化矩阵后做低秩逼近，计算代价高。</td></tr>
+            <tr><td>SVD</td><td>无约束，保留最大的奇异值</td><td>先补全/初始化矩阵后做低秩逼近，计算代价高。</td></tr>
             <tr><td>NMF</td><td>元素非负</td><td>潜在维度需可解释为非负的可加因素。</td></tr>
             <tr><td>SGD</td><td>最小化观测评分的平方误差 + 正则</td><td>只拿已知评分训练，天然适配稀疏且含缺失的数据。</td></tr>
           </tbody>
