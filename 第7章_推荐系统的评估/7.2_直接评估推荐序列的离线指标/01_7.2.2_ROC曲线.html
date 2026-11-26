@@ -39,7 +39,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
   <div class="layout">
     <nav class="toc" aria-label="文章目录">
       <strong>目录</strong>
-      <a href="#why">阀值一变，指标就变</a>
+      <a href="#why">阈值一变，指标就变</a>
       <a href="#rates">TPR 与 FPR</a>
       <a href="#draw">怎么画 ROC 曲线</a>
       <a href="#read">怎么读：形状与 AUC</a>
@@ -50,12 +50,12 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
     <main id="content"><article>
       <header class="article-header">
         <h1>ROC 曲线</h1>
-        <p class="dek">换一个分类阀值，准确率、精确率、召回率都会变——单点指标很难说明模型的真实水平。ROC 曲线把所有阀值下的“真阳性率 vs 假阳性率”连成一条线，用一条曲线看清模型区分正负样本的能力；曲线下的面积就是 AUC。</p>
+        <p class="dek">换一个分类阈值，准确率、精确率、召回率都会变——单点指标很难说明模型的真实水平。ROC 曲线把所有阈值下的“真阳性率 vs 假阳性率”连成一条线，用一条曲线看清模型区分正负样本的能力；曲线下的面积就是 AUC。</p>
       </header>
       <section id="why" aria-labelledby="why-h">
-        <h2 id="why-h">阀值一变，指标就变</h2>
-        <p>二分类模型输出的往往是一个得分（如点击概率），要变成“正/负”判断就得设一个阀值。阀值调高，模型更保守，被判定为正的样本变少；阀值调低，模型更激进。因此单个阀值下的指标（如精确率、召回率）只能描述模型的一种工作状态。</p>
-        <p>ROC 曲线（Receiver Operating Characteristic Curve，受试者工作特征曲线）的思路是：不选一个阀值，而是让阀值从高到低滑动，把每个阀值对应的两个比率记下来，连成一条线。这样就能一次看到模型在“低假阳性—高真阳性”之间所有可能的权衡。</p>
+        <h2 id="why-h">阈值一变，指标就变</h2>
+        <p>二分类模型输出的往往是一个得分（如点击概率），要变成“正/负”判断就得设一个阈值。阈值调高，模型更保守，被判定为正的样本变少；阈值调低，模型更激进。因此单个阈值下的指标（如精确率、召回率）只能描述模型的一种工作状态。</p>
+        <p>ROC 曲线（Receiver Operating Characteristic Curve，受试者工作特征曲线）的思路是：不选一个阈值，而是让阈值从高到低滑动，把每个阈值对应的两个比率记下来，连成一条线。这样就能一次看到模型在“低假阳性—高真阳性”之间所有可能的权衡。</p>
       </section>
       <section id="rates" aria-labelledby="rates-h">
         <h2 id="rates-h">TPR 与 FPR</h2>
@@ -66,11 +66,12 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
           </div>
         </div>
         <p><strong>TPR</strong>（也称召回率）是实际正类中被正确判正的比例，反映模型对正类样本的识别能力；<strong>FPR</strong> 是实际负类中被错判为正的比例，反映误识情况。横轴取 FPR、纵轴取 TPR，就得到 ROC 坐标。</p>
+      </section>
       <section id="draw" aria-labelledby="draw-h">
         <h2 id="draw-h">怎么画 ROC 曲线</h2>
         <ol>
           <li><strong>数据准备</strong>：得到模型对所有样本的预测评分，以及每个样本的真实标签。</li>
-          <li><strong>计算 TPR 和 FPR</strong>：设定不同的评分阀值，对每个阀值计算对应的 TPR 与 FPR，得到一组坐标点。</li>
+          <li><strong>计算 TPR 和 FPR</strong>：设定不同的评分阈值，对每个阈值计算对应的 TPR 与 FPR，得到一组坐标点。</li>
           <li><strong>绘制曲线</strong>：以 FPR 为横轴、TPR 为纵轴描点，把这些点依次连接，即得到 ROC 曲线。</li>
         </ol>
         <figure>
@@ -99,15 +100,15 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
       <section id="read" aria-labelledby="read-h">
         <h2 id="read-h">怎么读：形状与 AUC</h2>
         <ul>
-          <li><strong>曲线形状</strong>：越接近左上角，模型性能越好——在同一低假阳性率下能取得更高的真阳性率；曲线还能帮助挑选合适的评分阀值。</li>
+          <li><strong>曲线形状</strong>：越接近左上角，模型性能越好——在同一低假阳性率下能取得更高的真阳性率；曲线还能帮助挑选合适的评分阈值。</li>
           <li><strong>AUC 值</strong>：ROC 曲线下的面积（Area Under Curve）可以量化模型的整体性能，AUC 越大综合性能越好。</li>
           <li><strong>对比分析</strong>：把不同模型的 ROC 曲线画在同一张图上，就能直观比较优劣，选出更优的模型。</li>
         </ul>
-        <div class="note"><strong>对照：</strong>本仓 7.2.1 节已用 P-R 曲线讲过“精确率 vs 召回率”。两者都取不同阀值连成曲线，但横轴、适用场景与对不平衡数据的敏感度不同，下一节作对比。</div>
+        <div class="note"><strong>对照：</strong>本仓 7.2.1 节已用 P-R 曲线讲过“精确率 vs 召回率”。两者都取不同阈值连成曲线，但横轴、适用场景与对不平衡数据的敏感度不同，下一节作对比。</div>
       </section>
       <section id="compare" aria-labelledby="compare-h">
         <h2 id="compare-h">ROC 与 P-R 的取舍</h2>
-        <p>ROC 与 P-R（精确率-召回率）曲线都是“滑动阀值”得到的评估工具，但关注点不同。下表根据本仓同节讲义整理了几项关键差异。</p>
+        <p>ROC 与 P-R（精确率-召回率）曲线都是“滑动阈值”得到的评估工具，但关注点不同。下表根据本仓同节讲义整理了几项关键差异。</p>
         <table>
           <caption style="text-align:left;font-size:.85rem;color:var(--subtle);margin-bottom:.5rem">表 7.2.2-1：ROC 曲线与 P-R 曲线对比（整理自本仓同节讲义）</caption>
           <thead><tr><th style="width:20%">维度</th><th style="width:40%">ROC 曲线</th><th>P-R 曲线</th></tr></thead>
@@ -118,11 +119,11 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
             <tr><td>不平衡数据</td><td>可能产生误导性结论</td><td>更关注正类，对不平衡更直观</td></tr>
           </tbody>
         </table>
-        <p>一个实用的经验是：样本极度不平衡、且更在意正类的命中情况时，P-R 曲线往往更能反映实际业务表现；若更关心模型在所有阀值下区分正负样本的稳定性，ROC（及 AUC）更合适。</p>
+        <p>一个实用的经验是：样本极度不平衡、且更在意正类的命中情况时，P-R 曲线往往更能反映实际业务表现；若更关心模型在所有阈值下区分正负样本的稳定性，ROC（及 AUC）更合适。</p>
       </section>
       <section id="summary" aria-labelledby="summary-h">
         <h2 id="summary-h">小结</h2>
-        <p>ROC 曲线把“阀值选择”这个难题变成了一张图：横轴 FPR、纵轴 TPR，阀值从高到低滑动就画出一条曲线。越靠左上越好，曲线下的面积 AUC 量化了整体区分能力。它与 P-R 曲线并非谁取代谁，而是两种看问题的角度：前者看区分正负样本的能力，后者更看正类的命中表现。</p>
+        <p>ROC 曲线把“阈值选择”这个难题变成了一张图：横轴 FPR、纵轴 TPR，阈值从高到低滑动就画出一条曲线。越靠左上越好，曲线下的面积 AUC 量化了整体区分能力。它与 P-R 曲线并非谁取代谁，而是两种看问题的角度：前者看区分正负样本的能力，后者更看正类的命中表现。</p>
       </section>
       <section id="references" aria-labelledby="references-h">
         <h2 id="references-h">资料来源</h2>
