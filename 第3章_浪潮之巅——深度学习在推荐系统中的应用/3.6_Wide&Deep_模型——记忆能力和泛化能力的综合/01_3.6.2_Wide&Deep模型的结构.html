@@ -89,6 +89,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,
           <figcaption>图 3.6.2-1（自绘）：Wide &amp; Deep 有两条支路。左支（橙色）用交叉积变换与线性模型记住历史共现；右支（青色）把类别特征经 Embedding 拼接后送入多层 ReLU 全连接层做深层交叉。两支的输出汇入同一个逻辑回归层，共同拟合目标。图中层数与维度仅为示意。</figcaption>
         </figure>
         <div class="note"><strong>教学示意：</strong>本页为 3.6.2 节“Wide &amp; Deep 模型的结构”的结构化讲解，结构与维度说明整理自本仓同目录讲义；图中层数、维度为讲解用的示意。</div>
+      </section>
       <section id="wide" aria-labelledby="wide-h">
         <h2 id="wide-h">Wide 部分：记住历史共现</h2>
         <p>Wide 部分是一个线性模型，主要处理稀疏的类别型特征（用户历史行为、物品属性等）。它不是简单地对单特征加权，而是先做<strong>交叉积变换</strong>（Cross Product Transformation），把“哪些特征属于哪一个组合特征”显式地标记出来：</p>
