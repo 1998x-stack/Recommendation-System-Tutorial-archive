@@ -1,104 +1,159 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_3.2.2_AutoRec模型的结构</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.2.2 AutoRec 模型的结构</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_3.2.2 AutoRec模型的结构</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.2 AutoRec——单隐层神经网络推荐模型
-Content: 01_3.2.2 AutoRec模型的结构
-&quot;&quot;&quot;</p>
-<h3>AutoRec模型的结构</h3>
-<p>AutoRec模型是一种基于单隐层神经网络的推荐系统模型。其核心结构由输入层、隐层和输出层组成，通过自编码器的结构进行评分矩阵的重建。下面将详细介绍AutoRec模型的结构及其各组成部分的具体功能。</p>
-<h4>一、AutoRec模型的总体结构</h4>
-<p>AutoRec模型采用单隐层神经网络的结构进行评分预测。具体来说，AutoRec模型可以分为以下几部分：</p>
-<ol>
-<li><strong>输入层（Input Layer）：</strong> 输入层接收用户或物品的评分向量。在基于物品的AutoRec（Item-based AutoRec, I-AutoRec）中，输入向量是某一物品的所有用户评分；在基于用户的AutoRec（User-based AutoRec, U-AutoRec）中，输入向量是某一用户对所有物品的评分。</li>
-<li><strong>隐层（Hidden Layer）：</strong> 隐层是单隐层神经网络的核心部分，其神经元数量通常远小于输入向量的维度。隐层通过线性变换和非线性激活函数对输入向量进行编码，从而提取输入数据的潜在特征。</li>
-<li><strong>输出层（Output Layer）：</strong> 输出层对隐层的表示进行解码，生成与输入向量维度相同的输出向量。输出向量即为重建后的评分向量，用于预测未评分的物品或用户。</li>
-</ol>
-<h4>二、AutoRec模型的参数</h4>
-<p>AutoRec模型的参数主要包括权重矩阵和偏置向量，这些参数在训练过程中通过梯度下降法进行优化。</p>
-<ol>
-<li><strong>编码器参数（Encoder Parameters）：</strong>
-<ul>
-<li>权重矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>W</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">W_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>：从输入层到隐层的权重矩阵。</li>
-<li>偏置向量 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>b</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">b_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>：隐层的偏置向量。</li>
-</ul>
-</li>
-<li><strong>解码器参数（Decoder Parameters）：</strong>
-<ul>
-<li>权重矩阵 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>W</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">W_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>：从隐层到输出层的权重矩阵。</li>
-<li>偏置向量 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>b</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">b_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>：输出层的偏置向量。</li>
-</ul>
-</li>
-</ol>
-<h4>三、AutoRec模型的重建函数</h4>
-<p>AutoRec模型的重建函数表示为：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi><mo>(</mo><mi>r</mi><mo separator="true">;</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mi>f</mi><mo>(</mo><msub><mi>W</mi><mn>2</mn></msub><mo>⋅</mo><mi>g</mi><mo>(</mo><msub><mi>W</mi><mn>1</mn></msub><mo>⋅</mo><mi>r</mi><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><mo>)</mo><mo>+</mo><msub><mi>b</mi><mn>2</mn></msub><mo>)</mo></mrow><annotation encoding="application/x-tex">h(r; \theta) = f(W_2 \cdot g(W_1 \cdot r + b_1) + b_2) 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit">h</span><span class="mopen">(</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mpunct">;</span><span class="mord mathit" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mrel">=</span><span class="mord mathit" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">⋅</span><span class="mord mathit" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">⋅</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mbin">+</span><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span><span class="mbin">+</span><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.43056em;"></span><span class="strut bottom" style="height:0.43056em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.02778em;">r</span></span></span></span> 是输入向量，即用户或物品的评分向量。</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>W</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">W_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>W</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">W_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span> 分别是编码器和解码器的权重矩阵。</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>b</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">b_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>b</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">b_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class="mord"><span class="mord mathit">b</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span> 分别是隐层和输出层的偏置向量。</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>g</mi><mo>(</mo><mo>⋅</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">g(\cdot)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord">⋅</span><span class="mclose">)</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mo>⋅</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">f(\cdot)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord">⋅</span><span class="mclose">)</span></span></span></span> 分别是隐层和输出层的激活函数，通常选用Sigmoid或ReLU激活函数。</li>
-</ul>
-<h4>四、AutoRec模型的损失函数</h4>
-<p>AutoRec模型的目标是最小化输入向量与输出向量之间的重建误差，其损失函数可以表示为：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>L</mi><mo>=</mo><msub><mo>∑</mo><mrow><mi>r</mi><mo>∈</mo><mi>S</mi></mrow></msub><mi mathvariant="normal">∥</mi><mi>r</mi><mo>−</mo><mi>h</mi><mo>(</mo><mi>r</mi><mo separator="true">;</mo><mi>θ</mi><mo>)</mo><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>+</mo><mi>λ</mi><mo>(</mo><mi mathvariant="normal">∥</mi><msub><mi>W</mi><mn>1</mn></msub><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>+</mo><mi mathvariant="normal">∥</mi><msub><mi>W</mi><mn>2</mn></msub><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">L = \sum_{r \in S} \| r - h(r; \theta) \|^2 + \lambda (\| W_1 \|^2 + \| W_2 \|^2) 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.050005em;"></span><span class="strut bottom" style="height:2.3717110000000003em;vertical-align:-1.321706em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord mathit">L</span><span class="mrel">=</span><span class="mop op-limits"><span class="vlist"><span style="top:1.194336em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mrel">∈</span><span class="mord mathit" style="margin-right:0.05764em;">S</span></span></span></span><span style="top:-0.000005000000000032756em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord mathrm">∥</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mbin">−</span><span class="mord mathit">h</span><span class="mopen">(</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mpunct">;</span><span class="mord mathit" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathit">λ</span><span class="mopen">(</span><span class="mord mathrm">∥</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">1</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathrm">∥</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">W</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.68333em;"></span><span class="strut bottom" style="height:0.68333em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit" style="margin-right:0.05764em;">S</span></span></span></span> 是所有数据向量的集合。</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi><mo>(</mo><mi>r</mi><mo separator="true">;</mo><mi>θ</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">h(r; \theta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.75em;"></span><span class="strut bottom" style="height:1em;vertical-align:-0.25em;"></span><span class="base textstyle uncramped"><span class="mord mathit">h</span><span class="mopen">(</span><span class="mord mathit" style="margin-right:0.02778em;">r</span><span class="mpunct">;</span><span class="mord mathit" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span></span></span></span> 是自编码器的重建函数。</li>
-<li><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.69444em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord mathit">λ</span></span></span></span> 是正则化参数，用于防止过拟合。</li>
-</ul>
-<h4>五、AutoRec模型的训练过程</h4>
-<p>AutoRec模型的训练过程主要包括以下几个步骤：</p>
-<ol>
-<li><strong>数据预处理：</strong> 对用户-物品评分矩阵进行归一化处理，将评分标准化到[0, 1]或[-1, 1]范围内。</li>
-<li><strong>模型初始化：</strong> 随机初始化模型的参数，包括权重矩阵和偏置向量。</li>
-<li><strong>前向传播：</strong> 通过编码器和解码器进行前向传播，计算重建评分向量。</li>
-<li><strong>计算损失：</strong> 使用上述损失函数计算重建误差。</li>
-<li><strong>反向传播：</strong> 通过梯度下降算法更新模型参数，以最小化损失函数。</li>
-</ol>
-<h4>六、AutoRec模型的优点和局限性</h4>
-<h5>优点</h5>
-<ol>
-<li><strong>结构简单：</strong> AutoRec模型结构简单，易于实现和理解。</li>
-<li><strong>泛化能力：</strong> 通过自编码器的泛化过程，能够有效处理评分矩阵中的缺失值。</li>
-</ol>
-<h5>局限性</h5>
-<ol>
-<li><strong>表达能力有限：</strong> 由于模型结构较简单，AutoRec在处理复杂推荐场景时的表达能力可能不足。</li>
-<li><strong>数据稀疏性：</strong> 在评分数据稀疏的情况下，AutoRec模型的效果可能受到影响。</li>
-</ol>
-<h3>总结</h3>
-<p>AutoRec模型通过结合自编码器和协同过滤，提出了一种结构简单、原理清晰的推荐模型。其核心在于利用自编码器对评分矩阵进行重建，从而进行评分预测和推荐。尽管AutoRec在处理复杂场景和数据稀疏性方面存在一定的局限性，但作为深度学习推荐模型的入门模型，AutoRec提供了一个简洁有效的解决方案，为后续更复杂的深度学习推荐模型研究打下了基础。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">总体结构</a>
+      <a href="#params">参数与重建函数</a>
+      <a href="#loss">损失函数</a>
+      <a href="#train">训练过程</a>
+      <a href="#tradeoff">优点与局限</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>AutoRec 模型的结构</h1>
+        <p class="dek">AutoRec 把推荐问题看作一次“自编码”：输入一条评分向量，先压到低维隐层提取潜在特征，再还原成同样长度的评分向量；输出层里那些原输入缺失位置的取值，就是模型对未评分项的预测。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">总体结构</h2>
+        <p>AutoRec 采用<strong>单隐层神经网络</strong>的结构进行评分预测，由输入层、隐层、输出层三部分组成，通过自编码器的方式重建评分矩阵：</p>
+        <ul>
+          <li><strong>输入层</strong>：接收用户或物品的评分向量。基于物品的 AutoRec（I-AutoRec）输入“某一物品下所有用户的评分”；基于用户的 AutoRec（U-AutoRec）输入“某一用户对所有物品的评分”。</li>
+          <li><strong>隐层</strong>：神经元数量通常远小于输入维度，通过线性变换 + 非线性激活对输入编码，提取潜在特征。</li>
+          <li><strong>输出层</strong>：对隐层表示解码，生成与输入同维度的重建评分向量。</li>
+        </ul>
+        <figure>
+          <svg viewBox="0 0 900 400" role="img" aria-labelledby="fig322-t fig322-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig322-t">AutoRec 的单隐层自编码器结构</title>
+            <desc id="fig322-d">输入层是一条评分向量 r；编码器用权重 W1、偏置 b1 与激活函数 g 把 r 压到低维隐层；解码器用权重 W2、偏置 b2 与激活函数 f 重建出与 r 同维的输出向量 h(r)；在输入缺失的位置，输出值即为预测评分。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="16" font-weight="700" fill="#203035">编码器 → 低维隐层 → 解码器</text>
+              <text x="80" y="70" font-size="12" fill="#53676d" text-anchor="middle">输入层 r</text>
+              <g fill="#f3f9f6" stroke="#147f80" stroke-width="1.6">
+                <rect x="45" y="84" width="70" height="24" rx="4"/><rect x="45" y="114" width="70" height="24" rx="4"/><rect x="45" y="144" width="70" height="24" rx="4"/><rect x="45" y="174" width="70" height="24" rx="4"/><rect x="45" y="204" width="70" height="24" rx="4"/><rect x="45" y="234" width="70" height="24" rx="4"/>
+              </g>
+              <text x="80" y="280" font-size="11" fill="#53676d" text-anchor="middle">（含缺失项）</text>
+              <path d="M120 170 H190" stroke="#147f80" stroke-width="2"/>
+              <text x="155" y="162" font-size="11" fill="#147f80" text-anchor="middle">W₁, b₁</text>
+              <text x="330" y="70" font-size="12" fill="#53676d" text-anchor="middle">隐层 g(W₁r+b₁)</text>
+              <g fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.6">
+                <rect x="295" y="110" width="70" height="28" rx="4"/><rect x="295" y="146" width="70" height="28" rx="4"/><rect x="295" y="182" width="70" height="28" rx="4"/>
+              </g>
+              <text x="330" y="240" font-size="11" fill="#53676d" text-anchor="middle">低维潜在特征</text>
+              <path d="M370 170 H440" stroke="#d06d4d" stroke-width="2"/>
+              <text x="405" y="162" font-size="11" fill="#d06d4d" text-anchor="middle">W₂, b₂</text>
+              <text x="650" y="70" font-size="12" fill="#53676d" text-anchor="middle">输出层 h(r)</text>
+              <g fill="#ece7fb" stroke="#7461ba" stroke-width="1.6">
+                <rect x="615" y="84" width="70" height="24" rx="4"/><rect x="615" y="114" width="70" height="24" rx="4"/><rect x="615" y="144" width="70" height="24" rx="4"/><rect x="615" y="174" width="70" height="24" rx="4"/><rect x="615" y="204" width="70" height="24" rx="4"/><rect x="615" y="234" width="70" height="24" rx="4"/>
+              </g>
+              <text x="650" y="280" font-size="11" fill="#53676d" text-anchor="middle">重建评分向量</text>
+              <path d="M690 246 H775" stroke="#7461ba" stroke-width="1.6" stroke-dasharray="4 3"/>
+              <rect x="720" y="300" width="150" height="66" rx="8" fill="#fff" stroke="#7461ba" stroke-width="1.6"/>
+              <text x="795" y="328" font-size="12" fill="#203035" text-anchor="middle">缺失位置的输出</text>
+              <text x="795" y="350" font-size="12" fill="#203035" text-anchor="middle">= 预测评分</text>
+            </g>
+          </svg>
+          <figcaption>图 3.2.2-1（自绘）：AutoRec 的核心是一个单隐层自编码器。输入评分向量 r 经编码器（W₁, b₁, g）压到低维隐层提取潜在特征，再经解码器（W₂, b₂, f）重建出同维输出 h(r)。原输入中缺失的位置，其重建值就用作预测评分。图中维度、比例均为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页按 3.2.2 节内容整理；图 3.2.2-1 为按该节自绘，维度与激活函数取讲义所述常见设定，不代表某一具体实验配置。</div>
+      </section>
+      <section id="params" aria-labelledby="params-h">
+        <h2 id="params-h">参数与重建函数</h2>
+        <p>AutoRec 的参数主要是权重矩阵与偏置向量，训练时用梯度下降优化：</p>
+        <ul>
+          <li><strong>编码器参数</strong>：W<sub>1</sub>（输入层到隐层）与 b<sub>1</sub>（隐层偏置）。</li>
+          <li><strong>解码器参数</strong>：W<sub>2</sub>（隐层到输出层）与 b<sub>2</sub>（输出层偏置）。</li>
+        </ul>
+        <p>重建函数把上述参数组合成一次“编码—解码”：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="AutoRec 重建函数，可横向滚动">
+            <math display="block" aria-label="重建函数 h(r;θ) 等于输出层激活 f 作用于 W2 乘隐层表示，加上 b2；隐层表示为 g 作用于 W1 乘 r 加 b1"><mrow><mi>h</mi><mo>(</mo><mi>r</mi><mo>;</mo><mi>θ</mi><mo>)</mo><mo>=</mo><mi>f</mi><mo>(</mo><msub><mi>W</mi><mn>2</mn></msub><mo>&#x22C5;</mo><mi>g</mi><mo>(</mo><msub><mi>W</mi><mn>1</mn></msub><mo>&#x22C5;</mo><mi>r</mi><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><mo>)</mo><mo>+</mo><msub><mi>b</mi><mn>2</mn></msub><mo>)</mo></mrow></math>
+          </div>
+        </div>
+        <p>其中 r 是输入评分向量，W<sub>1</sub>、W<sub>2</sub> 是编码器/解码器权重，b<sub>1</sub>、b<sub>2</sub> 是偏置；g(·) 与 f(·) 分别是隐层和输出层激活函数，常选 Sigmoid 或 ReLU。</p>
+      </section>
+      <section id="loss" aria-labelledby="loss-h">
+        <h2 id="loss-h">损失函数</h2>
+        <p>训练目标是让输出尽量逼近输入，即最小化重建误差，并加 L2 正则防止过拟合：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="AutoRec 损失函数，可横向滚动">
+            <math display="block" aria-label="损失等于对数据集合 S 中所有向量 r 求 r 与 h(r;θ) 差的平方和，再加上 lambda 乘 W1、W2 的 Frobenius 范数平方"><mrow><mi>L</mi><mo>=</mo><munder><mo>&#x2211;</mo><mrow><mi>r</mi><mo>&#x2208;</mo><mi>S</mi></mrow></munder><msup><mrow><mo>&#x2016;</mo><mi>r</mi><mo>&#x2212;</mo><mi>h</mi><mo>(</mo><mi>r</mi><mo>;</mo><mi>θ</mi><mo>)</mo><mo>&#x2016;</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>λ</mi><mo>(</mo><msup><mrow><mo>&#x2016;</mo><msub><mi>W</mi><mn>1</mn></msub><mo>&#x2016;</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo>&#x2016;</mo><msub><mi>W</mi><mn>2</mn></msub><mo>&#x2016;</mo></mrow><mn>2</mn></msup><mo>)</mo></mrow></math>
+          </div>
+        </div>
+        <p>其中 S 是所有数据向量的集合，h(r;θ) 是重建函数，λ 是正则化参数。</p>
+      </section>
+      <section id="train" aria-labelledby="train-h">
+        <h2 id="train-h">训练过程</h2>
+        <ol>
+          <li><strong>数据预处理</strong>：对评分矩阵归一化，把评分标准化到 [0,1] 或 [-1,1] 范围。</li>
+          <li><strong>模型初始化</strong>：随机初始化权重矩阵与偏置向量。</li>
+          <li><strong>前向传播</strong>：经编码器、解码器计算重建评分向量。</li>
+          <li><strong>计算损失</strong>：用上述损失函数算重建误差。</li>
+          <li><strong>反向传播</strong>：用梯度下降更新参数，最小化损失。</li>
+        </ol>
+      </section>
+      <section id="tradeoff" aria-labelledby="tradeoff-h">
+        <h2 id="tradeoff-h">优点与局限</h2>
+        <p><strong>优点：</strong></p>
+        <ul>
+          <li>结构简单，易于实现和理解。</li>
+          <li>具备自编码器的泛化能力，能处理评分矩阵中的缺失值。</li>
+        </ul>
+        <p><strong>局限：</strong></p>
+        <ul>
+          <li>表达能力有限，处理复杂推荐场景时可能不足。</li>
+          <li>评分数据稀疏时，效果可能受影响。</li>
+        </ul>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>AutoRec 用单隐层自编码器重建评分矩阵：输入层收评分向量，隐层压缩出潜在特征，输出层还原出重建向量，缺失位置的重建值即预测评分。它以简单清晰的原理成为深度学习推荐模型的入门模型，也因结构简单、数据稀疏而存在表达能力的上限。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 3.2 节“AutoRec——单隐层神经网络推荐模型”，本仓同目录讲义文本（`01_3.2.2_AutoRec模型的结构.md`）。</li>
+          <li>本页图 3.2.2-1 为按该节内容<strong>自绘</strong>；公式与符号说明均取自讲义原文。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
