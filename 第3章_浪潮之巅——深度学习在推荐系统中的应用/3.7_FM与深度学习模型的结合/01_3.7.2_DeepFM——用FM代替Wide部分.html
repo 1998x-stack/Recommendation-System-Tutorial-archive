@@ -1,61 +1,134 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_3.7.2_DeepFM——用FM代替Wide部分</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.7.2 DeepFM——用 FM 代替 Wide 部分</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.1rem,5vw,3rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_3.7.2 DeepFM——用FM代替Wide部分</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.7 FM与深度学习模型的结合
-Content: 01_3.7.2 DeepFM——用FM代替Wide部分
-&quot;&quot;&quot;</p>
-<h3>3.7.2 DeepFM——用FM代替Wide部分</h3>
-<h4>1. 背景和动机</h4>
-<p>在推荐系统中，Wide&amp;Deep模型通过结合浅层的线性模型（Wide部分）和深层的非线性模型（Deep部分），在特征组合和泛化能力之间取得了平衡。然而，Wide部分虽然能够有效地处理大规模的稀疏特征，但其缺乏自动特征组合的能力，这在一定程度上限制了模型的表达能力。为了解决这个问题，DeepFM模型应运而生。DeepFM模型将因子分解机（FM）与深度神经网络结合，通过用FM替代Wide部分，增强了特征交互能力。</p>
-<h4>2. DeepFM模型概述</h4>
-<p>DeepFM模型由哈尔滨工业大学和华为公司联合提出，其模型结构如图3-19所示。DeepFM对Wide&amp;Deep模型的主要改进在于用FM替换了原来的Wide部分，从而加强了浅层网络部分特征组合的能力。具体而言，DeepFM模型的左边部分是FM模型，右边部分是深度神经网络（DNN），两部分共享相同的Embedding层。</p>
-<h4>3. FM模型与Deep部分的结合</h4>
-<p>在DeepFM模型中，FM部分和Deep部分的输入都是特征的Embedding向量。FM部分通过对不同特征域的Embedding向量进行两两交叉，捕捉到特征之间的二阶交互信息。具体地，FM部分将Embedding向量作为原FM模型中的隐向量，对特征进行交叉计算。然后，将FM的输出与DNN的输出一起输入到最后的输出层，进行目标拟合。</p>
-<h4>4. DeepFM模型的创新点</h4>
-<p>与Wide&amp;Deep模型相比，DeepFM模型的主要创新点在于以下几个方面：</p>
-<ol>
-<li><strong>增强的特征交互能力</strong>：通过用FM替代Wide部分，DeepFM模型能够自动进行特征组合，增强了浅层网络的特征交互能力。</li>
-<li><strong>共享Embedding层</strong>：FM部分和DNN部分共享相同的Embedding层，这不仅减少了参数数量，还提高了特征表示的一致性。</li>
-<li><strong>联合训练</strong>：DeepFM模型通过联合训练FM部分和DNN部分，能够更好地优化特征表示和特征交互。</li>
-</ol>
-<h4>5. DeepFM模型的优势</h4>
-<p>DeepFM模型在推荐系统中展现了以下优势：</p>
-<ol>
-<li><strong>自动特征组合</strong>：相比于Wide部分需要手动设计特征组合，FM部分能够自动进行特征交互，捕捉高阶特征组合信息。</li>
-<li><strong>训练效率高</strong>：共享Embedding层减少了参数数量，同时联合训练的方式提高了模型的训练效率。</li>
-<li><strong>泛化能力强</strong>：结合FM和DNN的优势，DeepFM模型在特征表达和泛化能力之间取得了平衡，具有较强的适应性。</li>
-</ol>
-<h4>6. 实验结果与分析</h4>
-<p>DeepFM模型在多个推荐任务中表现优异，通过实验结果验证了其在点击率预测、评分预测等任务中的效果。具体而言，DeepFM模型在特征组合和泛化能力上优于Wide&amp;Deep模型，同时在训练效率和预测性能上也有显著提升。</p>
-<h4>7. 总结</h4>
-<p>DeepFM模型通过将FM模型与深度神经网络结合，解决了Wide&amp;Deep模型在特征组合上的不足。其创新点在于用FM替代Wide部分，增强了特征交互能力，同时通过共享Embedding层和联合训练，提高了模型的训练效率和泛化能力。在推荐系统中，DeepFM模型提供了一种有效的解决方案，在特征表示和特征交互上展现了强大的性能优势。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">为什么替换 Wide 部分</a>
+      <a href="#structure">共享 Embedding 的双路结构</a>
+      <a href="#fm">FM 部分：自动二阶交叉</a>
+      <a href="#deep">Deep 部分与联合训练</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>DeepFM：用 FM 代替 Wide 部分</h1>
+        <p class="dek">Wide &amp; Deep 的 Wide 部分依赖人工设计交叉特征，既费人力又难以泛化。DeepFM 的做法很直接：把 Wide 部分换成一个 FM，让它自动做二阶特征交叉；FM 与 Deep 两部分共享同一套 Embedding，端到端联合训练。这样既免去人工特征工程，又让浅层交叉和深层交叉都到位。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">为什么替换 Wide 部分</h2>
+        <p>Wide &amp; Deep 用 Wide 部分处理浅层特征组合、用 Deep 部分做深层泛化，在二者间取得平衡。但 Wide 部分有一个明显短板：它靠<strong>人工设计</strong>的交叉特征来“记住”共现，既需要领域知识，又无法自动发现训练数据里的新组合，泛化能力有限。</p>
+        <p>DeepFM 的动机就是把这个短板補上：用因子分解机（FM）替掉 Wide 部分。FM 本身就能对特征做自动的二阶交叉，且参数量与特征维度线性相关，不需要人工枚举交叉项。于是模型的左半边变成了 FM，右半边仍是深度神经网络（DNN），两部分共享同一套 Embedding 层。</p>
+      </section>
+      <section id="structure" aria-labelledby="structure-h">
+        <h2 id="structure-h">共享 Embedding 的双路结构</h2>
+        <figure>
+          <svg viewBox="0 0 900 500" role="img" aria-labelledby="fig372-t fig372-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig372-t">DeepFM 的双路结构与共享 Embedding</title>
+            <desc id="fig372-d">稀疏特征经同一套共享 Embedding 层得到稠密向量，分别送入左侧的 FM 做二阶交叉、右侧的 DNN 做深层非线性变换；两路输出相加后经 sigmoid 得到预测。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="28" font-size="17" font-weight="700" fill="#203035">共享 Embedding → FM 支 + DNN 支 → 输出</text>
+              <rect x="60" y="50" width="330" height="52" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.5"/>
+              <text x="225" y="81" font-size="13" fill="#203035" text-anchor="middle">FM 部分（浅层、二阶交叉）</text>
+              <rect x="510" y="50" width="330" height="52" rx="8" fill="#e8f1ee" stroke="#147f80" stroke-width="1.5"/>
+              <text x="675" y="81" font-size="13" fill="#203035" text-anchor="middle">DNN 部分（深层、非线性）</text>
+              <path d="M225 102 V150" stroke="#d06d4d" stroke-width="2"/>
+              <path d="M675 102 V150" stroke="#147f80" stroke-width="2"/>
+              <rect x="60" y="150" width="330" height="66" rx="8" fill="#fff" stroke="#d06d4d" stroke-width="1.4"/>
+              <text x="225" y="175" font-size="12" fill="#53676d" text-anchor="middle">Embedding 向量作为隐向量</text>
+              <text x="225" y="197" font-size="12" fill="#53676d" text-anchor="middle">两两交叉 → FM 输出</text>
+              <rect x="510" y="150" width="330" height="66" rx="8" fill="#fff" stroke="#147f80" stroke-width="1.4"/>
+              <text x="675" y="175" font-size="12" fill="#53676d" text-anchor="middle">Embedding 拼接 → 多层全连接</text>
+              <text x="675" y="197" font-size="12" fill="#53676d" text-anchor="middle">（ReLU）→ DNN 输出</text>
+              <rect x="60" y="250" width="780" height="56" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.8"/>
+              <text x="450" y="274" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">共享 Embedding 层</text>
+              <text x="450" y="294" font-size="12" fill="#53676d" text-anchor="middle">同一套向量同时供 FM 与 DNN 使用，减少参数、统一表示</text>
+              <path d="M225 250 V238 H225 V216" fill="none" stroke="#d06d4d" stroke-width="2"/>
+              <path d="M675 250 V238 H675 V216" fill="none" stroke="#147f80" stroke-width="2"/>
+              <text x="450" y="334" font-size="12" fill="#53676d" text-anchor="middle">稀疏类别特征（用户、物品、上下文…）</text>
+              <path d="M225 216 V360 H450" fill="none" stroke="#d06d4d" stroke-width="2"/>
+              <path d="M675 216 V360 H450" fill="none" stroke="#147f80" stroke-width="2"/>
+              <rect x="315" y="360" width="270" height="56" rx="10" fill="#ece7fb" stroke="#7461ba" stroke-width="1.8"/>
+              <text x="450" y="384" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">输出层（相加 + sigmoid）</text>
+              <text x="450" y="404" font-size="12" fill="#53676d" text-anchor="middle">y = sigmoid(y_FM + y_DNN)</text>
+              <rect x="340" y="440" width="220" height="42" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="466" font-size="13" fill="#203035" text-anchor="middle">预测点击概率</text>
+            </g>
+          </svg>
+          <figcaption>图 3.7.2-1（自绘）：DeepFM 把 Wide &amp; Deep 的 Wide 支换成 FM。底部同一套共享 Embedding 同时供给左侧 FM 与右侧 DNN：FM 把 Embedding 当隐向量做二阶交叉，DNN 把 Embedding 拼接后过全连接层做高阶非线性交叉。两路输出相加后经 sigmoid 得到预测。图中层数与维度为讲解示意。</figcaption>
+        </figure>
+        <p>共享 Embedding 是 DeepFM 的一个关键设计。一方面它减少了参数总量；另一方面，FM 与 DNN 在同一套向量上学习，使浅层与深层对特征的表示保持一致，避免了两部分各学一套、彼此制抗。整个网络可以端到端联合训练。</p>
+        <div class="note"><strong>教学示意：</strong>本页为 3.7.2 节“DeepFM——用 FM 代替 Wide 部分”的结构化讲解，结构说明整理自本仓同目录讲义；图 3.7.2-1 为按该节内容自绘，层数与维度仅作示意。</div>
+      </section>
+      <section id="fm" aria-labelledby="fm-h">
+        <h2 id="fm-h">FM 部分：自动二阶交叉</h2>
+        <p>FM 部分与 Deep 部分的输入都是特征的 Embedding 向量。在 FM 一侧，这些 Embedding 向量就直接充当 FM 的<strong>隐向量</strong>，用来计算特征之间的二阶交叉：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="因子分解机的二阶交叉公式，可横向滚动">
+            <math display="block" aria-label="FM 输出等于全局偏置加一阶项 w_i 乘 x_i 之和，再加所有特征对的隐向量内积乘 x_i x_j 之和"><mrow><msub><mi>y</mi><mtext>FM</mtext></msub><mo>=</mo><msub><mi>w</mi><mn>0</mn></msub><mo>+</mo><munder><mo>&#x2211;</mo><mi>i</mi></munder><msub><mi>w</mi><mi>i</mi></msub><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>&lt;</mo><mi>j</mi></mrow></munder><mo>&#x27E8;</mo><msub><mi>v</mi><mi>i</mi></msub><mo>,</mo><msub><mi>v</mi><mi>j</mi></msub><mo>&#x27E9;</mo><msub><mi>x</mi><mi>i</mi></msub><msub><mi>x</mi><mi>j</mi></msub></mrow></math>
+          </div>
+        </div>
+        <p>其中 <em>x</em><sub>i</sub> 是第 i 个特征的取值，<em>w</em><sub>i</sub> 是其线性权重，<em>v</em><sub>i</sub> 是它的隐向量，〈v<sub>i</sub>, v<sub>j</sub>〉是两隐向量的内积。关键之处在于：即使某个交叉（i, j）在训练数据里从未共现，只要 i 与 j 各自出现过，内积仍能被估计出来，所以 FM 不需要人工枚举交叉项，就能自动地泛化到新组合。</p>
+      </section>
+      <section id="deep" aria-labelledby="deep-h">
+        <h2 id="deep-h">Deep 部分与联合训练</h2>
+        <p>DNN 部分把同一套 Embedding 向量拼接成一条稠密向量，送入多层全连接（常用 ReLU）做非线性变换，得到高阶、非线性的特征交叉。这一部分与 Wide &amp; Deep 的 Deep 支类似。</p>
+        <p>两路的输出相加，再经 sigmoid 得到最终预测。因为是共享 Embedding 的联合训练，反向传播时梯度会同时更新 FM 的隐向量与 DNN 的权重，两部分彼此促进。相比 Wide &amp; Deep，DeepFM 省去了人工交叉特征，同时浅层自动二阶交叉与深层高阶交叉兼备。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>DeepFM 可以概括为“一个共享 Embedding，两个分支”：</p>
+        <ul>
+          <li><strong>FM 支</strong>：把 Embedding 当隐向量做自动二阶交叉，取代了 Wide &amp; Deep 中需人工设计的 Wide 部分。</li>
+          <li><strong>DNN 支</strong>：把 Embedding 拼接后过全连接，做高阶非线性交叉。</li>
+          <li><strong>共享 Embedding + 联合训练</strong>：减少参数、统一表示，端到端优化。</li>
+        </ul>
+        <p>它的价值在于：用 FM 把“自动特征组合”从人工工工程里解放出来，又能与深度网络的优势互补，在点击率预测、评分预测等任务上均有良好表现。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Guo, H. et al. <em>DeepFM: A Factorization-Machine based Neural Network for CTR Prediction</em>, IJCAI 2017（哈尔滨工业大学与华为联合提出）。</li>
+          <li>王喆《深度学习推荐系统》第 3.7 节“FM 与深度学习模型的结合”，本仓同目录讲义文本。</li>
+          <li>本页图 3.7.2-1 为按该节内容<strong>自绘</strong>的结构示意图。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
