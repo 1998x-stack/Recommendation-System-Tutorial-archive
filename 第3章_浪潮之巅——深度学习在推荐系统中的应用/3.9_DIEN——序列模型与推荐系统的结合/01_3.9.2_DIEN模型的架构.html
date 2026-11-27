@@ -1,61 +1,138 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_3.9.2_DIEN模型的架构</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.9.2 DIEN 模型的架构</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.1rem,5vw,3rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_3.9.2 DIEN模型的架构</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.9 DIEN——序列模型与推荐系统的结合
-Content: 01_3.9.2 DIEN模型的架构
-&quot;&quot;&quot;</p>
-<h3>01_3.9.2 DIEN模型的架构</h3>
-<h4>1. DIEN模型概述</h4>
-<p>DIEN（Deep Interest Evolution Network）模型是阿里巴巴在DIN（Deep Interest Network）模型基础上进行改进的一种深度学习推荐模型。DIEN模型通过引入序列模型，能够更好地模拟和捕捉用户兴趣的动态变化，其整体架构如图3-25所示，包括输入层、Embedding层、连接层、多层全连接神经网络和输出层  。</p>
-<h4>2. DIEN模型的创新点</h4>
-<p>DIEN模型的核心创新在于“兴趣进化网络”，这是模拟用户兴趣动态变化的关键部分。兴趣进化网络分为三层，从下至上依次是：</p>
-<ol>
-<li><strong>行为序列层（Behavior Layer）</strong>：将原始的ID类行为序列转换为Embedding行为序列。</li>
-<li><strong>兴趣抽取层（Interest Extractor Layer）</strong>：通过模拟用户兴趣迁移过程，抽取用户的兴趣向量。</li>
-<li><strong>兴趣进化层（Interest Evolving Layer）</strong>：在兴趣抽取层的基础上加入注意力机制，模拟与当前目标广告相关的兴趣进化过程  。</li>
-</ol>
-<h4>3. 行为序列层</h4>
-<p>行为序列层的主要作用是将用户的原始行为数据（如点击、浏览、购买等）转换为对应的Embedding向量序列。通过Embedding层，将高维稀疏的ID类特征转换为低维稠密的向量表示，便于后续神经网络处理 。</p>
-<h4>4. 兴趣抽取层</h4>
-<p>兴趣抽取层采用GRU（Gated Recurrent Unit）网络来模拟用户的兴趣迁移过程。GRU网络通过门控机制控制信息流动，能够有效解决传统RNN中的梯度消失问题，并具有更快的训练速度。具体来说，GRU通过更新门（Update Gate）和重置门（Reset Gate）来决定当前时刻的隐藏状态向量如何更新，从而抽取出用户的兴趣状态向量  。</p>
-<h4>5. 兴趣进化层</h4>
-<p>兴趣进化层在兴趣抽取层的基础上引入了注意力机制，通过AUGRU（GRU with Attentional Update Gate）结构来模拟与当前目标广告相关的兴趣进化过程。AUGRU在GRU的更新门上加入了注意力得分，使得每个时刻的隐藏状态更新更加灵活和准确。具体来说，AUGRU的注意力得分生成过程与DIN模型中的注意力激活单元类似，通过计算当前兴趣状态向量与目标广告向量的匹配得分来生成注意力权重  。</p>
-<h4>6. DIEN模型的优势</h4>
-<p>相比传统的推荐模型，DIEN模型具有以下优势：</p>
-<ol>
-<li><strong>捕捉用户兴趣的动态变化</strong>：通过序列模型和注意力机制，DIEN模型能够更好地捕捉用户兴趣的变化，提高推荐的准确性和相关性。</li>
-<li><strong>增强模型的表达能力</strong>：引入GRU和AUGRU结构，使得模型在处理用户行为序列时具有更强的表达能力。</li>
-<li><strong>提高模型的训练效率</strong>：GRU相对于LSTM参数更少，训练速度更快，同时AUGRU的注意力机制使得模型能够更加高效地更新隐藏状态  。</li>
-</ol>
-<h4>7. 总结</h4>
-<p>DIEN模型通过引入序列模型和注意力机制，实现了对用户兴趣动态变化的模拟和捕捉。其创新点在于兴趣进化网络的设计，包括行为序列层、兴趣抽取层和兴趣进化层。这一系列改进使得DIEN模型在推荐系统中具有更强的表达能力和预测精度，为推荐系统的发展提供了新的思路和方法  。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">兴趣进化网络三层</a>
+      <a href="#behavior">行为序列层</a>
+      <a href="#extractor">兴趣抽取层：GRU</a>
+      <a href="#evolving">兴趣进化层：AUGRU</a>
+      <a href="#output">输出与优势</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>DIEN 模型的架构</h1>
+        <p class="dek">DIN 只看用户历史行为与候选广告的相关性，却不追踪兴趣本身如何随时间演变。DIEN（Deep Interest Evolution Network）由阿里巴巴提出，在 DIN 基础上加入序列模型：先用 GRU 从行为序列中抽取兴趣状态，再用带注意力的 AUGRU 模拟与当前广告相关的兴趣进化。它把“用户兴趣”从一张静态快照，变成一个会演化的过程。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">兴趣进化网络三层</h2>
+        <p>DIEN 的整体架构沿用了 DIN 的骨架：输入层、Embedding 层、连接层、多层全连接与输出层。它真正的创新是一个叫<strong>兴趣进化网络</strong>的模块，模拟用户兴趣的动态变化。</p>
+        <p>这个模块自下而上有三层：<strong>行为序列层</strong>把原始 ID 行为序列变成 Embedding 序列；<strong>兴趣抽取层</strong>用 GRU 模拟兴趣迁移、抽出兴趣状态；<strong>兴趣进化层</strong>在兴趣抽取层基础上加入注意力，模拟与当前目标广告相关的兴趣进化。</p>
+        <figure>
+          <svg viewBox="0 0 900 520" role="img" aria-labelledby="fig392-t fig392-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig392-t">DIEN 的兴趣进化网络三层结构</title>
+            <desc id="fig392-d">行为 ID 序列经行为序列层变成 Embedding 序列；兴趣抽取层用 GRU 逐个时刻抽取兴趣状态；兴趣进化层用 AUGRU 结合目标广告的注意力权重演化兴趣；结果与其他特征拼接后送入全连接层和输出层。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="28" font-size="17" font-weight="700" fill="#203035">行为序列 → GRU 抽取兴趣 → AUGRU 进化兴趣 → MLP</text>
+              <rect x="60" y="50" width="780" height="50" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="80" font-size="12" fill="#203035" text-anchor="middle">原始行为序列（点击 / 浏览 / 购买 的 ID 序列）</text>
+              <rect x="60" y="120" width="780" height="56" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.5"/>
+              <text x="450" y="143" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">① 行为序列层</text>
+              <text x="450" y="164" font-size="12" fill="#53676d" text-anchor="middle">高维稀疏 ID → 低维稠密 Embedding 行为序列</text>
+              <path d="M450 176 V210" stroke="#d06d4d" stroke-width="2"/>
+              <rect x="60" y="210" width="780" height="70" rx="8" fill="#ece7fb" stroke="#7461ba" stroke-width="1.5"/>
+              <text x="450" y="234" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">② 兴趣抽取层：GRU</text>
+              <text x="450" y="256" font-size="12" fill="#53676d" text-anchor="middle">更新门 / 重置门控制信息流动，逐个时刻抽出兴趣状态 h_t</text>
+              <path d="M450 280 V314" stroke="#7461ba" stroke-width="2"/>
+              <rect x="60" y="314" width="780" height="78" rx="8" fill="#e8f1ee" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="338" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">③ 兴趣进化层：AUGRU</text>
+              <text x="450" y="360" font-size="12" fill="#53676d" text-anchor="middle">在 GRU 更新门上乘注意力得分 a_t</text>
+              <text x="450" y="380" font-size="12" fill="#53676d" text-anchor="middle">a_t = f(兴趣状态 h_t, 目标广告)——与当前广告相关的兴趣被强化</text>
+              <rect x="690" y="326" width="130" height="54" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.4"/>
+              <text x="755" y="350" font-size="11" fill="#203035" text-anchor="middle">目标广告</text>
+              <text x="755" y="368" font-size="11" fill="#53676d" text-anchor="middle">Embedding</text>
+              <path d="M690 353 H840" stroke="#d06d4d" stroke-width="1.6" stroke-dasharray="5 4" transform="translate(-840,0)"/>
+              <path d="M450 392 V424" stroke="#147f80" stroke-width="2"/>
+              <rect x="290" y="424" width="320" height="58" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="1.8"/>
+              <text x="450" y="448" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">与其他特征拼接 → 多层全连接</text>
+              <text x="450" y="468" font-size="12" fill="#53676d" text-anchor="middle">输出层：点击概率</text>
+            </g>
+          </svg>
+          <figcaption>图 3.9.2-1（自绘）：DIEN 的兴趣进化网络三层。行为序列层把 ID 行为变成 Embedding 序列；兴趣抽取层用 GRU 抽出兴趣状态；兴趣进化层用 AUGRU 把目标广告的注意力得分乘进更新门，让与当前广告相关的兴趣更强、无关的更弱。进化结果与其他特征拼接后经全连接层和输出层预测。图中层数、维度与单元细节为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 3.9.2 节“DIEN 模型的架构”的结构化讲解，三层划分与 GRU/AUGRU 说明整理自本仓同目录讲义；图 3.9.2-1 为按该节内容自绘，层数与维度仅作示意。</div>
+      </section>
+      <section id="behavior" aria-labelledby="behavior-h">
+        <h2 id="behavior-h">行为序列层：把 ID 序列变成向量序列</h2>
+        <p>推荐的原始输入是用户的 ID 类行为序列，如点击、浏览、购买的物品 ID。它们是高维稀疏的离散符号，神经网络难以直接处理。</p>
+        <p>行为序列层用 Embedding 把这些 ID 映射为低维稠密的向量，得到一条<strong>Embedding 行为序列</strong>。这一步与 DIN 共享同一套思路：行为序列中每个时刻对应一个向量，为后续的序列模型提供按时间排列的输入。</p>
+      </section>
+      <section id="extractor" aria-labelledby="extractor-h">
+        <h2 id="extractor-h">兴趣抽取层：用 GRU 模拟兴趣迁移</h2>
+        <p>兴趣抽取层采用 <strong>GRU</strong>（Gated Recurrent Unit，门控循环单元）来模拟用户兴趣的迁移过程。GRU 通过门控机制控制信息流动：重置门决定“保留多少历史信息”，更新门决定“当前候选状态写入多少”。相比普通 RNN，门控能有效缓解梯度消失；相比 LSTM，GRU 参数更少、训练更快。</p>
+        <p>逐时刻地，GRU 根据当前行为向量与上一时刻的兴趣状态，算出新的兴趣状态向量 h<sub>t</sub>。整个序列跑完后，就得到一串“兴趣状态”轨迹，它刻画了用户逐时逐刻的兴趣表示。</p>
+      </section>
+      <section id="evolving" aria-labelledby="evolving-h">
+        <h2 id="evolving-h">兴趣进化层：AUGRU 与注意力</h2>
+        <p>光有兴趣状态还不够——推荐面对的是具体的目标广告。不同广告下，同一段历史行为里相关的部分不同。兴趣进化层在兴趣抽取层基础上引入注意力，用 <strong>AUGRU</strong>（GRU with Attentional Update Gate，带注意力更新门的 GRU）模拟与当前目标广告相关的兴趣进化。</p>
+        <p>AUGRU 的关键是把注意力得分乘到 GRU 的更新门上：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="AUGRU 的注意力更新门公式，可横向滚动">
+            <math display="block" aria-label="带上标的更新门 u tilde_t 等于注意力得分 a_t 乘以原更新门 u_t"><mrow><msub><mover><mi>u</mi><mo>~</mo></mover><mi>t</mi></msub><mo>=</mo><msub><mi>a</mi><mi>t</mi></msub><mo>&#x22C5;</mo><msub><mi>u</mi><mi>t</mi></msub></mrow></math>
+          </div>
+        </div>
+        <p>其中 a<sub>t</sub> 是注意力得分，它由当前兴趣状态 h<sub>t</sub> 与目标广告向量的匹配程度算出；u<sub>t</sub> 是 GRU 原本的更新门。a<sub>t</sub> 越大，对应时刻的兴趣状态越多地被写入。这样，与当前广告相关的兴趣被放大、无关的被压制，兴趣状态的更新随目标而变化。</p>
+      </section>
+      <section id="output" aria-labelledby="output-h">
+        <h2 id="output-h">输出与优势</h2>
+        <p>兴趣进化网络输出的兴趣表示，与其他特征（用户、广告、上下文）拼接后，送入多层全连接，最后由输出层给出点击概率。</p>
+        <p>相比传统推荐模型，DIEN 的优势在于：</p>
+        <ul>
+          <li><strong>捕捉兴趣的动态变化</strong>：用序列模型加注意力追踪兴趣随时间的演变，提高推荐的准确性与相关性。</li>
+          <li><strong>更强的表达能力</strong>：GRU 与 AUGRU 使模型在处理行为序列时能表达更复杂的时序模式。</li>
+          <li><strong>训练效率较高</strong>：GRU 比 LSTM 参数更少、训练更快；AUGRU 的注意力机制让隐藏状态更新更高效。</li>
+        </ul>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>DIEN 可以概括为“在 DIN 上再加一个兴趣进化网络”：行为序列层把 ID 序列变成 Embedding 序列；兴趣抽取层用 GRU 抽出兴趣状态；兴趣进化层用 AUGRU 把目标广告的注意力得分乘进更新门，让兴趣朝与当前广告相关的方向演化。它把“用户兴趣”从一张静态快照，变成一个随时间与目标变化的动态过程。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Zhou, G. et al. <em>Deep Interest Evolution Network for Click-Through Rate Prediction</em>, AAAI 2019（阿里巴巴提出，在 DIN 基础上引入 GRU/AUGRU）。</li>
+          <li>王喆《深度学习推荐系统》第 3.9 节“DIEN——序列模型与推荐系统的结合”，本仓同目录讲义文本。</li>
+          <li>本页图 3.9.2-1 为按该节内容<strong>自绘</strong>的结构示意图。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
