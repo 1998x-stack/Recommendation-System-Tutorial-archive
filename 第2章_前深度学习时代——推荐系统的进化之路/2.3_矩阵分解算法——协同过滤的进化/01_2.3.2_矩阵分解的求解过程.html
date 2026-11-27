@@ -1,117 +1,174 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_2.3.2_矩阵分解的求解过程</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>2.3.2 矩阵分解的求解过程</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_2.3.2 矩阵分解的求解过程</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第2章 前深度学习时代——推荐系统的进化之路/2.3 矩阵分解算法——协同过滤的进化
-Content: 01_2.3.2 矩阵分解的求解过程
-&quot;&quot;&quot;</p>
-<h3>2.3.2 矩阵分解的求解过程</h3>
-<h4>概述</h4>
-<p>矩阵分解是一种将高维的用户-物品评分矩阵分解为两个低维矩阵的技术，通过提取用户和物品的潜在特征，从而实现推荐。常见的矩阵分解方法包括特征值分解（Eigen Decomposition）、奇异值分解（Singular Value Decomposition, SVD）和梯度下降（Gradient Descent）。</p>
-<h4>特征值分解（Eigen Decomposition）</h4>
-<p>特征值分解主要用于方阵的分解，不适用于用户-物品矩阵的分解。在推荐系统中很少使用，因此不作详细介绍。</p>
-<h4>奇异值分解（Singular Value Decomposition, SVD）</h4>
-<p>奇异值分解是一种经典的矩阵分解方法，通过将矩阵分解为三个矩阵的乘积，从而提取潜在特征。具体过程如下：</p>
-<ol>
-<li>
-<p><strong>基本原理</strong>：
-假设矩阵 $ M $ 是一个 $ m \times n $ 的矩阵，则存在一个分解 $ M = U \Sigma V^T $，其中：</p>
-<ul>
-<li>$ U $ 是 $ m \times m $ 的正交矩阵。</li>
-<li>$ \Sigma $ 是 $ m \times n $ 的对角矩阵，其对角元素为奇异值。</li>
-<li>$ V $ 是 $ n \times n $ 的正交矩阵。</li>
-</ul>
-</li>
-<li>
-<p><strong>低秩近似</strong>：
-取对角矩阵 $ \Sigma $ 中较大的 $ k $ 个元素作为隐含特征，删除 $ \Sigma $ 的其他维度及 $ U $ 和 $ V $ 中对应的维度，矩阵 $ M $ 被分解为 $ M \approx U_{m \times k} \Sigma_{k \times k} V_{k \times n}^T $，完成隐向量维度为 $ k $ 的矩阵分解。</p>
-</li>
-<li>
-<p><strong>缺陷</strong>：</p>
-<ul>
-<li>奇异值分解要求原始的共现矩阵是稠密的，而互联网场景下大部分用户的行为历史非常少，用户-物品的共现矩阵非常稀疏。</li>
-<li>传统奇异值分解的计算复杂度达到 $ O(mn^2) $，对于大规模数据（如商品数量上百万、用户数量上千万）几乎不可接受。</li>
-</ul>
-</li>
-</ol>
-<h4>梯度下降（Gradient Descent）</h4>
-<p>梯度下降法是一种常用的优化算法，通过迭代更新用户和物品的特征矩阵来最小化误差。其步骤如下：</p>
-<ol>
-<li>
-<p><strong>确定目标函数</strong>：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>min</mi><mrow><mi>P</mi><mo separator="true">,</mo><mi>Q</mi></mrow></msub><msub><mo>∑</mo><mrow><mo>(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo>)</mo><mo>∈</mo><mi>K</mi></mrow></msub><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><msup><mo>)</mo><mn>2</mn></msup><mo>+</mo><mi>λ</mi><mo>(</mo><mi mathvariant="normal">∥</mi><mi>P</mi><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>+</mo><mi mathvariant="normal">∥</mi><mi>Q</mi><msup><mi mathvariant="normal">∥</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">\min_{P, Q} \sum_{(i,j) \in K} (R_{ij} - P_i Q_j^T)^2 + \lambda (\|P\|^2 + \|Q\|^2) 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.050005em;"></span><span class="strut bottom" style="height:2.5660100000000003em;vertical-align:-1.516005em;"></span><span class="base displaystyle textstyle uncramped"><span class="mop op-limits"><span class="vlist"><span style="top:0.644331em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mpunct">,</span><span class="mord mathit">Q</span></span></span></span><span style="top:2.7755575615628914e-17em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="mop">min</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mop op-limits"><span class="vlist"><span style="top:1.241005em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mopen">(</span><span class="mord mathit">i</span><span class="mpunct">,</span><span class="mord mathit" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mrel">∈</span><span class="mord mathit" style="margin-right:0.07153em;">K</span></span></span></span><span style="top:-0.000005000000000032756em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.00773em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.24700000000000003em;margin-left:0em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span style="top:-0.41300000000000003em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose"><span class="mclose">)</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathit">λ</span><span class="mopen">(</span><span class="mord mathrm">∥</span><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathrm">∥</span><span class="mord mathit">Q</span><span class="mord"><span class="mord mathrm">∥</span><span class="vlist"><span style="top:-0.413em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathrm">2</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>其中：</p>
-<ul>
-<li>$ K $ 是已知评分的集合。</li>
-<li>$ \lambda $ 是正则化参数，用于防止过拟合。</li>
-</ul>
-</li>
-<li>
-<p><strong>计算梯度</strong>：
-对目标函数分别对 $ P $ 和 $ Q $ 求偏导数，得到梯度。</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>P</mi><mi>i</mi></msub></mrow></mfrac><mo>=</mo><mo>−</mo><mn>2</mn><msub><mo>∑</mo><mrow><mi>j</mi><mo>∈</mo><mi>K</mi></mrow></msub><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo><msub><mi>Q</mi><mi>j</mi></msub><mo>+</mo><mn>2</mn><mi>λ</mi><msub><mi>P</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial P_i} = -2 \sum_{j \in K} (R_{ij} - P_i Q_j^T) Q_j + 2 \lambda P_i 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.37144em;"></span><span class="strut bottom" style="height:2.8018840000000003em;vertical-align:-1.430444em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord mathit">L</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span><span class="mrel">=</span><span class="mord">−</span><span class="mord mathrm">2</span><span class="mop op-limits"><span class="vlist"><span style="top:1.194336em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span><span class="mrel">∈</span><span class="mord mathit" style="margin-right:0.07153em;">K</span></span></span></span><span style="top:-0.000005000000000032756em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.00773em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.24700000000000003em;margin-left:0em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span style="top:-0.41300000000000003em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathrm">2</span><span class="mord mathit">λ</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>Q</mi><mi>j</mi></msub></mrow></mfrac><mo>=</mo><mo>−</mo><mn>2</mn><msub><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mi>K</mi></mrow></msub><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo><msub><mi>P</mi><mi>i</mi></msub><mo>+</mo><mn>2</mn><mi>λ</mi><msub><mi>Q</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial Q_j} = -2 \sum_{i \in K} (R_{ij} - P_i Q_j^T) P_i + 2 \lambda Q_j 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.37144em;"></span><span class="strut bottom" style="height:2.693146em;vertical-align:-1.321706em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.6859999999999999em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord mathit">L</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span><span class="mrel">=</span><span class="mord">−</span><span class="mord mathrm">2</span><span class="mop op-limits"><span class="vlist"><span style="top:1.194336em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mrel">∈</span><span class="mord mathit" style="margin-right:0.07153em;">K</span></span></span></span><span style="top:-0.000005000000000032756em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.00773em;">R</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.00773em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.24700000000000003em;margin-left:0em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span style="top:-0.41300000000000003em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord mathit" style="margin-right:0.13889em;">T</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">+</span><span class="mord mathrm">2</span><span class="mord mathit">λ</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span></span></p>
-</li>
-<li>
-<p><strong>更新参数</strong>：
-使用梯度下降法更新参数 $ P $ 和 $ Q $：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>P</mi><mi>i</mi></msub><mo>:</mo><mo>=</mo><msub><mi>P</mi><mi>i</mi></msub><mo>−</mo><mi>γ</mi><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>P</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">P_i := P_i - \gamma \frac{\partial L}{\partial P_i} 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.37144em;"></span><span class="strut bottom" style="height:2.20744em;vertical-align:-0.8360000000000001em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mrel">:</span><span class="mrel">=</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord mathit" style="margin-right:0.05556em;">γ</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.686em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathit" style="margin-right:0.13889em;">P</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.13889em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord mathit">L</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi>Q</mi><mi>j</mi></msub><mo>:</mo><mo>=</mo><msub><mi>Q</mi><mi>j</mi></msub><mo>−</mo><mi>γ</mi><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>Q</mi><mi>j</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">Q_j := Q_j - \gamma \frac{\partial L}{\partial Q_j} 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.37144em;"></span><span class="strut bottom" style="height:2.343548em;vertical-align:-0.972108em;"></span><span class="base displaystyle textstyle uncramped"><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mrel">:</span><span class="mrel">=</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">−</span><span class="mord mathit" style="margin-right:0.05556em;">γ</span><span class="mord reset-textstyle displaystyle textstyle uncramped"><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span><span class="mfrac"><span class="vlist"><span style="top:0.6859999999999999em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle cramped"><span class="mord textstyle cramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord"><span class="mord mathit">Q</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span><span style="top:-0.22999999999999998em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped frac-line"></span></span><span style="top:-0.677em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathrm" style="margin-right:0.05556em;">∂</span><span class="mord mathit">L</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="sizing reset-size5 size5 reset-textstyle textstyle uncramped nulldelimiter"></span></span></span></span></span></span></p>
-<p>其中 $ \gamma $ 为学习率。</p>
-</li>
-<li>
-<p><strong>迭代停止条件</strong>：
-当迭代次数超过上限或损失低于阈值时，停止迭代。</p>
-</li>
-</ol>
-<h4>矩阵分解的优势</h4>
-<ol>
-<li><strong>处理数据稀疏性</strong>：通过提取潜在特征，可以填补评分矩阵中的空缺，减少数据稀疏性的影响。</li>
-<li><strong>提高推荐准确性和泛化能力</strong>：提取用户和物品的潜在特征，能够更准确地捕捉用户的兴趣偏好。</li>
-<li><strong>模型可解释性</strong>：特别是非负矩阵分解（NMF），由于其非负约束，使得分解结果更具有可解释性和物理意义。</li>
-</ol>
-<h4>矩阵分解的劣势</h4>
-<ol>
-<li><strong>计算复杂度高</strong>：计算过程涉及大量的矩阵运算和迭代优化，计算复杂度较高。</li>
-<li><strong>对缺失数据敏感</strong>：对缺失数据较为敏感，缺失数据过多可能影响分解结果的准确性。</li>
-<li><strong>参数调优困难</strong>：需要调整多个参数，如潜在特征的维度 $ k $、正则化参数 $ \lambda $ 等，这些参数的选择对结果有较大影响，需要进行大量实验来确定最佳参数。</li>
-</ol>
-<h4>具体案例</h4>
-<ul>
-<li><strong>Netflix Prize</strong>：参赛者基于用户的历史评分数据，使用矩阵分解技术预测用户对未评分电影的评分，取得了显著的效果。</li>
-<li><strong>Amazon商品推荐</strong>：通过分析用户的购买历史数据，发现用户和商品的潜在特征，进行个性化推荐，提升用户购物体验和满意度。</li>
-</ul>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#routes">两条求解路线</a>
+      <a href="#svd">SVD 与低秩近似</a>
+      <a href="#gd">梯度下降求解</a>
+      <a href="#tradeoff">优劣势</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>矩阵分解的求解过程</h1>
+        <p class="dek">上一节问“为什么分解”，本节问“怎么分解”。理论上可用奇异值分解（SVD）一步得到低秩近似，但真实评分矩阵极其稀疏、规模又大，于是工程上改用梯度下降，把用户、物品的隐向量当作可训练参数迭代优化。</p>
+      </header>
+      <section id="routes" aria-labelledby="routes-h">
+        <h2 id="routes-h">两条求解路线</h2>
+        <p>矩阵分解把高维的用户-物品评分矩阵分解为两个低维矩阵，从中提取用户与物品的<strong>隐向量（潜在特征）</strong>。常见方法里，特征值分解只适用于方阵，几乎不用于推荐；真正有两条主线：</p>
+        <ul>
+          <li><strong>SVD（奇异值分解）</strong>：把矩阵精确分解为三个矩阵之积，再截断成低秩近似——数学上优雅，但对稠密矩阵友好。</li>
+          <li><strong>梯度下降</strong>：不要求精确分解，直接把用户、物品隐向量当参数，用已观测评分定义损失并迭代下降。</li>
+        </ul>
+        <figure>
+          <svg viewBox="0 0 900 260" role="img" aria-labelledby="fig232-t fig232-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig232-t">SVD 与梯度下降两条求解路线</title>
+            <desc id="fig232-d">上支：评分矩阵 M 经 SVD 分解为 U、Σ、V转置，截断取前 k 个奇异值得低秩近似。下支：初始化 P、Q 隐向量，计算梯度并迭代更新，直到损失收敛。</desc>
+            <rect width="900" height="260" fill="#fff"/>
+            <g font-family="system-ui,-apple-system,PingFang SC,sans-serif">
+              <rect x="40" y="45" width="180" height="70" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="2"/>
+              <text x="130" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#203035">评分矩阵 M</text>
+              <text x="130" y="100" text-anchor="middle" font-size="12" fill="#53676d">m×n，极稀疏</text>
+              <text x="320" y="85" text-anchor="middle" font-size="13" fill="#53676d">SVD</text>
+              <path d="M225 80 L300 80" stroke="#147f80" stroke-width="2" marker-end="url(#ar232)"/>
+              <rect x="340" y="45" width="220" height="70" rx="10" fill="#f3f9f6" stroke="#147f80"/>
+              <text x="450" y="72" text-anchor="middle" font-size="13" fill="#203035">M = U Σ Vᵀ</text>
+              <text x="450" y="98" text-anchor="middle" font-size="12" fill="#53676d">截断：取前 k 个奇异值得低秩近似</text>
+              <rect x="600" y="45" width="260" height="70" rx="10" fill="#f6f4fc" stroke="#7461ba"/>
+              <text x="730" y="72" text-anchor="middle" font-size="13" fill="#203035">M ≈ U(m×k) Σ(k×k) V(k×n)ᵀ</text>
+              <text x="730" y="98" text-anchor="middle" font-size="12" fill="#53676d">隐向量维度 = k</text>
+              <rect x="40" y="155" width="180" height="70" rx="10" fill="#fff7f2" stroke="#d06d4d" stroke-width="2"/>
+              <text x="130" y="188" text-anchor="middle" font-size="14" font-weight="700" fill="#203035">初始化 P、Q</text>
+              <text x="130" y="210" text-anchor="middle" font-size="12" fill="#53676d">随机小值隐向量</text>
+              <path d="M225 190 L300 190" stroke="#d06d4d" stroke-width="2" marker-end="url(#ar232)"/>
+              <text x="320" y="195" text-anchor="middle" font-size="13" fill="#53676d">迭代</text>
+              <rect x="340" y="155" width="220" height="70" rx="10" fill="#fff7f2" stroke="#d06d4d"/>
+              <text x="450" y="182" text-anchor="middle" font-size="13" fill="#203035">计算梯度 ∂L/∂P、∂L/∂Q</text>
+              <text x="450" y="208" text-anchor="middle" font-size="12" fill="#53676d">沿负梯度方向更新</text>
+              <rect x="600" y="155" width="260" height="70" rx="10" fill="#f6f4fc" stroke="#7461ba"/>
+              <text x="730" y="182" text-anchor="middle" font-size="13" fill="#203035">损失低于阈值 / 达迭代上限</text>
+              <text x="730" y="208" text-anchor="middle" font-size="12" fill="#53676d">停，输出 P、Q</text>
+              <defs><marker id="ar232" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#203035"/></marker></defs>
+            </g>
+          </svg>
+          <figcaption>图 2.3.2-1：SVD 一步截断得到低秩近似；梯度下降则把隐向量当参数迭代优化。前者不适合稀疏矩阵，后者是工程主流。（自绘，按本仓同目录讲义整理。）</figcaption>
+        </figure>
+      </section>
+      <section id="svd" aria-labelledby="svd-h">
+        <h2 id="svd-h">SVD 与低秩近似</h2>
+        <p>奇异值分解把一个 m×n 的矩阵 M 拆成三个矩阵之积：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="奇异值分解公式，可横向滚动">
+            <math display="block" aria-label="矩阵 M 等于正交矩阵 U 乘以对角矩阵 Sigma 再乘以 V 的转置"><mrow><mi>M</mi><mo>=</mo><mi>U</mi><mi>&#x03A3;</mi><msup><mi>V</mi><mi>T</mi></msup></mrow></math>
+          </div>
+        </div>
+        <p>其中 U 是 m×m 的正交矩阵，&#x03A3; 是 m×n 的对角矩阵（对角元素为<strong>奇异值</strong>），V 是 n×n 的正交矩阵。</p>
+        <p><strong>低秩近似</strong>：只保留 &#x03A3; 中最大的 k 个奇异值，删去其余维度及 U、V 中对应维度，就得到隐向量维度为 k 的近似分解：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="低秩近似公式，可横向滚动">
+            <math display="block" aria-label="M 约等于 U 取前 m 行 k 列、Sigma 取前 k 阶、V 的转置取前 k 行的乘积"><mrow><mi>M</mi><mo>&#x2248;</mo><msub><mi>U</mi><mrow><mi>m</mi><mo>&#x00D7;</mo><mi>k</mi></mrow></msub><msub><mi>&#x03A3;</mi><mrow><mi>k</mi><mo>&#x00D7;</mo><mi>k</mi></mrow></msub><msubsup><mi>V</mi><mrow><mi>k</mi><mo>&#x00D7;</mo><mi>n</mi></mrow><mi>T</mi></msubsup></mrow></math>
+          </div>
+        </div>
+        <p class="note">SVD 在真实推荐里有两大障碍：一是它要求<strong>共现矩阵是稠密的</strong>，而互联网场景下用户行为极少、矩阵极稀疏；二是传统 SVD 的计算复杂度高达 <strong>O(mn²)</strong>，面对上百万商品、上千万用户几乎不可接受。这两点正是工程上转向梯度下降的原因。</p>
+      </section>
+      <section id="gd" aria-labelledby="gd-h">
+        <h2 id="gd-h">梯度下降求解</h2>
+        <p>不再追求精确分解，而是把用户隐向量矩阵 P、物品隐向量矩阵 Q 当作待学习参数，用<strong>已观测评分</strong>定义带正则的平方误差，最小化它：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="矩阵分解目标函数，可横向滚动">
+            <math display="block" aria-label="最小化目标函数：对已知评分集合 K 求平方误差之和，加上正则项 lambda 乘以 P 与 Q 的范数平方和"><mrow><munder><mo>min</mo><mrow><mi>P</mi><mo>,</mo><mi>Q</mi></mrow></munder><munder><mo>&#x2211;</mo><mrow><mo>(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>)</mo><mo>&#x2208;</mo><mi>K</mi></mrow></munder><msup><mrow><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>&#x2212;</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x03BB;</mi><mrow><mo>(</mo><msup><mrow><mo>&#x2016;</mo><mi>P</mi><mo>&#x2016;</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo>&#x2016;</mo><mi>Q</mi><mo>&#x2016;</mo></mrow><mn>2</mn></msup><mo>)</mo></mrow></mrow></math>
+          </div>
+        </div>
+        <p>其中 K 是已知评分的集合，λ 是正则化参数（防止过拟合）。P<sub>i</sub> 是用户 i 的隐向量，Q<sub>j</sub> 是物品 j 的隐向量，P<sub>i</sub>Q<sub>j</sub><sup>T</sup> 就是模型对评分 R<sub>ij</sub> 的预测。</p>
+        <h3>计算梯度</h3>
+        <p>对目标函数分别就 P、Q 求偏导，得到两个梯度：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="对 P 的偏导公式，可横向滚动">
+            <math display="block" aria-label="损失 L 对用户隐向量 P_i 的偏导等于负二倍的、对 j 在 K 中的求和：评分误差乘以 Q_j，再加二 lambda 乘 P_i"><mrow><mfrac><mrow><mo>&#x2202;</mo><mi>L</mi></mrow><mrow><mo>&#x2202;</mo><msub><mi>P</mi><mi>i</mi></msub></mrow></mfrac><mo>=</mo><mo>&#x2212;</mo><mn>2</mn><munder><mo>&#x2211;</mo><mrow><mi>j</mi><mo>&#x2208;</mo><mi>K</mi></mrow></munder><mrow><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>&#x2212;</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo></mrow><msub><mi>Q</mi><mi>j</mi></msub><mo>+</mo><mn>2</mn><mi>&#x03BB;</mi><msub><mi>P</mi><mi>i</mi></msub></mrow></math>
+          </div>
+        </div>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="对 Q 的偏导公式，可横向滚动">
+            <math display="block" aria-label="损失 L 对物品隐向量 Q_j 的偏导等于负二倍的、对 i 在 K 中的求和：评分误差乘以 P_i，再加二 lambda 乘 Q_j"><mrow><mfrac><mrow><mo>&#x2202;</mo><mi>L</mi></mrow><mrow><mo>&#x2202;</mo><msub><mi>Q</mi><mi>j</mi></msub></mrow></mfrac><mo>=</mo><mo>&#x2212;</mo><mn>2</mn><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>&#x2208;</mo><mi>K</mi></mrow></munder><mrow><mo>(</mo><msub><mi>R</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>&#x2212;</mo><msub><mi>P</mi><mi>i</mi></msub><msubsup><mi>Q</mi><mi>j</mi><mi>T</mi></msubsup><mo>)</mo></mrow><msub><mi>P</mi><mi>i</mi></msub><mo>+</mo><mn>2</mn><mi>&#x03BB;</mi><msub><mi>Q</mi><mi>j</mi></msub></mrow></math>
+          </div>
+        </div>
+        <h3>更新参数</h3>
+        <p>沿负梯度方向以学习率 γ 更新两个隐向量：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="P 的更新公式，可横向滚动">
+            <math display="block" aria-label="用户隐向量 P_i 更新为 P_i 减去学习率 gamma 乘损失对 P_i 的偏导"><mrow><msub><mi>P</mi><mi>i</mi></msub><mo>:=</mo><msub><mi>P</mi><mi>i</mi></msub><mo>&#x2212;</mo><mi>&#x03B3;</mi><mfrac><mrow><mo>&#x2202;</mo><mi>L</mi></mrow><mrow><mo>&#x2202;</mo><msub><mi>P</mi><mi>i</mi></msub></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="Q 的更新公式，可横向滚动">
+            <math display="block" aria-label="物品隐向量 Q_j 更新为 Q_j 减去学习率 gamma 乘损失对 Q_j 的偏导"><mrow><msub><mi>Q</mi><mi>j</mi></msub><mo>:=</mo><msub><mi>Q</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x03B3;</mi><mfrac><mrow><mo>&#x2202;</mo><mi>L</mi></mrow><mrow><mo>&#x2202;</mo><msub><mi>Q</mi><mi>j</mi></msub></mrow></mfrac></mrow></math>
+          </div>
+        </div>
+        <p>当迭代次数超过上限、或损失低于阈值时停止，输出训练好的 P、Q。</p>
+      <section id="tradeoff" aria-labelledby="tradeoff-h">
+        <h2 id="tradeoff-h">优劣势</h2>
+        <h3>优势</h3>
+        <ul>
+          <li><strong>处理数据稀疏性</strong>：通过低维潜在特征填补评分矩阵的空缺。</li>
+          <li><strong>提升泛化能力</strong>：提取用户与物品的潜在特征，能更准地捕捉兴趣偏好。</li>
+          <li><strong>可解释性（尤其 NMF）</strong>：非负约束使分解结果更具物理意义。</li>
+        </ul>
+        <h3>劣势</h3>
+        <ul>
+          <li><strong>计算复杂度高</strong>：大量矩阵运算与迭代优化，开销大。</li>
+          <li><strong>对缺失数据敏感</strong>：缺失过多可能影响分解结果的准确性。</li>
+          <li><strong>参数调优困难</strong>：隐向量维度 k、正则化系数 λ 等都会显著影响结果，需要大量实验。</li>
+        </ul>
+        <p class="note">值得一提的是，隐向量矩阵 P、Q 正是后面深度学习推荐模型中 <strong>Embedding 层</strong>的雏形——把离散的用户/物品 ID 映射为低维稠密向量。矩阵分解因此常被看作“飞入深度学习”的桥梁。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>SVD 给出优雅的精确分解，却因要求稠密矩阵与 O(mn²) 的复杂度而不适用于真实推荐；工程上改用梯度下降，用已观测评分定义带正则的平方误差，对用户、物品隐向量求偏导并沿负梯度迭代更新。这套“隐向量 + 目标函数 + 梯度更新”的套路，也是后面深度学习推荐模型的共同骨架。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 2.3 节“矩阵分解算法——协同过滤的进化”，本仓同目录讲义文本（`01_2.3.2_矩阵分解的求解过程.md`）。</li>
+          <li>本页图 2.3.2-1 为按该节内容<strong>自绘</strong>；SVD 分解式、低秩近似式、目标函数与梯度公式均逐项对应该节讲义，未引入外部数据集或未标注的指标数值。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
