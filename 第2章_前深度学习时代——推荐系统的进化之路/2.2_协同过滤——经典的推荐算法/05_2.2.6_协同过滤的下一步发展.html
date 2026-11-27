@@ -1,295 +1,123 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>05_2.2.6_协同过滤的下一步发展</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>2.2.6 协同过滤的下一步发展</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+caption{text-align:left;font-size:.83rem;color:var(--subtle);margin-bottom:.5rem}
+th,td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--surface)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}table{font-size:.82rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>05_2.2.6 协同过滤的下一步发展</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第2章 前深度学习时代——推荐系统的进化之路/2.2 协同过滤——经典的推荐算法
-Content: 05_2.2.6 协同过滤的下一步发展
-&quot;&quot;&quot;</p>
-<h3>2.2.6 协同过滤的下一步发展</h3>
-<h4>1. 概述</h4>
-<p>协同过滤（Collaborative Filtering, CF）是一种直观且可解释性很强的推荐算法。其基本原理是通过协同用户的反馈、评价和意见来过滤海量信息，从中筛选出用户可能感兴趣的内容。然而，随着数据量和用户数量的急剧增加，传统的协同过滤方法暴露出了一些缺陷和不足，特别是在处理稀疏矩阵和扩展性方面。为了克服这些问题，协同过滤的发展方向主要集中在改进算法的泛化能力、处理稀疏性问题和结合新兴技术三个方面。</p>
-<h4>2. 协同过滤的主要缺陷</h4>
-<ol>
-<li><strong>泛化能力差</strong>：传统的协同过滤方法无法将某两个物品的相似性信息推广到其他物品的相似性计算上。这意味着，如果某个物品缺乏足够的用户反馈信息，就很难被推荐。</li>
-<li><strong>热门物品的头部效应</strong>：由于热门物品的评价数据丰富，它们往往与许多其他物品产生相似性，从而导致这些热门物品被频繁推荐，而冷门物品则很少被推荐。</li>
-<li><strong>数据稀疏性</strong>：在实际应用中，用户对物品的评价数据往往是稀疏的，导致协同过滤方法难以计算准确的相似度。</li>
-</ol>
-<h4>3. 协同过滤的发展方向</h4>
-<p>为了克服上述缺陷，协同过滤算法的发展方向主要包括以下几个方面：</p>
-<h5>3.1 矩阵分解技术</h5>
-<p>矩阵分解（Matrix Factorization, MF）是一种通过将用户-物品评分矩阵分解为低维矩阵的乘积，从而挖掘用户和物品潜在特征的方法。矩阵分解技术能够有效地处理数据稀疏性问题，提高推荐的准确性和泛化能力。</p>
-<ul>
-<li><strong>奇异值分解（SVD）</strong>：通过将原始评分矩阵分解为三个矩阵的乘积，提取用户和物品的潜在特征向量。</li>
-<li><strong>非负矩阵分解（NMF）</strong>：通过约束矩阵分解的结果为非负值，更加符合实际应用中的评分情况。</li>
-</ul>
-<h5>3.2 基于深度学习的方法</h5>
-<p>深度学习在处理高维数据和非线性关系方面具有显著优势，结合深度学习技术的协同过滤方法可以更好地捕捉用户和物品之间的复杂关系。</p>
-<ul>
-<li><strong>深度矩阵分解（Deep Matrix Factorization）</strong>：将矩阵分解与深度神经网络结合，增强模型的表达能力。</li>
-<li><strong>卷积神经网络（CNN）和递归神经网络（RNN）</strong>：通过处理用户和物品的序列数据，捕捉用户兴趣的动态变化。</li>
-</ul>
-<h5>3.3 图嵌入技术</h5>
-<p>图嵌入（Graph Embedding）技术通过将用户和物品映射到图结构中，从而利用图的拓扑结构信息来改进推荐效果。</p>
-<ul>
-<li><strong>节点嵌入（Node Embedding）</strong>：将用户和物品作为图的节点，通过图嵌入算法（如Node2Vec）生成低维向量表示。</li>
-<li><strong>图卷积网络（GCN）</strong>：通过卷积操作捕捉图结构中的局部信息，提高推荐的准确性。</li>
-</ul>
-<h5>3.4 混合推荐系统</h5>
-<p>混合推荐系统通过结合多种推荐算法的优势，进一步提升推荐效果和用户满意度。</p>
-<ul>
-<li><strong>协同过滤与内容推荐结合</strong>：结合用户和物品的内容信息（如用户个人资料、物品属性）进行推荐。</li>
-<li><strong>基于规则与基于模型结合</strong>：结合业务规则和数据驱动的模型，生成更符合实际需求的推荐结果。</li>
-</ul>
-<h4>4. 具体案例分析</h4>
-<p>为了更好地理解协同过滤的发展方向，以下是两个具体案例分析：</p>
-<h5>4.1 Netflix的深度学习推荐系统</h5>
-<p>Netflix通过结合矩阵分解技术和深度学习方法，构建了高效的推荐系统。通过利用用户观看历史和评分数据，结合神经网络提取用户和物品的潜在特征，从而生成个性化的推荐列表。</p>
-<h5>4.2 Amazon的商品推荐系统</h5>
-<p>Amazon利用基于物品的协同过滤方法，结合商品的属性信息和用户的购买历史，构建了精准的推荐系统。通过处理大规模的用户行为数据，Amazon能够实时生成个性化的商品推荐，提升用户购物体验。</p>
-<h4>5. 结论</h4>
-<p>协同过滤算法在推荐系统中具有重要地位，但其传统方法存在一些不足。通过引入矩阵分解、深度学习、图嵌入和混合推荐系统等新技术，协同过滤算法在处理数据稀疏性、提高泛化能力和扩展性方面取得了显著进展。未来，随着数据规模和复杂度的增加，协同过滤算法将继续发展，进一步提升推荐系统的性能和用户体验。</p>
-<hr>
-<h3>协同过滤的发展方向详细对比表</h3>
-<table>
-<thead>
-<tr>
-<th><strong>发展方向</strong></th>
-<th><strong>概述</strong></th>
-<th><strong>优势</strong></th>
-<th><strong>劣势</strong></th>
-<th><strong>应用场景</strong></th>
-<th><strong>典型技术/方法</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>矩阵分解技术</strong></td>
-<td>将用户-物品评分矩阵分解为低维矩阵的乘积，提取潜在特征</td>
-<td>1. 有效处理数据稀疏性&lt;br&gt;2. 提高推荐准确性和泛化能力</td>
-<td>1. 模型复杂度高&lt;br&gt;2. 需要大量计算资源</td>
-<td>大规模推荐系统、电影推荐、音乐推荐</td>
-<td>奇异值分解（SVD）、非负矩阵分解（NMF）</td>
-</tr>
-<tr>
-<td><strong>基于深度学习的方法</strong></td>
-<td>利用深度学习模型处理高维数据和非线性关系，增强模型的表达能力</td>
-<td>1. 捕捉复杂关系&lt;br&gt;2. 处理动态数据&lt;br&gt;3. 适应性强</td>
-<td>1. 训练时间长&lt;br&gt;2. 需要大量训练数据&lt;br&gt;3. 模型解释性差</td>
-<td>视频推荐、广告推荐、个性化内容推荐</td>
-<td>深度矩阵分解、卷积神经网络（CNN）、递归神经网络（RNN）</td>
-</tr>
-<tr>
-<td><strong>图嵌入技术</strong></td>
-<td>将用户和物品映射到图结构中，利用图的拓扑结构信息改进推荐效果</td>
-<td>1. 利用图结构信息&lt;br&gt;2. 提高推荐准确性&lt;br&gt;3. 捕捉复杂关系</td>
-<td>1. 图构建复杂&lt;br&gt;2. 计算复杂度高&lt;br&gt;3. 数据处理要求高</td>
-<td>社交网络推荐、知识图谱推荐、复杂网络分析</td>
-<td>节点嵌入（Node Embedding）、图卷积网络（GCN）</td>
-</tr>
-<tr>
-<td><strong>混合推荐系统</strong></td>
-<td>结合多种推荐算法的优势，提升推荐效果和用户满意度</td>
-<td>1. 综合多种算法优势&lt;br&gt;2. 提高推荐准确性&lt;br&gt;3. 适用性广</td>
-<td>1. 模型复杂度高&lt;br&gt;2. 实现难度大&lt;br&gt;3. 需要调优多个模型</td>
-<td>电商推荐、新闻推荐、综合内容推荐</td>
-<td>协同过滤与内容推荐结合、基于规则与基于模型结合</td>
-</tr>
-<tr>
-<td><strong>强化学习推荐</strong></td>
-<td>利用强化学习算法动态调整推荐策略，最大化长期用户满意度</td>
-<td>1. 动态调整策略&lt;br&gt;2. 考虑长期效益&lt;br&gt;3. 提高用户粘性</td>
-<td>1. 模型训练复杂&lt;br&gt;2. 需要大量互动数据&lt;br&gt;3. 模型解释性差</td>
-<td>实时推荐、游戏推荐、广告投放</td>
-<td>深度Q网络（DQN）、策略梯度算法（Policy Gradient）</td>
-</tr>
-<tr>
-<td><strong>跨领域推荐</strong></td>
-<td>利用用户在不同领域的行为数据进行推荐，发现用户潜在兴趣</td>
-<td>1. 利用多领域数据&lt;br&gt;2. 发现潜在兴趣&lt;br&gt;3. 提高推荐覆盖面</td>
-<td>1. 数据整合复杂&lt;br&gt;2. 跨领域数据稀疏性&lt;br&gt;3. 领域间差异大</td>
-<td>综合平台推荐、跨领域内容推荐</td>
-<td>矩阵分解结合跨领域特征、跨领域图嵌入</td>
-</tr>
-<tr>
-<td><strong>多模态推荐</strong></td>
-<td>结合多种数据模态（文本、图像、音频等）进行推荐，增强推荐的多样性和准确性</td>
-<td>1. 综合多模态信息&lt;br&gt;2. 提高推荐多样性&lt;br&gt;3. 处理不同数据类型</td>
-<td>1. 数据处理复杂&lt;br&gt;2. 模型训练难度大&lt;br&gt;3. 需要多模态数据</td>
-<td>视频推荐、音频推荐、图文推荐</td>
-<td>多模态深度学习模型、联合嵌入模型</td>
-</tr>
-</tbody>
-</table>
-<h3>详细解释</h3>
-<h4>矩阵分解技术</h4>
-<ol>
-<li><strong>概述</strong>：将用户-物品评分矩阵分解为两个低维矩阵的乘积，提取用户和物品的潜在特征向量。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>有效处理数据稀疏性</strong>：通过低维度特征向量的学习，填补评分矩阵中的空缺，减少数据稀疏性的影响。</li>
-<li><strong>提高推荐准确性和泛化能力</strong>：提取用户和物品的潜在特征，捕捉隐藏的兴趣模式，提升推荐的准确性和泛化能力。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>模型复杂度高</strong>：矩阵分解模型涉及大量参数，训练过程复杂，计算开销大。</li>
-<li><strong>需要大量计算资源</strong>：大规模数据集上的矩阵分解需要强大的计算能力和存储资源。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：大规模推荐系统、电影推荐、音乐推荐等。</li>
-<li><strong>典型技术/方法</strong>：奇异值分解（SVD）、非负矩阵分解（NMF）等。</li>
-</ol>
-<h4>基于深度学习的方法</h4>
-<ol>
-<li><strong>概述</strong>：利用深度学习模型处理高维数据和非线性关系，增强模型的表达能力，捕捉复杂的用户和物品关系。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>捕捉复杂关系</strong>：深度学习模型能够处理复杂的非线性关系，提取丰富的特征表示。</li>
-<li><strong>处理动态数据</strong>：适用于处理时序数据和用户行为序列，捕捉用户兴趣的动态变化。</li>
-<li><strong>适应性强</strong>：能够处理多种类型的数据，包括文本、图像、音频等。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>训练时间长</strong>：深度学习模型训练需要大量数据和时间，训练过程复杂。</li>
-<li><strong>需要大量训练数据</strong>：深度学习模型的性能依赖于大量高质量的训练数据。</li>
-<li><strong>模型解释性差</strong>：深度学习模型往往是黑箱模型，难以解释推荐结果。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：视频推荐、广告推荐、个性化内容推荐等。</li>
-<li><strong>典型技术/方法</strong>：深度矩阵分解、卷积神经网络（CNN）、递归神经网络（RNN）等。</li>
-</ol>
-<h4>图嵌入技术</h4>
-<ol>
-<li><strong>概述</strong>：将用户和物品映射到图结构中，利用图的拓扑结构信息改进推荐效果，捕捉用户和物品之间的复杂关系。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>利用图结构信息</strong>：通过图嵌入方法，充分利用用户和物品之间的关系信息。</li>
-<li><strong>提高推荐准确性</strong>：通过捕捉图结构中的局部和全局信息，提高推荐的准确性。</li>
-<li><strong>捕捉复杂关系</strong>：适用于处理社交网络、知识图谱等复杂网络结构中的推荐问题。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>图构建复杂</strong>：构建大规模图结构和进行图嵌入计算复杂，处理开销大。</li>
-<li><strong>计算复杂度高</strong>：图嵌入方法需要进行大量的矩阵运算，计算复杂度高。</li>
-<li><strong>数据处理要求高</strong>：需要高质量的图数据和合理的图构建方法。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：社交网络推荐、知识图谱推荐、复杂网络分析等。</li>
-<li><strong>典型技术/方法</strong>：节点嵌入（Node Embedding）、图卷积网络（GCN）等。</li>
-</ol>
-<h4>混合推荐系统</h4>
-<ol>
-<li><strong>概述</strong>：结合多种推荐算法的优势，综合利用不同数据源和模型，提高推荐效果和用户满意度。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>综合多种算法优势</strong>：通过结合协同过滤、内容推荐和基于规则的推荐方法，提高推荐的准确性和覆盖面。</li>
-<li><strong>提高推荐准确性</strong>：利用多种数据源和模型，生成更符合用户需求的推荐结果。</li>
-<li><strong>适用性广</strong>：适用于多种应用场景和业务需求。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>模型复杂度高</strong>：混合推荐系统涉及多种算法和模型，集成复杂，训练和调优难度大。</li>
-<li><strong>实现难度大</strong>：需要设计合理的集成策略和调优方法，确保各个模型的协同工作。</li>
-<li><strong>需要调优多个模型</strong>：不同推荐方法的参数调优和模型选择需要耗费大量时间和资源。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：电商推荐、新闻推荐、综合内容推荐等。</li>
-<li><strong>典型技术/方法</strong>：协同过滤与内容推荐结合、基于规则与基于模型结合等。</li>
-</ol>
-<h4>强化学习推荐</h4>
-<ol>
-<li><strong>概述</strong>：利用强化学习算法动态调整推荐策略，最大化长期用户满意度，通过用户反馈优化推荐结果。</li>
-<li><strong>优势</strong>：
-<ul>
-<li>**动态调整</li>
-</ul>
-</li>
-</ol>
-<p>策略**：能够根据用户反馈和环境变化，动态调整推荐策略，提升推荐效果。</p>
-<ul>
-<li><strong>考虑长期效益</strong>：通过优化长期回报，提高用户粘性和满意度。</li>
-<li><strong>提高用户粘性</strong>：通过持续优化推荐结果，增强用户参与度和留存率。</li>
-</ul>
-<ol start="3">
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>模型训练复杂</strong>：强化学习模型的训练过程复杂，需要大量的交互数据和计算资源。</li>
-<li><strong>需要大量互动数据</strong>：强化学习模型的性能依赖于用户的互动数据，冷启动问题严重。</li>
-<li><strong>模型解释性差</strong>：强化学习模型的决策过程复杂，难以解释推荐结果。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：实时推荐、游戏推荐、广告投放等。</li>
-<li><strong>典型技术/方法</strong>：深度Q网络（DQN）、策略梯度算法（Policy Gradient）等。</li>
-</ol>
-<h4>跨领域推荐</h4>
-<ol>
-<li><strong>概述</strong>：利用用户在不同领域的行为数据进行推荐，发现用户的潜在兴趣和需求，扩展推荐系统的覆盖范围。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>利用多领域数据</strong>：结合多个领域的数据，提高推荐的多样性和覆盖面。</li>
-<li><strong>发现潜在兴趣</strong>：通过跨领域数据分析，挖掘用户的潜在兴趣和需求。</li>
-<li><strong>提高推荐覆盖面</strong>：扩展推荐系统的应用范围，提高推荐效果。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>数据整合复杂</strong>：跨领域数据的整合和处理复杂，需要统一的数据格式和处理方法。</li>
-<li><strong>跨领域数据稀疏性</strong>：不同领域的数据稀疏性差异大，增加了数据处理的难度。</li>
-<li><strong>领域间差异大</strong>：不同领域之间的差异大，难以统一建模和推荐。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：综合平台推荐、跨领域内容推荐等。</li>
-<li><strong>典型技术/方法</strong>：矩阵分解结合跨领域特征、跨领域图嵌入等。</li>
-</ol>
-<h4>多模态推荐</h4>
-<ol>
-<li><strong>概述</strong>：结合多种数据模态（如文本、图像、音频等）进行推荐，增强推荐的多样性和准确性，适应不同类型的数据。</li>
-<li><strong>优势</strong>：
-<ul>
-<li><strong>综合多模态信息</strong>：通过结合多种数据模态，提高推荐的丰富性和多样性。</li>
-<li><strong>提高推荐多样性</strong>：处理不同类型的数据，提供更加个性化和多样化的推荐结果。</li>
-<li><strong>处理不同数据类型</strong>：适应文本、图像、音频等多种数据类型，增强推荐系统的适应性。</li>
-</ul>
-</li>
-<li><strong>劣势</strong>：
-<ul>
-<li><strong>数据处理复杂</strong>：多模态数据的处理和整合复杂，需要不同的预处理和特征提取方法。</li>
-<li><strong>模型训练难度大</strong>：多模态模型的训练需要大量数据和计算资源，训练过程复杂。</li>
-<li><strong>需要多模态数据</strong>：多模态推荐的性能依赖于高质量的多模态数据，数据获取和处理难度大。</li>
-</ul>
-</li>
-<li><strong>应用场景</strong>：视频推荐、音频推荐、图文推荐等。</li>
-<li><strong>典型技术/方法</strong>：多模态深度学习模型、联合嵌入模型等。</li>
-</ol>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#limits">协同过滤的三大短板</a>
+      <a href="#directions">主要发展方向</a>
+      <a href="#cases">典型案例</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>协同过滤的下一步发展</h1>
+        <p class="dek">协同过滤直观、可解释，却在数据规模上涨后暴露短板：泛化差、热门头部效应、数据稀疏。本节先讲清这三个问题，再看后续模型如何用矩阵分解、深度学习、图嵌入与混合推荐逐一回应。</p>
+      </header>
+      <section id="limits" aria-labelledby="limits-h">
+        <h2 id="limits-h">协同过滤的三大短板</h2>
+        <p>协同过滤（Collaborative Filtering, CF）靠用户行为共同“过滤”信息，原理直观、可解释性强。但当数据量与用户数急剧增长时，传统方法暴露出三个结构性缺陷：</p>
+        <ol>
+          <li><strong>泛化能力差</strong>：无法把某两个物品的相似性推广到其他物品上；物品缺乏足够反馈时，就很难被推荐。</li>
+          <li><strong>热门物品的头部效应</strong>：热门物品评价多、与许多物品都相似，于是被频繁推荐；冷门物品则很难出头。</li>
+          <li><strong>数据稀疏性</strong>：真实场景中评分极稀疏，难以算出准确的相似度。</li>
+        </ol>
+        <p>后续模型的发展方向，几乎都可以看作对这三个问题的分别回应。</p>
+        <figure>
+          <svg viewBox="0 0 900 300" role="img" aria-labelledby="fig226-t fig226-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig226-t">协同过滤的短板与对应的发展方向</title>
+            <desc id="fig226-d">左侧三个短板：泛化差、头部效应、数据稀疏；右侧四个发展方向：矩阵分解缓解稀疏、深度学习提升泛化、图嵌入引入结构、混合推荐综合优劣。</desc>
+            <rect width="900" height="300" fill="#fff"/>
+            <g font-family="system-ui,-apple-system,PingFang SC,sans-serif">
+              <text x="170" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#d06d4d">短板</text>
+              <text x="640" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#147f80">发展方向</text>
+              <rect x="40" y="60" width="260" height="60" rx="10" fill="#fff7f2" stroke="#d06d4d"/><text x="170" y="96" text-anchor="middle" font-size="14" fill="#203035">泛化能力差</text>
+              <rect x="40" y="132" width="260" height="60" rx="10" fill="#fff7f2" stroke="#d06d4d"/><text x="170" y="168" text-anchor="middle" font-size="14" fill="#203035">热门头部效应</text>
+              <rect x="40" y="204" width="260" height="60" rx="10" fill="#fff7f2" stroke="#d06d4d"/><text x="170" y="240" text-anchor="middle" font-size="14" fill="#203035">数据稀疏性</text>
+              <rect x="510" y="60" width="300" height="46" rx="10" fill="#f3f9f6" stroke="#147f80"/><text x="660" y="89" text-anchor="middle" font-size="14" fill="#203035">矩阵分解：低维潜在特征补全稀疏</text>
+              <rect x="510" y="116" width="300" height="46" rx="10" fill="#f3f9f6" stroke="#147f80"/><text x="660" y="145" text-anchor="middle" font-size="14" fill="#203035">深度学习：非线性关系提升泛化</text>
+              <rect x="510" y="172" width="300" height="46" rx="10" fill="#f3f9f6" stroke="#147f80"/><text x="660" y="201" text-anchor="middle" font-size="14" fill="#203035">图嵌入：用图结构挖掘关系</text>
+              <rect x="510" y="228" width="300" height="46" rx="10" fill="#f3f9f6" stroke="#147f80"/><text x="660" y="257" text-anchor="middle" font-size="14" fill="#203035">混合推荐：综合多种信号</text>
+              <path d="M300 150 L505 150" stroke="#203035" stroke-width="2" marker-end="url(#ar226)"/>
+              <defs><marker id="ar226" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#203035"/></marker></defs>
+            </g>
+          </svg>
+          <figcaption>图 2.2.6-1：协同过滤的短板与对应的发展方向。每个方向都针对一个或多个短板。（自绘，按本仓同目录讲义整理。）</figcaption>
+        </figure>
+      </section>
+      <section id="directions" aria-labelledby="directions-h">
+        <h2 id="directions-h">主要发展方向</h2>
+        <p>讲义正文归约为四个方向，并在延伸对比表中补充了强化学习、跨领域与多模态三类。它们共同的思路是：用更强的表示或更多信号，弥补传统协同过滤在稀疏性与泛化上的不足。</p>
+        <table>
+          <caption>表 2.2.6-1：协同过滤的主要发展方向（整理自本仓同目录讲义）。</caption>
+          <thead><tr><th>方向</th><th>核心思路</th><th>针对的短板</th></tr></thead>
+          <tbody>
+            <tr><td>矩阵分解</td><td>把用户-物品评分矩阵分解为低维潜在特征向量（SVD、NMF）</td><td>数据稀疏性</td></tr>
+            <tr><td>深度学习</td><td>用网络捕捉高维、非线性关系与序列行为（深度矩阵分解、CNN、RNN）</td><td>泛化能力、动态兴趣</td></tr>
+            <tr><td>图嵌入</td><td>把用户与物品建成图，用拓扑结构表示（Node2Vec、GCN）</td><td>关系挖掘、泛化</td></tr>
+            <tr><td>混合推荐</td><td>结合协同过滤与内容、规则等多种信号</td><td>综合各类短板</td></tr>
+            <tr><td>强化学习</td><td>通过与环境交互优化长期收益（DQN、策略梯度）</td><td>长期效果、动态策略</td></tr>
+            <tr><td>跨领域推荐</td><td>利用用户在其他领域的行为发掘潜在兴趣</td><td>数据稀疏、覆盖面</td></tr>
+            <tr><td>多模态推荐</td><td>融合文本、图像、音频等多种模态</td><td>表示丰富度、多样性</td></tr>
+          </tbody>
+        </table>
+        <p class="note">这些方向并非互相排斥：实际系统常以矩阵分解做 Embedding 初始化、用深度网络做特征交叉、用图嵌入注入社交关系，再用混合策略融合。后续第 3、第 4 章会分别展开深度学习模型与 Embedding 技术。</p>
+      </section>
+      <section id="cases" aria-labelledby="cases-h">
+        <h2 id="cases-h">典型案例</h2>
+        <ul>
+          <li><strong>Netflix</strong>：结合矩阵分解与深度学习方法，从观看历史与评分数据中提取用户、物品的潜在特征，生成个性化推荐。</li>
+          <li><strong>Amazon</strong>：以基于物品的协同过滤为主，结合商品属性与购买历史，处理大规模用户行为并实时生成商品推荐。</li>
+        </ul>
+        <p>两个案例正好对应两条进化主线：一条往更强的特征表示走（矩阵分解 / 深度网络），一条往更多信号源走（内容属性与行为结合）。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>协同过滤直观、可解释，却受困于泛化差、热门头部效应与数据稀疏。矩阵分解与深度学习提升表示能力，图嵌入引入结构信息，混合推荐综合多种信号，共同把推荐从“记忆共现”推向“学习泛化”——这正是下一章深度学习推荐模型的起点。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 2.2 节“协同过滤——经典的推荐算法”，本仓同目录讲义文本（`05_2.2.6_协同过滤的下一步发展.md`）。</li>
+          <li>本页图 2.2.6-1 与表 2.2.6-1 为按该节内容<strong>自绘 / 整理</strong>；SVD/NMF、CNN/RNN、Node2Vec/GCN、DQN 等方法名称均取自讲义原文，未引入外部数据集或未标注的指标数值。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
