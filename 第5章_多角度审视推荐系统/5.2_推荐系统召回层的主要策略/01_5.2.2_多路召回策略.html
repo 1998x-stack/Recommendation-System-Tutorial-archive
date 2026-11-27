@@ -1,135 +1,140 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>01_5.2.2_多路召回策略</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>5.2.2 多路召回策略</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+caption{text-align:left;font-size:.83rem;color:var(--subtle);margin-bottom:.5rem}
+th,td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--surface)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>01_5.2.2 多路召回策略</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第5章 多角度审视推荐系统/5.2 推荐系统召回层的主要策略
-Content: 01_5.2.2 多路召回策略
-&quot;&quot;&quot;</p>
-<h3>5.2.2 多路召回策略</h3>
-<p>在推荐系统中，多路召回策略是一种非常实用的工程方法，旨在平衡计算速度和召回率，通过多种简单策略的组合，从不同角度快速筛选出候选集。以下是对多路召回策略的详细分析。</p>
-<h4>一、多路召回策略的定义</h4>
-<ol>
-<li>
-<p><strong>基本概念</strong>：</p>
-<ul>
-<li>多路召回策略是指采用不同的策略、特征或简单模型，分别召回一部分候选集，然后将这些候选集混合在一起供后续排序模型使用的策略  。</li>
-<li>这种方法的核心思想是在保持计算效率的前提下，从多个角度设计策略，以保证召回率接近理想状态，不至于损害排序效果 。</li>
-</ul>
-</li>
-<li>
-<p><strong>实现方式</strong>：</p>
-<ul>
-<li>通过多种简单模型（如协同过滤）、基于单一特征的召回方法（如兴趣标签）和预处理好的召回策略（如热门新闻、最近流行）等，快速召回候选集。</li>
-<li>具体实现时，可以根据业务需求选择不同的召回策略，并设置每种策略的召回数量（K值），通过离线评估和线上A/B测试确定合理的参数  。</li>
-</ul>
-</li>
-</ol>
-<h4>二、多路召回策略的优点</h4>
-<ol>
-<li>
-<p><strong>提高召回率</strong>：</p>
-<ul>
-<li>通过多种策略的组合，能够从不同角度充分挖掘潜在候选物品，提高整体召回率。例如，在新闻推荐系统中，可以同时使用热门新闻、兴趣标签、协同过滤等策略，确保用户可能感兴趣的新闻被召回 。</li>
-</ul>
-</li>
-<li>
-<p><strong>计算效率高</strong>：</p>
-<ul>
-<li>每一路召回策略采用简单模型和少量特征，保证了计算速度的快捷性。例如，基于协同过滤的召回策略可以快速从相似用户的历史行为中找到候选物品 。</li>
-</ul>
-</li>
-<li>
-<p><strong>灵活性强</strong>：</p>
-<ul>
-<li>多路召回策略的设计灵活，可以根据具体业务场景进行调整。例如，在视频推荐系统中，可以根据用户的观看历史、导演、演员、类型等特征，设计多种召回策略 。</li>
-</ul>
-</li>
-</ol>
-<h4>三、多路召回策略的设计原则</h4>
-<ol>
-<li>
-<p><strong>策略多样性</strong>：</p>
-<ul>
-<li>多路召回策略需要涵盖多种不同的角度，确保召回的候选集多样化。例如，可以包括基于用户行为的召回（如协同过滤）、基于内容的召回（如兴趣标签）、基于流行趋势的召回（如热门新闻）等  。</li>
-</ul>
-</li>
-<li>
-<p><strong>K值选择</strong>：</p>
-<ul>
-<li>每一路召回策略的K值（即召回的候选数量）需要合理设置，既要保证足够的候选数量供排序层使用，又要控制计算成本。K值的选择通常通过离线评估和线上A/B测试确定 。</li>
-</ul>
-</li>
-<li>
-<p><strong>业务相关性</strong>：</p>
-<ul>
-<li>召回策略的选择应与业务场景紧密结合。例如，在电商推荐系统中，召回策略可以包括基于用户浏览历史的召回、基于商品类别的召回、基于促销活动的召回等 。</li>
-</ul>
-</li>
-</ol>
-<h4>四、实际应用案例</h4>
-<ol>
-<li>
-<p><strong>信息流推荐</strong>：</p>
-<ul>
-<li>在信息流推荐系统中，多路召回策略通常包括“热门新闻”、“兴趣标签”、“协同过滤”、“最近流行”、“朋友喜欢”等多种方法。这些方法结合使用，可以从不同角度快速召回用户可能感兴趣的内容 。</li>
-</ul>
-</li>
-<li>
-<p><strong>视频推荐</strong>：</p>
-<ul>
-<li>对于视频推荐系统，可以采用“热门视频”、“导演召回”、“演员召回”、“最近上映”、“流行趋势”、“类型召回”等策略，通过多种方式快速筛选出用户可能感兴趣的视频 。</li>
-</ul>
-</li>
-<li>
-<p><strong>电商推荐</strong>：</p>
-<ul>
-<li>在电商推荐系统中，多路召回策略可以包括基于用户浏览历史的召回、基于用户购买历史的召回、基于商品类别的召回、基于用户兴趣标签的召回等，通过多种方式挖掘潜在购买意向的商品 。</li>
-</ul>
-</li>
-</ol>
-<h4>五、挑战与未来发展</h4>
-<ol>
-<li>
-<p><strong>策略之间的信息割裂</strong>：</p>
-<ul>
-<li>目前，多路召回策略之间的信息是割裂的，无法综合考虑不同策略对同一物品的影响。这需要在设计策略时，尽量考虑策略之间的互补性和协同性 。</li>
-</ul>
-</li>
-<li>
-<p><strong>自动化与智能化</strong>：</p>
-<ul>
-<li>随着深度学习和自动化技术的发展，未来的多路召回策略可能更多依赖于智能化和自动化的方法，通过深度学习模型自动生成和优化召回策略，提高召回的准确性和效率  。</li>
-</ul>
-</li>
-</ol>
-<h4>总结</h4>
-<p>多路召回策略在推荐系统中发挥着重要作用，通过多种简单策略的组合，能够在保证计算效率的前提下提高召回率，为排序层提供高质量的候选集。未来，随着技术的发展，多路召回策略将更加智能化和自动化，不断提升推荐系统的整体性能。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#define">定义与实现</a>
+      <a href="#pros">优点</a>
+      <a href="#design">设计原则</a>
+      <a href="#cases">应用案例</a>
+      <a href="#future">挑战与未来</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>多路召回策略</h1>
+        <p class="dek">多路召回是推荐系统里一项实用的工程方法：不靠一个复杂模型，而是用多套简单策略各自快速取一批候选，再合并交给排序层。本页说明它如何用工程手段换回召回率，以及它的设计要点与遗留问题。</p>
+      </header>
+      <section id="define" aria-labelledby="define-h">
+        <h2 id="define-h">定义与实现</h2>
+        <p><strong>多路召回策略</strong>指采用不同的策略、特征或简单模型，分别召回一部分候选集，再把这些候选集混合在一起供后续排序模型使用。它的核心思想是：在保持计算效率的前提下，从多个角度设计策略，使召回率接近理想状态，不损害排序效果。</p>
+        <p>实现时常用多种简单模型（如协同过滤）、基于单一特征的召回（如兴趣标签）和预处理好的召回（如热门内容、最近流行）快速取候选；再根据业务选择策略组合，并给每一路设置召回数量 K，通过离线评估与线上 A/B 测试确定合理参数。</p>
+        <figure>
+          <svg viewBox="0 0 900 430" role="img" aria-labelledby="fig522-t fig522-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig522-t">多路召回：多套简单策略并行召回后合并送入排序</title>
+            <desc id="fig522-d">左侧四路召回策略（热门、兴趣标签、协同过滤、最近流行）各自召回首 K 个候选，合并汇总为一个候选集，再交给排序模型输出推荐列表。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="28" font-size="15" font-weight="700" fill="#203035">多路召回 → 合并 → 排序</text>
+              <rect x="30" y="55" width="200" height="52" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.6"/>
+              <text x="130" y="86" font-size="12" fill="#203035" text-anchor="middle">热门内容（Top K）</text>
+              <rect x="30" y="123" width="200" height="52" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.6"/>
+              <text x="130" y="154" font-size="12" fill="#203035" text-anchor="middle">兴趣标签（Top K）</text>
+              <rect x="30" y="191" width="200" height="52" rx="8" fill="#ece7fb" stroke="#7461ba" stroke-width="1.6"/>
+              <text x="130" y="222" font-size="12" fill="#203035" text-anchor="middle">协同过滤（Top K）</text>
+              <rect x="30" y="259" width="200" height="52" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.6"/>
+              <text x="130" y="290" font-size="12" fill="#203035" text-anchor="middle">最近流行（Top K）</text>
+              <path d="M230 81 C300 81 300 180 360 186" stroke="#147f80" stroke-width="1.6" fill="none"/>
+              <path d="M230 149 C300 149 300 180 360 190" stroke="#d06d4d" stroke-width="1.6" fill="none"/>
+              <path d="M230 217 C300 217 300 195 360 194" stroke="#7461ba" stroke-width="1.6" fill="none"/>
+              <path d="M230 285 C300 285 300 200 360 198" stroke="#147f80" stroke-width="1.6" fill="none"/>
+              <rect x="360" y="150" width="180" height="90" rx="9" fill="#e8f1ee" stroke="#147f80" stroke-width="1.8"/>
+              <text x="450" y="188" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">合并候选集</text>
+              <text x="450" y="212" font-size="11" fill="#53676d" text-anchor="middle">去重 / 混合</text>
+              <path d="M540 195 H620" stroke="#147f80" stroke-width="2"/>
+              <rect x="620" y="140" width="250" height="110" rx="10" fill="#fff" stroke="#d06d4d" stroke-width="1.8"/>
+              <text x="745" y="176" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">排序模型</text>
+              <text x="745" y="200" font-size="11" fill="#53676d" text-anchor="middle">（对候选集精排）</text>
+              <text x="745" y="226" font-size="11" fill="#53676d" text-anchor="middle">输出最终推荐列表</text>
+              <text x="300" y="370" font-size="12" fill="#53676d" text-anchor="middle">每一路用简单模型 + 少量特征，先快后准地保证召回率</text>
+            </g>
+          </svg>
+          <figcaption>图 5.2.2-1（自绘）：多路召回把“一个复杂模型”换成“多套简单策略并行”。每路各召回首 K 个候选，合并去重后交给排序模型。这样既控制了单路计算开销，又能从不同角度保证召回率。图中策略名称与 K 均为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页按 5.2.2 节内容整理；图 5.2.2-1 为按该节自绘，策略组合与数量不代表某一具体系统配置。</div>
+      </section>
+      <section id="pros" aria-labelledby="pros-h">
+        <h2 id="pros-h">优点</h2>
+        <ul>
+          <li><strong>提高召回率</strong>：多种策略从不同角度挖掘潜在候选，整体召回率更高。例如新闻推荐可同时用热门新闻、兴趣标签、协同过滤，促使用户可能感兴趣的新闻被召回。</li>
+          <li><strong>计算效率高</strong>：每一路采用简单模型和少量特征，保证计算速度。如协同过滤召回可快速从相似用户的历史行为中找到候选物品。</li>
+          <li><strong>灵活性强</strong>：可随业务调整。如视频推荐可根据观看历史、导演、演员、类型等特征设计多路策略。</li>
+        </ul>
+      </section>
+      <section id="design" aria-labelledby="design-h">
+        <h2 id="design-h">设计原则</h2>
+        <ul>
+          <li><strong>策略多样性</strong>：涵盖不同角度，保证候选多样化，如基于用户行为的召回（协同过滤）、基于内容的召回（兴趣标签）、基于流行趋势的召回（热门新闻）。</li>
+          <li><strong>K 值选择</strong>：每一路召回的候选数量 K 要合理——既要给排序层提供足够候选，又要控制计算成本；K 通常由离线评估与线上 A/B 测试确定。</li>
+          <li><strong>业务相关性</strong>：召回策略与场景紧密结合。如电商可包含基于浏览历史、商品类别、促销活动的召回。</li>
+        </ul>
+      </section>
+      <section id="cases" aria-labelledby="cases-h">
+        <h2 id="cases-h">应用案例</h2>
+        <table>
+          <caption>表 5.2.2-1：不同场景下的多路召回策略举例（整理自本仓同目录讲义）。</caption>
+          <thead><tr><th>场景</th><th>常见召回策略</th></tr></thead>
+          <tbody>
+            <tr><td>信息流推荐</td><td>热门新闻、兴趣标签、协同过滤、最近流行、朋友喜欢</td></tr>
+            <tr><td>视频推荐</td><td>热门视频、导演召回、演员召回、最近上映、流行趋势、类型召回</td></tr>
+            <tr><td>电商推荐</td><td>基于浏览历史、购买历史、商品类别、兴趣标签的召回</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="future" aria-labelledby="future-h">
+        <h2 id="future-h">挑战与未来</h2>
+        <ul>
+          <li><strong>策略之间的信息割裂</strong>：各策略目前相互独立，无法综合考虑不同策略对同一物品的影响；设计时应尽量考虑策略间的互补性与协同性。</li>
+          <li><strong>自动化与智能化</strong>：随着深度学习与自动化技术发展，未来的多路召回可能更多依赖智能化、自动化的方法，由模型自动生成与优化召回策略，提高准确性与效率。</li>
+        </ul>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>多路召回用多套简单策略的组合，在保证计算效率的前提下提高召回率，为排序层提供高质量候选集。设计时重点把握策略多样性、K 值选择与业务相关性；总结的遗留问题在于各策略信息割裂，未来趋势是用深度学习走向更智能、更自动化的召回。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>王喆《深度学习推荐系统》第 5.2 节“推荐系统召回层的主要策略”，本仓同目录讲义文本（`01_5.2.2_多路召回策略.md`）。</li>
+          <li>本页图 5.2.2-1 与表 5.2.2-1 为按该节内容<strong>自绘 / 整理</strong>，未引入外部数值。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
