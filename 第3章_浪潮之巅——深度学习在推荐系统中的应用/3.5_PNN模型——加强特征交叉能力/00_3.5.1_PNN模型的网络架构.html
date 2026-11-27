@@ -1,95 +1,146 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_3.5.1_PNN模型的网络架构</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.5.1 PNN 模型的网络架构</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.1rem,5vw,3rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;table-layout:fixed}th,td{border-bottom:1px solid var(--border);text-align:left;padding:.6rem;vertical-align:top;overflow-wrap:anywhere}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_3.5.1 PNN模型的网络架构</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.5 PNN模型——加强特征交叉能力
-Content: 00_3.5.1 PNN模型的网络架构
-&quot;&quot;&quot;</p>
-<h3>PNN模型的网络架构</h3>
-<h4>一、引言</h4>
-<p>PNN（Product-based Neural Network）模型是上海交通大学的研究人员于2016年提出的，旨在解决CTR（Click-Through Rate）预估和推荐系统中的特征交叉问题。PNN模型通过引入乘积层（Product Layer），有效地捕捉了不同特征之间的交叉信息。以下将详细分析PNN模型的网络架构。</p>
-<h4>二、PNN模型的网络架构</h4>
-<h5>1. 输入层和Embedding层</h5>
-<p><strong>1.1 输入层：</strong></p>
-<ul>
-<li>输入层包括用户ID、物品ID以及其他可能的辅助特征（如上下文信息等）。这些输入特征通常是类别型特征，需要通过Embedding层进行稠密化处理。</li>
-</ul>
-<p><strong>1.2 Embedding层：</strong></p>
-<ul>
-<li>将类别型特征转换为稠密的低维向量，即Embedding向量。每个类别型特征都有一个独立的Embedding矩阵，将类别ID映射到稠密向量。</li>
-</ul>
-<h5>2. 乘积层（Product Layer）</h5>
-<p><strong>2.1 乘积层的定义：</strong></p>
-<ul>
-<li>乘积层是PNN模型的核心创新部分，用于捕捉特征之间的交叉信息。乘积层包括内积操作和外积操作，分别生成内积向量和外积矩阵。</li>
-</ul>
-<p><strong>2.2 内积操作：</strong></p>
-<ul>
-<li>内积操作计算特征向量之间的内积，生成一个新的向量。假设特征向量为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">f</mi></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{f}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">f</mi></mrow><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{f}_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.980548em;vertical-align:-0.286108em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>，内积操作定义为：$$ g_{\text{inner}}(\mathbf{f}_i, \mathbf{f}_j) = \mathbf{f}_i \cdot \mathbf{f}_j $$</li>
-</ul>
-<p><strong>2.3 外积操作：</strong></p>
-<ul>
-<li>外积操作计算特征向量之间的外积，生成一个新的矩阵。假设特征向量为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">f</mi></mrow><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{f}_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">f</mi></mrow><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{f}_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.980548em;vertical-align:-0.286108em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf" style="margin-right:0.10903em;">f</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>，外积操作定义为：$$ g_{\text{outer}}(\mathbf{f}_i, \mathbf{f}_j) = \mathbf{f}_i \otimes \mathbf{f}_j $$</li>
-</ul>
-<p><strong>2.4 降维处理：</strong></p>
-<ul>
-<li>为了减小外积操作带来的计算复杂度，PNN模型对外积结果进行了降维处理，将所有两两特征向量的外积结果叠加形成一个叠加外积向量。</li>
-</ul>
-<h5>3. 隐藏层</h5>
-<p><strong>3.1 全连接层：</strong></p>
-<ul>
-<li>乘积层的输出向量和原始特征向量一起输入到全连接层。全连接层由多层神经网络组成，每层神经网络由线性变换和非线性激活函数（如ReLU）组成。</li>
-</ul>
-<p><strong>3.2 局部全连接层：</strong></p>
-<ul>
-<li>在乘积层内部，PNN模型对内积和外积结果进行了局部全连接层的转换，将内积部分<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi mathvariant="bold">z</mi></mrow></mrow><annotation encoding="application/x-tex">\mathbf{z}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.44444em;"></span><span class="strut bottom" style="height:0.44444em;vertical-align:0em;"></span><span class="base textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathbf">z</span></span></span></span></span>和外积部分<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi mathvariant="bold">p</mi></mrow></mrow><annotation encoding="application/x-tex">\mathbf{p}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.44444em;"></span><span class="strut bottom" style="height:0.63888em;vertical-align:-0.19444em;"></span><span class="base textstyle uncramped"><span class="mord textstyle uncramped"><span class="mord mathbf">p</span></span></span></span></span>映射成新的向量<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">l</mi></mrow><mi>z</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{l}_z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf">l</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.04398em;">z</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">l</mi></mrow><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{l}_p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.980548em;vertical-align:-0.286108em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf">l</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">p</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>，然后将<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">l</mi></mrow><mi>z</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{l}_z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf">l</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.04398em;">z</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mrow><mi mathvariant="bold">l</mi></mrow><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{l}_p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:0.69444em;"></span><span class="strut bottom" style="height:0.980548em;vertical-align:-0.286108em;"></span><span class="base textstyle uncramped"><span class=""><span class="mord textstyle uncramped"><span class="mord mathbf">l</span></span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">p</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span></span></span></span>叠加输入到隐藏层。</li>
-</ul>
-<h5>4. 输出层</h5>
-<p><strong>4.1 预测层：</strong></p>
-<ul>
-<li>最后的输出层用于预测用户对物品的点击率或评分。输出层通常使用Sigmoid函数，将输出值映射到[0,1]区间内，表示预测的点击概率。</li>
-</ul>
-<p><strong>4.2 损失函数：</strong></p>
-<ul>
-<li>对于点击率预估任务，常用的损失函数是交叉熵损失函数。对于评分预测任务，常用的损失函数是均方误差（MSE）损失函数。</li>
-</ul>
-<h4>三、PNN模型的应用实例</h4>
-<p><strong>3.1 CTR预估：</strong></p>
-<ul>
-<li>在广告推荐中，PNN模型可以用于预估用户对广告的点击率。通过捕捉用户和广告特征之间的交叉信息，提高了点击率预估的准确性。</li>
-</ul>
-<p><strong>3.2 推荐系统：</strong></p>
-<ul>
-<li>在推荐系统中，PNN模型可以用于预测用户对商品的评分或点击概率，提供个性化推荐服务。</li>
-</ul>
-<h4>四、总结</h4>
-<p>PNN模型通过引入乘积层，有效地捕捉了不同特征之间的交叉信息，增强了模型的表达能力。其创新的内积和外积操作，使得PNN模型在CTR预估和推荐系统中表现出色。尽管PNN模型在特征交叉上具有优势，但在计算复杂度上需要进行合理的降维处理，以保证模型的训练效率。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">乘积层：PNN 的核心</a>
+      <a href="#embedding">输入层与 Embedding 层</a>
+      <a href="#product">乘积层：内积与外积</a>
+      <a href="#hidden">隐藏层与局部全连接</a>
+      <a href="#output">输出层</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>PNN 模型的网络架构</h1>
+        <p class="dek">PNN（Product-based Neural Network）于 2016 年由上海交通大学的研究者提出。它在 Embedding 与全连接层之间插了一个“乘积层”，用内积或外积显式地构造特征之间的交叉向量，再交给后面的全连接网络。相比只靠 MLP 隐式交叉，乘积层让“哪些特征两两相乘”变得可设计、可解释。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">乘积层：PNN 的核心</h2>
+        <p>PNN 要解决的是 CTR 预估与推荐中的<strong>特征交叉</strong>问题。它在常见的“Embedding + 全连接”结构里插入了一个专门做交叉的<strong>乘积层</strong>（Product Layer），它不是等 MLP 去隐式地学交叉，而是直接把特征向量两两相乘（内积或外积）得到交叉信号。</p>
+        <p>整体信息流是：输入特征经 Embedding 变成若干向量；乘积层把这些向量两两做内积/外积，得到交叉向量；乘积层的输出与原始 Embedding 一起送入隐藏层做多层非线性变换；最后由输出层得到点击概率。</p>
+        <figure>
+          <svg viewBox="0 0 900 520" role="img" aria-labelledby="fig351-t fig351-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig351-t">PNN 模型的网络架构与乘积层</title>
+            <desc id="fig351-d">输入特征经 Embedding 得到多个向量；乘积层分两路：内积得到交叉向量 z，外积得到交叉矩阵 p；两路各经局部全连接得到 l_z 与 l_p，与原始 Embedding 拼接后送入隐藏层，最后由输出层给出点击概率。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="28" font-size="17" font-weight="700" fill="#203035">Embedding → 乘积层 → 隐藏层 → 输出</text>
+              <rect x="60" y="50" width="780" height="52" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="73" font-size="12" fill="#53676d" text-anchor="middle">输入层：用户 ID、物品 ID、上下文等类别型特征</text>
+              <text x="450" y="93" font-size="12" fill="#53676d" text-anchor="middle">每个特征一个独立 Embedding 矩阵 → 稠密向量 f₁ … fₙ</text>
+              <rect x="60" y="140" width="780" height="150" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.5"/>
+              <text x="450" y="164" font-size="14" font-weight="700" fill="#203035" text-anchor="middle">乘积层 Product Layer</text>
+              <rect x="100" y="180" width="330" height="92" rx="8" fill="#fff" stroke="#7461ba" stroke-width="1.4"/>
+              <text x="265" y="203" font-size="12" font-weight="700" fill="#203035" text-anchor="middle">内积：g = f_i · f_j</text>
+              <text x="265" y="224" font-size="11" fill="#53676d" text-anchor="middle">两两内积 → 交叉向量 z</text>
+              <text x="265" y="248" font-size="11" fill="#53676d" text-anchor="middle">局部全连接 → l_z</text>
+              <rect x="470" y="180" width="330" height="92" rx="8" fill="#fff" stroke="#147f80" stroke-width="1.4"/>
+              <text x="635" y="203" font-size="12" font-weight="700" fill="#203035" text-anchor="middle">外积：g = f_i ⊗ f_j</text>
+              <text x="635" y="224" font-size="11" fill="#53676d" text-anchor="middle">两两外积叠加 → 交叉矩阵 p</text>
+              <text x="635" y="248" font-size="11" fill="#53676d" text-anchor="middle">局部全连接 → l_p</text>
+              <path d="M265 272 V320 H450" fill="none" stroke="#7461ba" stroke-width="2"/>
+              <path d="M635 272 V320 H450" fill="none" stroke="#147f80" stroke-width="2"/>
+              <rect x="290" y="320" width="320" height="58" rx="8" fill="#ece7fb" stroke="#7461ba" stroke-width="1.5"/>
+              <text x="450" y="345" font-size="12" fill="#203035" text-anchor="middle">与原始 Embedding 拼接</text>
+              <text x="450" y="366" font-size="11" fill="#53676d" text-anchor="middle">多层全连接 + ReLU → 隐藏层</text>
+              <path d="M450 378 V416" stroke="#147f80" stroke-width="2"/>
+              <rect x="320" y="416" width="260" height="56" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="1.8"/>
+              <text x="450" y="440" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">输出层（sigmoid）</text>
+              <text x="450" y="460" font-size="12" fill="#53676d" text-anchor="middle">点击概率 / 评分</text>
+            </g>
+          </svg>
+          <figcaption>图 3.5.1-1（自绘）：PNN 的乘积层把特征向量两两相乘。左路内积产生交叉向量 z，右路外积产生交叉矩阵 p（实际会把各对特征的叠加外积降维）；两路各经“局部全连接”得到 l_z 与 l_p，再与原始 Embedding 拼接入隐藏层。用内积还是外积，就分出 IPNN 与 OPNN 两个变体。图中维度、层数为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 3.5.1 节“PNN 模型的网络架构”的结构化讲解，分层说明整理自本仓同目录讲义；图 3.5.1-1 为按该节内容自绘，维度与层数仅作示意。</div>
+      </section>
+      <section id="embedding" aria-labelledby="embedding-h">
+        <h2 id="embedding-h">输入层与 Embedding 层</h2>
+        <p>输入层接收用户 ID、物品 ID 以及可能的辅助特征（如上下文信息）。这些大多是类别型特征，取值空间大而稀疏，直接输入网络既占参数又难以学习。</p>
+        <p>Embedding 层为每个类别型特征维护一个独立的 Embedding 矩阵，把类别 ID 映射为稠密低维向量。得到的一组向量（记作 f₁, f₂, …, fₙ）既保留了每个特征的语义，又为后续的乘积层提供了可做乘法的数值表示。</p>
+      </section>
+      <section id="product" aria-labelledby="product-h">
+        <h2 id="product-h">乘积层：内积与外积</h2>
+        <p>乘积层是 PNN 的核心创新，用来显式捕捉特征之间的交叉信息。它包含两种操作，分别生成向量和矩阵。</p>
+        <p><strong>内积操作</strong>把两个特征向量相乘得到一个标量，对所有特征对做内积就拼成一个交叉向量 z：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="内积操作的定义，可横向滚动">
+            <math display="block" aria-label="g 下标 inner 等于特征向量 f_i 与 f_j 的内积"><mrow><msub><mi>g</mi><mtext>inner</mtext></msub><mo>(</mo><msub><mi>f</mi><mi>i</mi></msub><mo>,</mo><msub><mi>f</mi><mi>j</mi></msub><mo>)</mo><mo>=</mo><msub><mi>f</mi><mi>i</mi></msub><mo>&#x22C5;</mo><msub><mi>f</mi><mi>j</mi></msub></mrow></math>
+          </div>
+        </div>
+        <p><strong>外积操作</strong>把两个特征向量相乘得到一个矩阵，能保留更细粒度的交叉信息：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="外积操作的定义，可横向滚动">
+            <math display="block" aria-label="g 下标 outer 等于特征向量 f_i 与 f_j 的外积"><mrow><msub><mi>g</mi><mtext>outer</mtext></msub><mo>(</mo><msub><mi>f</mi><mi>i</mi></msub><mo>,</mo><msub><mi>f</mi><mi>j</mi></msub><mo>)</mo><mo>=</mo><msub><mi>f</mi><mi>i</mi></msub><mo>&#x2297;</mo><msub><mi>f</mi><mi>j</mi></msub></mrow></math>
+          </div>
+        </div>
+        <p>外积的代价是参数与计算量随维度平方增长。为了控制复杂度，PNN 会对两两外积的结果做<strong>降维</strong>：把所有特征对的外积矩阵<strong>叠加</strong>成一个叠加外积矩阵，从面把 O(n²) 的存储压回可控范围。选内积还是外积，就区分出 PNN 的两个变体——IPNN 与 OPNN。</p>
+      </section>
+      <section id="hidden" aria-labelledby="hidden-h">
+        <h2 id="hidden-h">隐藏层与局部全连接</h2>
+        <p>乘积层的输出不会直接丢掉原始信息。PNN 先将内积部分 z 和外积部分 p 分别经过各自的<strong>局部全连接层</strong>，映射成新的向量 l<sub>z</sub> 和 l<sub>p</sub>，再把它们叠加（或拼接）后送入隐藏层。</p>
+        <p>隐藏层由多层全连接组成，每层包含一次线性变换与一个非线性激活（如 ReLU）。这样一来，模型既有乘积层给出的显式二阶交叉，又有隐藏层提供的更高阶、非线性的组合，表达能力比单纯 MLP 更强。</p>
+      </section>
+      <section id="output" aria-labelledby="output-h">
+        <h2 id="output-h">输出层</h2>
+        <p>输出层把隐藏层的结果经 sigmoid 映射到 [0, 1]，表示预测点击概率或评分。损失函数随任务而变：点击率预估常用交叉熵，评分预测常用均方误差（MSE）。</p>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>PNN 的结构可以概括为“Embedding → 乘积层 → 隐藏层 → 输出”：</p>
+        <ul>
+          <li><strong>Embedding 层</strong>：把稀疏类别特征变成稠密向量 f₁ … fₙ。</li>
+          <li><strong>乘积层</strong>：用内积（IPNN）或外积（OPNN）显式构造两两特征交叉。</li>
+          <li><strong>隐藏层</strong>：局部全连接整理交叉信号，再与原始 Embedding 一起做多层非线性变换。</li>
+          <li><strong>输出层</strong>：sigmoid 给出点击概率或评分。</li>
+        </ul>
+        <p>它的优点是交叉方式可设计、可解释；代价是外积带来的计算开销，因此需要合理的降维处理来保证训练效率。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Qu, Y. et al. <em>Product-based Neural Networks for User Response Prediction</em>, ICDM 2016（上海交通大学提出；IPNN/OPNN 均出自该文）。</li>
+          <li>王喆《深度学习推荐系统》第 3.5 节“PNN 模型——加强特征交叉能力”，本仓同目录讲义文本。</li>
+          <li>本页图 3.5.1-1 为按该节内容<strong>自绘</strong>的结构示意图。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
