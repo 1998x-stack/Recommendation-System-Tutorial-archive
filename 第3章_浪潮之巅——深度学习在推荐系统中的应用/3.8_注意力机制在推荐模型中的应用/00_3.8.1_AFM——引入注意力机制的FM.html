@@ -1,66 +1,127 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_3.8.1_AFM——引入注意力机制的FM</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.8.1 AFM——引入注意力机制的 FM</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2.1rem,5vw,3rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+.math-equation{max-width:100%;min-width:0;margin:1.6rem 0;padding:.5rem 0;border-block:1px solid #dfe8e4}
+.math-scroll{display:block;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.math-scroll:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.math-scroll math[display="block"]{width:max-content;min-width:100%;font-size:clamp(1.05rem,2.2vw,1.3rem)}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_3.8.1 AFM——引入注意力机制的FM</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.8 注意力机制在推荐模型中的应用
-Content: 00_3.8.1 AFM——引入注意力机制的FM
-&quot;&quot;&quot;</p>
-<h3>3.8.1 AFM——引入注意力机制的FM</h3>
-<h4>1. 背景和动机</h4>
-<p>推荐系统中的Factorization Machines（FM）模型因其在处理稀疏数据和捕捉特征交互方面的优势而被广泛应用。然而，FM模型对所有的交叉特征一视同仁，这种加和池化（Sum Pooling）操作忽略了不同特征对结果的影响程度。为了解决这一问题，研究人员引入了注意力机制，提出了AFM（Attention-based Factorization Machine）模型。</p>
-<h4>2. AFM模型概述</h4>
-<p>AFM模型是在NFM（Neural Factorization Machine）模型的基础上发展而来的。NFM模型通过特征交叉池化层实现特征交互，但池化操作一视同仁地对待所有特征交互。AFM模型通过引入注意力机制，为每个特征交互分配不同的权重，从而保留了更多有价值的信息。</p>
-<h4>3. 注意力机制的引入</h4>
-<p>在AFM模型中，注意力机制通过一个注意力网络（Attention Net）实现。具体来说，AFM的特征交叉过程仍然采用元素积操作，但在池化过程中加入了注意力得分。注意力得分由一个简单的单全连接层和softmax输出层生成。假设两个特征向量的元素积为$$v_i \odot v_j$$，其注意力得分表示为$$a_{ij}$$。池化后的输出向量表示为：</p>
-<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></msubsup><msubsup><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></msubsup><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>(</mo><msub><mi>v</mi><mi>i</mi></msub><mo>⊙</mo><msub><mi>v</mi><mi>j</mi></msub><mo>)</mo></mrow><annotation encoding="application/x-tex">\sum_{i=1}^{n} \sum_{j=i+1}^{n} a_{ij} (v_i \odot v_j) 
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="strut" style="height:1.6513970000000007em;"></span><span class="strut bottom" style="height:3.0651740000000007em;vertical-align:-1.4137769999999998em;"></span><span class="base displaystyle textstyle uncramped"><span class="mop op-limits"><span class="vlist"><span style="top:1.1776689999999999em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mrel">=</span><span class="mord mathrm">1</span></span></span></span><span style="top:-0.000005000000000143778em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span style="top:-1.2500050000000003em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord scriptstyle uncramped"><span class="mord mathit">n</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mop op-limits"><span class="vlist"><span style="top:1.1776689999999999em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span><span class="mrel">=</span><span class="mord mathit">i</span><span class="mbin">+</span><span class="mord mathrm">1</span></span></span></span><span style="top:-0.000005000000000254801em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span><span class="op-symbol large-op mop">∑</span></span></span><span style="top:-1.2500050000000005em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle uncramped"><span class="mord scriptstyle uncramped"><span class="mord mathit">n</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mord"><span class="mord mathit">a</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:0em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord scriptstyle cramped"><span class="mord mathit">i</span><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">v</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit">i</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mbin">⊙</span><span class="mord"><span class="mord mathit" style="margin-right:0.03588em;">v</span><span class="vlist"><span style="top:0.15em;margin-right:0.05em;margin-left:-0.03588em;"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span><span class="reset-textstyle scriptstyle cramped"><span class="mord mathit" style="margin-right:0.05724em;">j</span></span></span><span class="baseline-fix"><span class="fontsize-ensurer reset-size5 size5"><span style="font-size:0em;">​</span></span>​</span></span></span><span class="mclose">)</span></span></span></span></span></p>
-<p>这种加权的池化方式，可以更好地反映不同特征交互对结果的重要性。</p>
-<h4>4. 注意力机制的实现</h4>
-<p>具体地，AFM模型引入注意力机制的步骤如下：</p>
-<ol>
-<li><strong>特征交叉</strong>：与NFM模型类似，AFM模型首先对特征向量进行元素积操作，生成交叉特征。</li>
-<li><strong>生成注意力得分</strong>：通过一个单全连接层和softmax层，计算每个交叉特征的注意力得分。</li>
-<li><strong>加权池化</strong>：将交叉特征与对应的注意力得分相乘，进行加权池化，得到池化后的特征向量。</li>
-<li><strong>输出层</strong>：将加权池化后的特征向量输入到最终的输出层，进行目标值的预测。</li>
-</ol>
-<h4>5. AFM模型的优势</h4>
-<p>AFM模型相比传统的FM模型和其他基于FM的深度学习模型，具有以下优势：</p>
-<ol>
-<li><strong>增强的特征交互能力</strong>：通过引入注意力机制，AFM模型能够更有效地捕捉重要的特征交互，提升模型的表达能力。</li>
-<li><strong>更强的非线性特征表示</strong>：注意力机制使得模型在特征交互时具有更强的非线性表达能力，能够更好地适应复杂的推荐场景。</li>
-<li><strong>自动特征加权</strong>：注意力机制能够自动为不同特征交互分配权重，减少了人工特征工程的工作量，提高了模型的灵活性和适应性。</li>
-<li><strong>高训练效率</strong>：与其他模型相比，AFM模型在保持高表达能力的同时，仍具有较高的训练效率。</li>
-</ol>
-<h4>6. 实验结果与分析</h4>
-<p>实验结果表明，AFM模型在多个推荐任务中表现优异。在点击率预测和评分预测等任务中，AFM模型能够显著提升预测精度，优于传统的FM模型和其他基于FM的深度学习模型。</p>
-<h4>7. 总结</h4>
-<p>AFM模型通过引入注意力机制，改进了传统FM模型在特征交互处理上的局限性。其创新点在于为每个交叉特征分配不同的权重，使得模型能够更好地捕捉重要的特征交互信息。AFM模型在推荐系统中展示了强大的性能优势，不仅提升了模型的表达能力和预测精度，还减少了人工特征工程的工作量。通过上述分析，我们可以更深入地理解AFM模型的结构和其在推荐系统中的应用价值，为进一步的研究和实践提供了坚实的理论基础。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#overview">FM 的“一视同仁”问题</a>
+      <a href="#attention">注意力网：给每对交叉打分</a>
+      <a href="#pooling">加权池化与输出</a>
+      <a href="#advantages">AFM 的优势</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>AFM：引入注意力机制的 FM</h1>
+        <p class="dek">FM 把所有特征交叉一视同仁地相加，但现实中不同交叉的重要性差别很大。AFM（Attention-based Factorization Machine）在 NFM 的交叉池化基础上加了一个注意力网：给每一对特征交叉算一个权重 a<sub>ij</sub>，再做加权池化。重要的交叉被放大，无效的交叉被压制。</p>
+      </header>
+      <section id="overview" aria-labelledby="overview-h">
+        <h2 id="overview-h">FM 的“一视同仁”问题</h2>
+        <p>FM 在稀疏数据下能捕捉特征交叉，但它对<strong>所有</strong>交叉特征一视同仁：把所有两两交叉直接相加（加和池化，sum pooling）。这隐含了一个假设——每对交叉对结果的重要性相同。实际推荐场景里并非如此：用户当前意图相关的交叉（如“近期点击的品牌 × 当前场景”）往往远比无关交叉重要。</p>
+        <p>AFM 是在 NFM（Neural Factorization Machine）基础上发展出来的。NFM 通过特征交叉池化层做特征交互，但池化也是一视同仁。AFM 则用<strong>注意力机制</strong>给每对交叉分配一个权重，从而保留更有价值的信息。</p>
+        <figure>
+          <svg viewBox="0 0 900 470" role="img" aria-labelledby="fig381-t fig381-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig381-t">AFM 的注意力加权交叉池化</title>
+            <desc id="fig381-d">特征 Embedding 两两做元素积得到交叉向量；同一批交叉向量送入注意力网（单全连接层加 softmax）得到权重 a_ij；交叉向量与权重相乘后求和（加权池化），再送入输出层预测。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="28" font-size="17" font-weight="700" fill="#203035">交叉 → 打分 → 加权池化 → 输出</text>
+              <rect x="60" y="50" width="780" height="52" rx="8" fill="#f3f9f6" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="81" font-size="13" fill="#203035" text-anchor="middle">特征 Embedding：v₁, v₂, …, vₙ（每个特征一个向量）</text>
+              <path d="M450 102 V140" stroke="#147f80" stroke-width="2"/>
+              <rect x="60" y="140" width="360" height="70" rx="8" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.5"/>
+              <text x="240" y="166" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">元素积：v_i ⊙ v_j</text>
+              <text x="240" y="188" font-size="12" fill="#53676d" text-anchor="middle">得到每对特征的交叉向量</text>
+              <rect x="480" y="140" width="360" height="70" rx="8" fill="#ece7fb" stroke="#7461ba" stroke-width="1.5"/>
+              <text x="660" y="166" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">注意力网（单全连接 + softmax）</text>
+              <text x="660" y="188" font-size="12" fill="#53676d" text-anchor="middle">输出权重 a_ij</text>
+              <path d="M420 175 H480" stroke="#7461ba" stroke-width="2"/>
+              <path d="M240 210 V255 H430" fill="none" stroke="#d06d4d" stroke-width="2"/>
+              <path d="M660 210 V255 H470" fill="none" stroke="#7461ba" stroke-width="2"/>
+              <rect x="290" y="255" width="320" height="70" rx="8" fill="#e8f1ee" stroke="#147f80" stroke-width="1.5"/>
+              <text x="450" y="282" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">加权池化：Σ a_ij (v_i ⊙ v_j)</text>
+              <text x="450" y="304" font-size="12" fill="#53676d" text-anchor="middle">重要的交叉被放大，无关的被压制</text>
+              <path d="M450 325 V365" stroke="#147f80" stroke-width="2"/>
+              <rect x="330" y="365" width="240" height="58" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="1.8"/>
+              <text x="450" y="390" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">输出层</text>
+              <text x="450" y="410" font-size="12" fill="#53676d" text-anchor="middle">预测点击 / 评分</text>
+            </g>
+          </svg>
+          <figcaption>图 3.8.1-1（自绘）：AFM 的前向流程。特征两两做元素积得到交叉向量；同一批交叉向量送入一个“单全连接层 + softmax”的注意力网，得到每对交叉的权重 a<sub>ij</sub>；交叉向量与权重相乘后求和（加权池化）；结果送入输出层预测。图中维度与层数为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页为 3.8.1 节“AFM——引入注意力机制的 FM”的结构化讲解，流程与优势整理自本仓同目录讲义；图 3.8.1-1 为按该节内容自绘，维度与层数仅作示意。</div>
+      </section>
+      <section id="attention" aria-labelledby="attention-h">
+        <h2 id="attention-h">注意力网：给每对交叉打分</h2>
+        <p>AFM 的特征交叉过程仍采用 NFM 的<strong>元素积</strong>操作：把两个特征向量逐元素相乘，得到交叉向量 v<sub>i</sub> ⊙ v<sub>j</sub>。区别在于池化时不再直接相加，而是先算一个注意力得分。</p>
+        <p>得分由一个简单的<strong>注意力网</strong>生成：它实际上就是一个单全连接层加 softmax 输出层。对每对交叉 (i, j)，注意力网输出一个标量 a<sub>ij</sub>，表示这对交叉的重要性。softmax 使这些权重归一到一组相对的比例，便于比较。</p>
+      </section>
+      <section id="pooling" aria-labelledby="pooling-h">
+        <h2 id="pooling-h">加权池化与输出</h2>
+        <p>把交叉向量与对应的注意力得分相乘再求和，就得到池化后的特征向量：</p>
+        <div class="math-equation">
+          <div class="math-scroll" data-math-scroll tabindex="0" role="region" aria-label="加权池化公式，可横向滚动">
+            <math display="block" aria-label="对所有特征对 i 小于 j，把注意力得分 a_ij 乘以元素积 v_i ⊙ v_j 后求和"><mrow><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>(</mo><msub><mi>v</mi><mi>i</mi></msub><mo>&#x2299;</mo><msub><mi>v</mi><mi>j</mi></msub><mo>)</mo></mrow></math>
+          </div>
+        </div>
+        <p>其中 a<sub>ij</sub> 是注意力得分，v<sub>i</sub> ⊙ v<sub>j</sub> 是元素积交叉向量。与 FM/NFM 的无差别求和相比，这种加权池化能更好地反映不同特征交叉对结果的重要性。池化后的向量再送入最终输出层，做目标值预测。</p>
+      </section>
+      <section id="advantages" aria-labelledby="advantages-h">
+        <h2 id="advantages-h">AFM 的优势</h2>
+        <ul>
+          <li><strong>增强的特征交互能力</strong>：注意力让模型聚焦重要的交叉，提升表达能力。</li>
+          <li><strong>更强的非线性表示</strong>：加权后再池化，使特征交互更具非线性、更适应复杂场景。</li>
+          <li><strong>自动特征加权</strong>：权重由模型学出，减少了人工特征工程。</li>
+          <li><strong>训练效率较高</strong>：注意力网只是一个单全连接，参数开销小，在保持表达能力的同时仍保持较高效率。</li>
+        </ul>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>AFM 可以概括为“FM 的交叉 + 注意力加权”：特征先做元素积得到交叉向量，再由一个“单全连接 + softmax”的注意力网为每对交叉打分，最后做加权池化。它保留了 FM 处理稀疏数据、自动交叉的长处，又补上了 FM“一视同仁”的短板——让重要的交叉获得更大的权重。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Xiao, J. et al. <em>Attentional Factorization Machines: Learning the Weight of Feature Interactions via Attention Networks</em>, IJCAI 2017（在 NFM 基础上引入注意力）。</li>
+          <li>王喆《深度学习推荐系统》第 3.8 节“注意力机制在推荐模型中的应用”，本仓同目录讲义文本。</li>
+          <li>本页图 3.8.1-1 为按该节内容<strong>自绘</strong>的结构示意图。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
