@@ -1,71 +1,145 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>00_3.6.1_模型的记忆能力与泛化能力</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
+  <title>3.6.1 模型的记忆能力与泛化能力</title>
+  <style>
+:root{--paper:#fffdf9;--ink:#203035;--subtle:#53676d;--accent:#147f80;--transform:#d06d4d;--structure:#7461ba;--border:#dce8e4;--surface:#f3f9f6;--max-reading:820px;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent);text-underline-offset:.17em}a:hover{color:var(--transform)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.skip-link{position:absolute;left:1rem;top:-5rem;background:var(--ink);color:#fff;padding:.5rem 1rem;z-index:10}.skip-link:focus{top:1rem}
+.layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:4.25rem 2rem 8rem}
+.toc{position:sticky;top:2rem;align-self:start;font-size:.83rem;line-height:1.55;max-height:calc(100vh - 4rem);overflow:auto}
+.toc strong{display:block;font-size:.85rem;letter-spacing:.08em;margin-bottom:.9rem}
+.toc a{display:block;text-decoration:none;color:var(--subtle);border-left:2px solid var(--border);padding:.4rem .75rem}
+.toc a:hover{border-color:var(--accent);color:var(--accent);background:var(--surface)}
+main{min-width:0}article{max-width:var(--max-reading);margin:0 auto;min-width:0}
+.article-header h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;letter-spacing:-.03em;margin:.35rem 0 1rem}
+.dek{font-size:clamp(1.05rem,2vw,1.25rem);line-height:1.65;color:var(--subtle)}
+section{scroll-margin-top:2rem;margin-top:4rem}h2{font-size:clamp(1.5rem,3vw,1.9rem);line-height:1.4;margin:0 0 1.2rem}h3{font-size:1.2rem;line-height:1.5;margin:2rem 0 .7rem}
+figure{margin:2rem 0;padding:1.1rem;border:1px solid var(--border);border-radius:1rem;background:#fff}
+figure svg{width:100%;height:auto;display:block}
+figcaption{font-size:.83rem;line-height:1.7;color:var(--subtle);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.8rem}
+.note{margin:1.5rem 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 .5rem .5rem 0}
+@media(max-width:900px){.layout{display:block;padding:2rem 1.2rem 5rem}.toc{position:static;max-height:none;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem}.toc a{display:inline-block;border-left:0;margin-right:.3rem}}
+@media(max-width:480px){body{font-size:16px}.layout{padding:1.3rem 1rem 4rem}figure{padding:.6rem}}
+@media print{.layout{display:block;padding:0}.toc,.skip-link{display:none!important}}
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>00_3.6.1 模型的记忆能力与泛化能力</h1>
-<p>&quot;&quot;&quot;
-Lecture: 第3章 浪潮之巅——深度学习在推荐系统中的应用/3.6 Wide&amp;Deep 模型——记忆能力和泛化能力的综合
-Content: 00_3.6.1 模型的记忆能力与泛化能力
-&quot;&quot;&quot;</p>
-<h3>模型的记忆能力与泛化能力</h3>
-<h4>一、引言</h4>
-<p>Wide &amp; Deep 模型是 Google 于 2016 年提出的一种混合模型，旨在结合记忆能力和泛化能力，从而提升推荐系统的性能。以下将详细解释模型的记忆能力与泛化能力。</p>
-<h4>二、记忆能力</h4>
-<p>记忆能力是指模型直接学习并利用历史数据中物品或者特征的共现频率的能力。协同过滤和逻辑回归等简单模型通常具有较强的记忆能力。这些模型结构简单，原始数据往往可以直接影响推荐结果，生成类似于“如果用户点击过 A，那么推荐 B”这类规则式的推荐。</p>
-<h5>1. 记忆能力的定义</h5>
-<ul>
-<li><strong>共现频率</strong>：模型通过学习用户行为中的共现频率来进行推荐。例如，如果用户 A 和用户 B 都点击过相同的项目，则推荐系统会记住这种行为模式，并在未来的推荐中利用这种信息。</li>
-<li><strong>简单模型</strong>：如协同过滤、逻辑回归等，通过直接记住和利用历史数据中的共现频率进行推荐。</li>
-</ul>
-<h5>2. 实例解释</h5>
-<p>假设在 Google Play 的推荐系统中，用户已安装 Netflix 应用且曾在应用商店中看到 Pandora 应用。如果用户安装 Pandora 的频率高于平均水平，则系统会记住这种特征组合，并在未来推荐中利用这条规则。这种记忆能力在简单模型中尤为突出 。</p>
-<h4>三、泛化能力</h4>
-<p>泛化能力是指模型能够传递特征的相关性，并发掘稀疏甚至从未出现过的稀有特征与标签相关性的能力。深度神经网络和矩阵分解模型通常具有较强的泛化能力。</p>
-<h5>1. 泛化能力的定义</h5>
-<ul>
-<li><strong>特征相关性</strong>：模型能够学习和传递特征之间的相关性，即使是稀疏的特征也能生成稳定的推荐结果。</li>
-<li><strong>隐向量</strong>：如矩阵分解模型中，通过引入隐向量，使数据稀少的用户或物品也能生成有效的推荐评分。</li>
-</ul>
-<h5>2. 实例解释</h5>
-<p>矩阵分解模型通过引入隐向量结构，即使对于数据稀疏的用户或物品也能生成有效的推荐评分。深度神经网络通过多次自动组合特征，可以深度发掘数据中潜在的模式，即使输入的是非常稀疏的特征向量，也能得到较稳定的推荐概率 。</p>
-<h4>四、Wide &amp; Deep 模型</h4>
-<p>Wide &amp; Deep 模型的设计初衷是结合简单模型的记忆能力和深度神经网络的泛化能力，形成一个具有两者优势的混合模型。</p>
-<h5>1. Wide 部分</h5>
-<ul>
-<li><strong>单层结构</strong>：Wide 部分由单层网络组成，主要处理大规模稀疏的特征，如用户的历史行为数据。</li>
-<li><strong>逻辑回归</strong>：利用逻辑回归模型快速处理并记忆大量历史行为特征。</li>
-</ul>
-<h5>2. Deep 部分</h5>
-<ul>
-<li><strong>多层神经网络</strong>：Deep 部分由多层神经网络组成，通过深层的特征交叉，挖掘特征背后的数据模式。</li>
-<li><strong>特征组合</strong>：利用 Embedding 层将类别型特征转换为稠密向量，再通过多层 ReLU 全连接层，增强模型的泛化能力。</li>
-</ul>
-<h4>五、总结</h4>
-<p>Wide &amp; Deep 模型通过结合 Wide 部分的记忆能力和 Deep 部分的泛化能力，形成了一个强大的混合模型。这种设计使模型能够快速处理并记忆大量历史行为特征，同时具有强大的表达能力，能够深度发掘数据中的潜在模式。因此，Wide &amp; Deep 模型在各种推荐系统中表现出色，成为业界主流模型之一 。</p>
-
+  <a class="skip-link" href="#content">跳转至正文</a>
+  <div class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <strong>目录</strong>
+      <a href="#memory">记忆能力</a>
+      <a href="#generalize">泛化能力</a>
+      <a href="#hybrid">Wide &amp; Deep：两者的结合</a>
+      <a href="#compare">对比速查</a>
+      <a href="#summary">小结</a>
+      <a href="#references">资料来源</a>
+    </nav>
+    <main id="content"><article>
+      <header class="article-header">
+        <h1>模型的记忆能力与泛化能力</h1>
+        <p class="dek">Wide &amp; Deep 模型（Google, 2016）想同时要两样东西：像简单模型那样“记住”历史中的共现规则，又像深层网络那样“泛化”到从未出现过的组合。理解这两项能力，就理解了 Wide &amp; Deep 的设计动机。</p>
+      </header>
+      <section id="memory" aria-labelledby="memory-h">
+        <h2 id="memory-h">记忆能力</h2>
+        <p><strong>记忆能力</strong>指模型直接学习并利用历史数据中物品或特征<strong>共现频率</strong>的能力。协同过滤、逻辑回归等简单模型通常具有较强的记忆能力：结构简单，原始数据能直接影响推荐结果，生成“如果用户点击过 A，那就推 B”这类规则式的推荐。</p>
+        <ul>
+          <li><strong>共现频率</strong>：模型学习用户行为中的共现模式。例如用户 A 与用户 B 点击过相同项目，系统就记住这个模式并用于后续推荐。</li>
+          <li><strong>简单模型</strong>：协同过滤、逻辑回归等直接记住并利用历史共现频率。</li>
+        </ul>
+        <p>以 Google Play 为例：用户已安装 Netflix 且曾在应用商店看到 Pandora，如果“装了 Netflix 的人装 Pandora 的比例高于平均”，系统就会记住这一特征组合，并在未来利用这条规则。</p>
+        <figure>
+          <svg viewBox="0 0 900 380" role="img" aria-labelledby="fig361-t fig361-d" xmlns="http://www.w3.org/2000/svg">
+            <title id="fig361-t">记忆能力与泛化能力，以及 Wide &amp; Deep 的结合</title>
+            <desc id="fig361-d">左：记忆能力靠历史共现频率生成“已经见过 A 就推 B”的规则。中：泛化能力靠隐向量/深度网络，把相关性传到从未出现的稀有组合。右：Wide &amp; Deep 用一个混合模型同时具备两部分能力。</desc>
+            <g font-family="system-ui,'PingFang SC','Microsoft YaHei',sans-serif">
+              <text x="15" y="30" font-size="15" font-weight="700" fill="#203035">记忆（Wide） + 泛化（Deep） = Wide &amp; Deep</text>
+              <rect x="25" y="55" width="260" height="250" rx="10" fill="#f3f9f6" stroke="#147f80" stroke-width="1.6"/>
+              <text x="155" y="84" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">记忆能力</text>
+              <text x="155" y="108" font-size="11" fill="#53676d" text-anchor="middle">靠历史共现频率</text>
+              <rect x="60" y="128" width="190" height="44" rx="8" fill="#fff" stroke="#147f80" stroke-width="1.3"/>
+              <text x="155" y="155" font-size="11" fill="#203035" text-anchor="middle">用户点过 A → 推 B</text>
+              <text x="155" y="200" font-size="11" fill="#53676d" text-anchor="middle">代表：协同过滤 / 逻辑回归</text>
+              <text x="155" y="228" font-size="11" fill="#53676d" text-anchor="middle">优点：见得多、记得准</text>
+              <text x="155" y="256" font-size="11" fill="#53676d" text-anchor="middle">局限：没见过的组合推不出</text>
+              <rect x="320" y="55" width="260" height="250" rx="10" fill="#ece7fb" stroke="#7461ba" stroke-width="1.6"/>
+              <text x="450" y="84" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">泛化能力</text>
+              <text x="450" y="108" font-size="11" fill="#53676d" text-anchor="middle">靠隐向量 / 深层特征交叉</text>
+              <rect x="355" y="128" width="190" height="44" rx="8" fill="#fff" stroke="#7461ba" stroke-width="1.3"/>
+              <text x="450" y="148" font-size="11" fill="#203035" text-anchor="middle">稀有组合也能得到</text>
+              <text x="450" y="166" font-size="11" fill="#203035" text-anchor="middle">稳定评分</text>
+              <text x="450" y="200" font-size="11" fill="#53676d" text-anchor="middle">代表：矩阵分解 / 深度网络</text>
+              <text x="450" y="228" font-size="11" fill="#53676d" text-anchor="middle">优点：能传递特征相关性</text>
+              <text x="450" y="256" font-size="11" fill="#53676d" text-anchor="middle">局限：细粒度共现记忆弱</text>
+              <rect x="615" y="55" width="260" height="250" rx="10" fill="#fdf1ec" stroke="#d06d4d" stroke-width="1.6"/>
+              <text x="745" y="84" font-size="13" font-weight="700" fill="#203035" text-anchor="middle">混合模型</text>
+              <text x="745" y="108" font-size="11" fill="#53676d" text-anchor="middle">Wide 部分 + Deep 部分</text>
+              <text x="745" y="150" font-size="11" fill="#203035" text-anchor="middle">同时处理稀疏特征</text>
+              <text x="745" y="174" font-size="11" fill="#203035" text-anchor="middle">与深层特征交叉</text>
+              <text x="745" y="210" font-size="11" fill="#53676d" text-anchor="middle">两部分输出相加</text>
+              <text x="745" y="238" font-size="11" fill="#53676d" text-anchor="middle">兼顾记忆与泛化</text>
+            </g>
+          </svg>
+          <figcaption>图 3.6.1-1（自绘）：左侧是记忆能力——直接从历史共现中生成规则；中间是泛化能力——靠隐向量与深层交叉，把相关性传递到未见过的稀有组合；右侧把两者合成 Wide &amp; Deep 的混合模型。图中例子与结构均为讲解示意。</figcaption>
+        </figure>
+        <div class="note"><strong>教学示意：</strong>本页按 3.6.1 节内容整理；图 3.6.1-1 为按该节自绘，代表模型与例子仅为说明。</div>
+      </section>
+      <section id="generalize" aria-labelledby="generalize-h">
+        <h2 id="generalize-h">泛化能力</h2>
+        <p><strong>泛化能力</strong>指模型能够传递特征的相关性，并发掘稀疏甚至从未出现过的稀有特征与标签相关性的能力。深度神经网络与矩阵分解模型通常具有较强的泛化能力。</p>
+        <ul>
+          <li><strong>特征相关性</strong>：模型能够学习和传递特征之间的相关性，即便是稀疏特征也能生成稳定的推荐结果。</li>
+          <li><strong>隐向量</strong>：矩阵分解引入隐向量后，数据稀少的用户或物品也能生成有效的推荐评分。</li>
+        </ul>
+        <p>矩阵分解靠隐向量结构，即使对稀疏的用户或物品也能给出有效评分；深度神经网络通过多次自动组合特征，可以深度发掘潜在模式，即使输入是非常稀疏的特征向量，也能得到较稳定的推荐概率。</p>
+      </section>
+      <section id="hybrid" aria-labelledby="hybrid-h">
+        <h2 id="hybrid-h">Wide &amp; Deep：两者的结合</h2>
+        <p>Wide &amp; Deep 的设计初衷，就是把简单模型的记忆能力与深度神经网络的泛化能力合到一个混合模型里（参见图 3.6.1-1 右侧）：</p>
+        <h3>Wide 部分</h3>
+        <ul>
+          <li><strong>单层结构</strong>：由单层网络组成，主要处理大规模稀疏特征，如用户历史行为数据。</li>
+          <li><strong>逻辑回归</strong>：用逻辑回归快速处理并记忆大量历史行为特征。</li>
+        </ul>
+        <h3>Deep 部分</h3>
+        <ul>
+          <li><strong>多层神经网络</strong>：通过深层特征交叉挖掘特征背后的数据模式。</li>
+          <li><strong>特征组合</strong>：用 Embedding 层把类别型特征转为稠密向量，再经多层 ReLU 全连接层，增强泛化能力。</li>
+        </ul>
+        <p>两部分的输出相加后一起训练，使模型在一条路径上“快而准”地记忆，在另一条路径上“深而稳”地泛化。</p>
+      </section>
+      <section id="compare" aria-labelledby="compare-h">
+        <h2 id="compare-h">对比速查</h2>
+        <table>
+          <caption>表 3.6.1-1：记忆能力与泛化能力对比（整理自本仓同目录讲义）。</caption>
+          <thead><tr><th>维度</th><th>记忆能力</th><th>泛化能力</th></tr></thead>
+          <tbody>
+            <tr><td>依靠什么</td><td>历史共现频率</td><td>隐向量 / 深层特征交叉</td></tr>
+            <tr><td>代表模型</td><td>协同过滤、逻辑回归</td><td>矩阵分解、深度神经网络</td></tr>
+            <tr><td>擅长</td><td>高频、已见过的规则</td><td>传递相关性、处理稀疏与稀有组合</td></tr>
+            <tr><td>弱点</td><td>未出现过的组合推不出</td><td>细粒度共现记忆弱</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="summary" aria-labelledby="summary-h">
+        <h2 id="summary-h">小结</h2>
+        <p>记忆能力从历史共现中直接生成规则，泛化能力则把特征相关性传递到稀疏、稀有甚至从未出现的组合。Wide &amp; Deep 用 Wide 部分（单层 + 逻辑回归）负责记忆、Deep 部分（Embedding + 多层 ReLU）负责泛化，把两种能力的优点结合在一个模型里，成为业界主流模型之一。</p>
+      </section>
+      <section id="references" aria-labelledby="references-h">
+        <h2 id="references-h">资料来源</h2>
+        <ul>
+          <li>Cheng, H.-T. et al. <em>Wide &amp; Deep Learning for Recommender Systems</em>, RecSys 2016（Wide &amp; Deep 原始论文）。</li>
+          <li>王喆《深度学习推荐系统》第 3.6 节“Wide&amp;Deep 模型——记忆能力和泛化能力的综合”，本仓同目录讲义文本（`00_3.6.1_模型的记忆能力与泛化能力.md`）。</li>
+          <li>本页图 3.6.1-1 与表 3.6.1-1 为按该节内容<strong>自绘 / 整理</strong>。</li>
+        </ul>
+      </section>
+    </article></main>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\(", right: "\)", display: false},
-          {left: "\[", right: "\]", display: true}
-        ]
-      });
-    });
-  </script>
 </body>
 </html>
-  
